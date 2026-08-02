@@ -30,27 +30,14 @@
             <h1 class="text-2xl">📚 Perpus Ceria</h1>
             <div id="nav-buttons" class="space-x-2">
                 <button onclick="showPage('dashboard')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">Beranda</button>
-                <button id="nav-murid" onclick="showPage('murid')" class="hover:bg-emerald-700 px-3 py-1 rounded transition hidden">Murid</button>
+                <button onclick="showPage('murid')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">Murid</button>
                 <button onclick="showPage('absen')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">Absen</button>
                 <button onclick="showPage('transaksi')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">Pinjam</button>
-                <button id="btn-login" onclick="toggleLogin()" class="bg-white text-emerald-600 px-3 py-1 rounded font-bold shadow hover:bg-emerald-50 transition">Login Admin</button>
-                <button id="btn-logout" onclick="logout()" class="bg-red-500 px-3 py-1 rounded hidden hover:bg-red-600 transition">Keluar</button>
             </div>
         </div>
     </nav>
 
     <main class="container mx-auto p-4 md:p-8">
-        <div id="login-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div class="bg-white p-8 rounded-2xl w-full max-w-sm text-center shadow-2xl">
-                <h2 class="text-2xl mb-4 text-emerald-800">Login Pustakawan</h2>
-                <input type="password" id="admin-pass" placeholder="Password (12345)" class="border p-2 w-full rounded mb-4 text-center">
-                <div class="flex space-x-2">
-                    <button onclick="doLogin()" class="bg-emerald-600 text-white flex-1 py-2 rounded hover:bg-emerald-700 transition">Masuk</button>
-                    <button onclick="toggleLogin()" class="bg-gray-300 text-gray-700 flex-1 py-2 rounded hover:bg-gray-400 transition">Batal</button>
-                </div>
-            </div>
-        </div>
-
         <div id="page-dashboard" class="page-content active-page">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-3xl text-emerald-800">Selamat Datang di Perpus Ceria!</h2>
@@ -81,7 +68,6 @@
     <script>
         const SPREADSHEET_ID = "1RFxZ6uY1CrDSxKd6GeMLSOD7QwZBd66jqZsvxfnkbXk";
         let appData = { murid: [], absensi: [], transaksi: [] };
-        let isAdmin = false;
 
         async function fetchSpreadsheetData() {
             try {
@@ -89,21 +75,21 @@
                 const resMurid = await fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=murid`);
                 if (resMurid.ok) {
                     const text = await resMurid.text();
-                    appData.murid = parseGvizJSON(text);
+                    appData.murid = parseGvizJSON(text, true); // true untuk melewati baris header pertama
                 }
 
                 // Tarik data dari Tab 'absen'
                 const resAbsen = await fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=absen`);
                 if (resAbsen.ok) {
                     const text = await resAbsen.text();
-                    appData.absensi = parseGvizJSON(text);
+                    appData.absensi = parseGvizJSON(text, true);
                 }
 
-                // Tarik data dari Tab 'pinjam' atau 'transaksi'
+                // Tarik data dari Tab 'pinjam'
                 const resPinjam = await fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=pinjam`);
                 if (resPinjam.ok) {
                     const text = await resPinjam.text();
-                    appData.transaksi = parseGvizJSON(text);
+                    appData.transaksi = parseGvizJSON(text, true);
                 }
 
                 render();
@@ -113,16 +99,18 @@
             }
         }
 
-        function parseGvizJSON(responseText) {
+        function parseGvizJSON(responseText, skipHeader = false) {
             try {
                 const jsonString = responseText.match(/(?<=["']table["']\s*:\s*).*(?=}\s*\);\s*$)/s)?.[0] || responseText.substring(47).slice(0, -2);
                 const json = JSON.parse(jsonString);
                 const rows = json.table.rows;
                 let list = [];
-                rows.forEach(r => {
+                
+                rows.forEach((r, index) => {
+                    if (skipHeader && index === 0) return; // Lewati baris pertama (header)
                     if (!r || !r.c) return;
                     const cols = r.c.map(cell => cell ? (cell.f || cell.v || '') : '');
-                    if (cols[0]) { // Ambil baris yang ada isinya
+                    if (cols[0] !== '') { 
                         list.push({ col1: cols[0], col2: cols[1], col3: cols[2], col4: cols[3] || '' });
                     }
                 });
@@ -142,40 +130,7 @@
             document.getElementById('custom-modal').classList.add('hidden');
         }
 
-        function toggleLogin() { document.getElementById('login-modal').classList.toggle('hidden'); }
-        
-        function doLogin() {
-            if (document.getElementById('admin-pass').value === '12345') {
-                isAdmin = true;
-                document.getElementById('btn-login').classList.add('hidden');
-                document.getElementById('btn-logout').classList.remove('hidden');
-                document.getElementById('nav-murid').classList.remove('hidden');
-                toggleLogin();
-                document.getElementById('admin-pass').value = '';
-                render();
-                showModal('Berhasil', 'Login Admin Berhasil!');
-            } else {
-                showModal('Gagal', 'Password salah!');
-            }
-        }
-
-        function logout() { 
-            isAdmin = false; 
-            document.getElementById('btn-logout').classList.add('hidden');
-            document.getElementById('btn-login').classList.remove('hidden');
-            document.getElementById('nav-murid').classList.add('hidden');
-            if(document.getElementById('page-murid').classList.contains('active-page')) {
-                showPage('dashboard');
-            }
-            render();
-            showModal('Informasi', 'Anda telah keluar dari mode admin.');
-        }
-
         function showPage(id) {
-            if (id === 'murid' && !isAdmin) {
-                showModal('Akses Dibatasi', 'Hanya Admin yang dapat mengakses halaman Data Murid.');
-                return;
-            }
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active-page'));
             document.getElementById('page-' + id).classList.add('active-page');
         }
