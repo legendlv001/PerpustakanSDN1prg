@@ -397,7 +397,7 @@
             
             // Render Tabel Murid
             const containerMurid = document.getElementById('table-murid-container');
-            let htmlMurid = `<table class="w-full text-left border-collapse"><thead><tr class="bg-emerald-50"><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Kelas</th><th class="p-2">QR Code</th>`;
+            let htmlMurid = `<table class="w-full text-left border-collapse"><thead><tr class="bg-emerald-50"><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2 text-center">Kelas</th><th class="p-2 text-center">QR Code</th>`;
             if (isAdminLoggedIn) htmlMurid += `<th class="p-2 text-center">Aksi Admin</th>`;
             htmlMurid += `</tr></thead><tbody>`;
 
@@ -406,7 +406,7 @@
                 htmlMurid += `<tr><td colspan="${colspan}" class="p-4 text-center text-gray-500">Tidak ada data di tab 'murid' atau spreadsheet belum dipublikasikan.</td></tr>`;
             } else {
                 appData.murid.forEach((m, idx) => {
-                    htmlMurid += `<tr class="border-b"><td class="p-2">${m.col1}</td><td class="p-2">${m.col2}</td><td class="p-2">${m.col3}</td><td class="p-2"><div id="qr-${m.col2}-${idx}"></div></td>`;
+                    htmlMurid += `<tr class="border-b"><td class="p-2">${m.col1}</td><td class="p-2">${m.col2}</td><td class="p-2 text-center">${m.col3}</td><td class="p-2 text-center"><div class="inline-block" id="qr-${m.col2}-${idx}"></div></td>`;
                     if (isAdminLoggedIn) {
                         htmlMurid += `<td class="p-2 text-center space-x-1">
                             <button onclick="openFormMuridModal(${idx})" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs">Edit</button>
@@ -426,7 +426,7 @@
 
             // Render Tabel Absen
             const containerAbsen = document.getElementById('table-absen-container');
-            let htmlAbsen = `<table class="w-full text-left border-collapse"><thead><tr class="bg-emerald-50"><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Waktu</th>`;
+            let htmlAbsen = `<table class="w-full text-left border-collapse"><thead><tr class="bg-emerald-50"><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2 text-center">Waktu</th>`;
             if (isAdminLoggedIn) htmlAbsen += `<th class="p-2 text-center">Aksi Admin</th>`;
             htmlAbsen += `</tr></thead><tbody>`;
 
@@ -435,7 +435,7 @@
                 htmlAbsen += `<tr><td colspan="${colspan}" class="p-4 text-center text-gray-500">Belum ada data di tab 'absen'.</td></tr>`;
             } else {
                 appData.absensi.forEach((a, idx) => {
-                    htmlAbsen += `<tr class="border-b"><td class="p-2">${a.col1}</td><td class="p-2">${a.col2}</td><td class="p-2">${a.col3}</td>`;
+                    htmlAbsen += `<tr class="border-b"><td class="p-2">${a.col1}</td><td class="p-2">${a.col2}</td><td class="p-2 text-center">${a.col3}</td>`;
                     if (isAdminLoggedIn) {
                         htmlAbsen += `<td class="p-2 text-center">
                             <button data-action="delete-absen" data-index="${idx}" class="btn-del-absen bg-rose-500 hover:bg-rose-600 text-white px-2 py-1 rounded text-xs">Hapus</button>
@@ -449,7 +449,7 @@
 
             // Render Tabel Transaksi
             const containerTransaksi = document.getElementById('table-transaksi-container');
-            let htmlTransaksi = `<table class="w-full text-left border-collapse"><thead><tr class="bg-blue-50"><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Buku</th><th class="p-2">Tanggal</th>`;
+            let htmlTransaksi = `<table class="w-full text-left border-collapse"><thead><tr class="bg-blue-50"><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Buku</th><th class="p-2 text-center">Tanggal</th>`;
             if (isAdminLoggedIn) htmlTransaksi += `<th class="p-2 text-center">Aksi Admin</th>`;
             htmlTransaksi += `</tr></thead><tbody>`;
 
@@ -458,7 +458,7 @@
                 htmlTransaksi += `<tr><td colspan="${colspan}" class="p-4 text-center text-gray-500">Belum ada data di tab 'pinjam'.</td></tr>`;
             } else {
                 appData.transaksi.forEach((t, idx) => {
-                    htmlTransaksi += `<tr class="border-b"><td class="p-2">${t.col1}</td><td class="p-2">${t.col2}</td><td class="p-2">${t.col3}</td><td class="p-2">${t.col4}</td>`;
+                    htmlTransaksi += `<tr class="border-b"><td class="p-2">${t.col1}</td><td class="p-2">${t.col2}</td><td class="p-2">${t.col3}</td><td class="p-2 text-center">${t.col4}</td>`;
                     if (isAdminLoggedIn) {
                         htmlTransaksi += `<td class="p-2 text-center">
                             <button data-action="delete-transaksi" data-index="${idx}" class="btn-del-transaksi bg-rose-500 hover:bg-rose-600 text-white px-2 py-1 rounded text-xs">Hapus</button>
