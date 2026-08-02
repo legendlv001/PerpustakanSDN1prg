@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perpus Ceria - SDN Ceria</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0fdf4; }
+        h1, h2, h3 { font-family: 'Fredoka One', cursive; }
+        .page-content { display: none; }
+        .active-page { display: block; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Notifikasi Modal Kustom -->
+    <div id="custom-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-sm text-center shadow-2xl">
+            <h3 id="modal-title" class="text-xl mb-2 text-emerald-800">Informasi</h3>
+            <p id="modal-message" class="text-gray-600 mb-4">Pesan...</p>
+            <button onclick="closeModal()" class="bg-emerald-600 text-white w-full py-2 rounded-lg hover:bg-emerald-700 transition">OK</button>
+        </div>
+    </div>
+
+    <nav class="bg-emerald-600 text-white p-4 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl">📚 Perpus Ceria</h1>
+            <div id="nav-buttons" class="space-x-2">
+                <button onclick="showPage('dashboard')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">Beranda</button>
+                <button id="nav-murid" onclick="showPage('murid')" class="hover:bg-emerald-700 px-3 py-1 rounded transition hidden">Murid</button>
+                <button onclick="showPage('absen')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">Absen</button>
+                <button onclick="showPage('transaksi')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">Pinjam</button>
+                <button id="btn-login" onclick="toggleLogin()" class="bg-white text-emerald-600 px-3 py-1 rounded font-bold shadow hover:bg-emerald-50 transition">Login Admin</button>
+                <button id="btn-logout" onclick="logout()" class="bg-red-500 px-3 py-1 rounded hidden hover:bg-red-600 transition">Keluar</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-4 md:p-8">
+        <div id="login-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="bg-white p-8 rounded-2xl w-full max-w-sm text-center shadow-2xl">
+                <h2 class="text-2xl mb-4 text-emerald-800">Login Pustakawan</h2>
+                <input type="password" id="admin-pass" placeholder="Password (12345)" class="border p-2 w-full rounded mb-4 text-center">
+                <div class="flex space-x-2">
+                    <button onclick="doLogin()" class="bg-emerald-600 text-white flex-1 py-2 rounded hover:bg-emerald-700 transition">Masuk</button>
+                    <button onclick="toggleLogin()" class="bg-gray-300 text-gray-700 flex-1 py-2 rounded hover:bg-gray-400 transition">Batal</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-dashboard" class="page-content active-page">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl text-emerald-800">Selamat Datang di Perpus Ceria!</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-purple-500 text-white p-6 rounded-2xl shadow-md"><h3>Total Anggota</h3><p id="stat-murid" class="text-4xl font-bold">0</p></div>
+                <div class="bg-blue-500 text-white p-6 rounded-2xl shadow-md"><h3>Total Kunjungan</h3><p id="stat-absen" class="text-4xl font-bold">0</p></div>
+                <div class="bg-orange-500 text-white p-6 rounded-2xl shadow-md"><h3>Peminjaman Aktif</h3><p id="stat-pinjam" class="text-4xl font-bold">0</p></div>
+            </div>
+        </div>
+
+        <div id="page-murid" class="page-content">
+            <h2 class="text-2xl mb-4 text-emerald-800">Data Murid (Dari Spreadsheet)</h2>
+            <div id="table-murid-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto">Memuat data dari Spreadsheet...</div>
+        </div>
+
+        <div id="page-absen" class="page-content">
+            <h2 class="text-2xl mb-4 text-emerald-800">Absen Kunjungan</h2>
+            <div id="table-absen-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto">Memuat data absen...</div>
+        </div>
+
+        <div id="page-transaksi" class="page-content">
+            <h2 class="text-2xl mb-4 text-emerald-800">Data Peminjaman Buku</h2>
+            <div id="table-transaksi-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto">Memuat data transaksi...</div>
+        </div>
+    </main>
+
+    <script>
+        const SPREADSHEET_ID = "1RFxZ6uY1CrDSxKd6GeMLSOD7QwZBd66jqZsvxfnkbXk";
+        let appData = { murid: [], absensi: [], transaksi: [] };
+        let isAdmin = false;
+
+        async function fetchSpreadsheetData() {
+            try {
+                // Tarik data dari Tab 'murid'
+                const resMurid = await fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=murid`);
+                if (resMurid.ok) {
+                    const text = await resMurid.text();
+                    appData.murid = parseGvizJSON(text);
+                }
+
+                // Tarik data dari Tab 'absen'
+                const resAbsen = await fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=absen`);
+                if (resAbsen.ok) {
+                    const text = await resAbsen.text();
+                    appData.absensi = parseGvizJSON(text);
+                }
+
+                // Tarik data dari Tab 'pinjam' atau 'transaksi'
+                const resPinjam = await fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=pinjam`);
+                if (resPinjam.ok) {
+                    const text = await resPinjam.text();
+                    appData.transaksi = parseGvizJSON(text);
+                }
+
+                render();
+            } catch (err) {
+                console.error("Gagal mengambil data spreadsheet:", err);
+                showModal("Peringatan", "Gagal memuat data dari Spreadsheet. Pastikan link Google Sheet sudah disetel ke 'Siapa saja yang memiliki link' (Public).");
+            }
+        }
+
+        function parseGvizJSON(responseText) {
+            try {
+                const jsonString = responseText.match(/(?<=["']table["']\s*:\s*).*(?=}\s*\);\s*$)/s)?.[0] || responseText.substring(47).slice(0, -2);
+                const json = JSON.parse(jsonString);
+                const rows = json.table.rows;
+                let list = [];
+                rows.forEach(r => {
+                    if (!r || !r.c) return;
+                    const cols = r.c.map(cell => cell ? (cell.f || cell.v || '') : '');
+                    if (cols[0]) { // Ambil baris yang ada isinya
+                        list.push({ col1: cols[0], col2: cols[1], col3: cols[2], col4: cols[3] || '' });
+                    }
+                });
+                return list;
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function showModal(title, message) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = message;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+        }
+
+        function toggleLogin() { document.getElementById('login-modal').classList.toggle('hidden'); }
+        
+        function doLogin() {
+            if (document.getElementById('admin-pass').value === '12345') {
+                isAdmin = true;
+                document.getElementById('btn-login').classList.add('hidden');
+                document.getElementById('btn-logout').classList.remove('hidden');
+                document.getElementById('nav-murid').classList.remove('hidden');
+                toggleLogin();
+                document.getElementById('admin-pass').value = '';
+                render();
+                showModal('Berhasil', 'Login Admin Berhasil!');
+            } else {
+                showModal('Gagal', 'Password salah!');
+            }
+        }
+
+        function logout() { 
+            isAdmin = false; 
+            document.getElementById('btn-logout').classList.add('hidden');
+            document.getElementById('btn-login').classList.remove('hidden');
+            document.getElementById('nav-murid').classList.add('hidden');
+            if(document.getElementById('page-murid').classList.contains('active-page')) {
+                showPage('dashboard');
+            }
+            render();
+            showModal('Informasi', 'Anda telah keluar dari mode admin.');
+        }
+
+        function showPage(id) {
+            if (id === 'murid' && !isAdmin) {
+                showModal('Akses Dibatasi', 'Hanya Admin yang dapat mengakses halaman Data Murid.');
+                return;
+            }
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active-page'));
+            document.getElementById('page-' + id).classList.add('active-page');
+        }
+        
+        function render() {
+            document.getElementById('stat-murid').innerText = appData.murid.length;
+            document.getElementById('stat-pinjam').innerText = appData.transaksi.length;
+            document.getElementById('stat-absen').innerText = appData.absensi.length;
+            
+            // Render Tabel Murid
+            const containerMurid = document.getElementById('table-murid-container');
+            let htmlMurid = `<table class="w-full text-left border-collapse"><thead><tr class="bg-emerald-50"><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Kelas</th><th class="p-2">QR Code</th></tr></thead><tbody>`;
+            if (appData.murid.length === 0) {
+                htmlMurid += `<tr><td colspan="4" class="p-4 text-center text-gray-500">Tidak ada data di tab 'murid' atau spreadsheet belum dipublikasikan.</td></tr>`;
+            } else {
+                appData.murid.forEach(m => {
+                    htmlMurid += `<tr class="border-b"><td class="p-2">${m.col1}</td><td class="p-2">${m.col2}</td><td class="p-2">${m.col3}</td><td class="p-2"><div id="qr-${m.col2}"></div></td></tr>`;
+                });
+            }
+            htmlMurid += `</tbody></table>`;
+            containerMurid.innerHTML = htmlMurid;
+
+            appData.murid.forEach(m => {
+                const el = document.getElementById(`qr-${m.col2}`);
+                if (el && el.innerHTML === '' && m.col2) new QRCode(el, { text: String(m.col2), width: 40, height: 40 });
+            });
+
+            // Render Tabel Absen
+            const containerAbsen = document.getElementById('table-absen-container');
+            let htmlAbsen = `<table class="w-full text-left border-collapse"><thead><tr class="bg-emerald-50"><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Waktu</th></tr></thead><tbody>`;
+            if (appData.absensi.length === 0) {
+                htmlAbsen += `<tr><td colspan="3" class="p-4 text-center text-gray-500">Belum ada data di tab 'absen'.</td></tr>`;
+            } else {
+                appData.absensi.forEach(a => {
+                    htmlAbsen += `<tr class="border-b"><td class="p-2">${a.col1}</td><td class="p-2">${a.col2}</td><td class="p-2">${a.col3}</td></tr>`;
+                });
+            }
+            htmlAbsen += `</tbody></table>`;
+            containerAbsen.innerHTML = htmlAbsen;
+
+            // Render Tabel Transaksi
+            const containerTransaksi = document.getElementById('table-transaksi-container');
+            let htmlTransaksi = `<table class="w-full text-left border-collapse"><thead><tr class="bg-blue-50"><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Buku</th><th class="p-2">Tanggal</th></tr></thead><tbody>`;
+            if (appData.transaksi.length === 0) {
+                htmlTransaksi += `<tr><td colspan="4" class="p-4 text-center text-gray-500">Belum ada data di tab 'pinjam'.</td></tr>`;
+            } else {
+                appData.transaksi.forEach(t => {
+                    htmlTransaksi += `<tr class="border-b"><td class="p-2">${t.col1}</td><td class="p-2">${t.col2}</td><td class="p-2">${t.col3}</td><td class="p-2">${t.col4}</td></tr>`;
+                });
+            }
+            htmlTransaksi += `</tbody></table>`;
+            containerTransaksi.innerHTML = htmlTransaksi;
+        }
+
+        // Ambil data otomatis saat pertama kali dibuka
+        fetchSpreadsheetData();
+    </script>
+</body>
+</html>
