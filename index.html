@@ -14,7 +14,7 @@
         .active-page { display: block; }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen flex flex-col justify-between">
 
     <!-- Notifikasi Modal Kustom -->
     <div id="custom-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -25,99 +25,178 @@
         </div>
     </div>
 
-    <nav class="bg-emerald-600 text-white p-4 shadow-lg sticky top-0 z-50">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl">📚 Perpus Ceria</h1>
-            <div id="nav-buttons" class="space-x-2">
-                <button onclick="showPage('dashboard')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">Beranda</button>
-                <button onclick="showPage('murid')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">Murid</button>
-                <button onclick="showPage('absen')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">Absen</button>
-                <button onclick="showPage('transaksi')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">Pinjam</button>
+    <!-- Modal Login Admin -->
+    <div id="login-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-sm text-center shadow-2xl">
+            <h3 class="text-xl mb-2 text-emerald-800">Login Admin</h3>
+            <p class="text-gray-600 mb-4 text-sm">Masukkan kata sandi admin untuk mengakses fitur ubah/edit data.</p>
+            <form onsubmit="handleAdminLogin(event)">
+                <input type="password" id="admin-password-input" placeholder="Kata Sandi (123)" class="w-full px-3 py-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                <div class="flex space-x-2">
+                    <button type="button" onclick="closeLoginModal()" class="bg-gray-300 text-gray-700 w-1/2 py-2 rounded-lg hover:bg-gray-400 transition">Batal</button>
+                    <button type="submit" class="bg-emerald-600 text-white w-1/2 py-2 rounded-lg hover:bg-emerald-700 transition">Masuk</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Form Tambah/Edit Data Murid -->
+    <div id="form-murid-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-md text-left shadow-2xl">
+            <h3 id="form-murid-title" class="text-xl mb-4 text-emerald-800 text-center">Form Murid</h3>
+            <form onsubmit="saveMurid(event)">
+                <input type="hidden" id="murid-index" value="-1">
+                <div class="mb-3">
+                    <label class="block text-sm text-gray-700 mb-1">Nama</label>
+                    <input type="text" id="input-nama-murid" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-sm text-gray-700 mb-1">NIS</label>
+                    <input type="text" id="input-nis-murid" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-700 mb-1">Kelas</label>
+                    <input type="text" id="input-kelas-murid" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                </div>
+                <div class="flex space-x-2">
+                    <button type="button" onclick="closeFormMuridModal()" class="bg-gray-300 text-gray-700 w-1/2 py-2 rounded-lg hover:bg-gray-400 transition">Batal</button>
+                    <button type="submit" class="bg-emerald-600 text-white w-1/2 py-2 rounded-lg hover:bg-emerald-700 transition">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div>
+        <nav class="bg-emerald-600 text-white p-4 shadow-lg sticky top-0 z-40">
+            <div class="container mx-auto flex flex-wrap justify-between items-center gap-2">
+                <h1 class="text-2xl">📚 Perpus Ceria</h1>
+                <div id="nav-buttons" class="flex flex-wrap items-center gap-2">
+                    <button onclick="showPage('dashboard')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">Beranda</button>
+                    <button onclick="showPage('murid')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">Murid</button>
+                    <button onclick="showPage('absen')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">Absen</button>
+                    <button onclick="showPage('transaksi')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">Pinjam</button>
+                    <button onclick="loadAllData()" class="bg-emerald-700 hover:bg-emerald-800 px-3 py-1 rounded transition text-sm">🔄 Muat Ulang</button>
+                    <div id="auth-nav-container">
+                        <button onclick="openLoginModal()" id="btn-login-admin" class="bg-amber-500 hover:bg-amber-600 px-3 py-1 rounded transition text-sm font-semibold">🔐 Login Admin</button>
+                        <button onclick="logoutAdmin()" id="btn-logout-admin" class="hidden bg-rose-600 hover:bg-rose-700 px-3 py-1 rounded transition text-sm font-semibold">🚪 Logout Admin</button>
+                    </div>
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
 
-    <main class="container mx-auto p-4 md:p-8">
-        <div id="page-dashboard" class="page-content active-page">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-3xl text-emerald-800">Selamat Datang di Perpus Ceria!</h2>
+        <main class="container mx-auto p-4 md:p-8">
+            <div id="page-dashboard" class="page-content active-page">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl text-emerald-800">Selamat Datang di Perpus Ceria!</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-purple-500 text-white p-6 rounded-2xl shadow-md"><h3>Total Anggota</h3><p id="stat-murid" class="text-4xl font-bold">0</p></div>
+                    <div class="bg-blue-500 text-white p-6 rounded-2xl shadow-md"><h3>Total Kunjungan</h3><p id="stat-absen" class="text-4xl font-bold">0</p></div>
+                    <div class="bg-orange-500 text-white p-6 rounded-2xl shadow-md"><h3>Peminjaman Aktif</h3><p id="stat-pinjam" class="text-4xl font-bold">0</p></div>
+                </div>
+                <div id="admin-status-banner" class="mt-8 bg-amber-50 border border-amber-200 p-4 rounded-xl text-amber-800 flex justify-between items-center hidden">
+                    <div>
+                        <h4 class="font-bold">Mode Admin Aktif</h4>
+                        <p class="text-sm">Anda memiliki akses penuh untuk menambah, mengedit, dan menghapus data pada sistem.</p>
+                    </div>
+                    <span class="bg-amber-200 text-amber-900 text-xs px-2.5 py-1 rounded-full font-semibold">Admin</span>
+                </div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-purple-500 text-white p-6 rounded-2xl shadow-md"><h3>Total Anggota</h3><p id="stat-murid" class="text-4xl font-bold">0</p></div>
-                <div class="bg-blue-500 text-white p-6 rounded-2xl shadow-md"><h3>Total Kunjungan</h3><p id="stat-absen" class="text-4xl font-bold">0</p></div>
-                <div class="bg-orange-500 text-white p-6 rounded-2xl shadow-md"><h3>Peminjaman Aktif</h3><p id="stat-pinjam" class="text-4xl font-bold">0</p></div>
+
+            <div id="page-murid" class="page-content">
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+                    <h2 class="text-2xl text-emerald-800">Data Murid (Dari Spreadsheet)</h2>
+                    <button onclick="openFormMuridModal()" id="btn-tambah-murid" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-sm transition">➕ Tambah Murid</button>
+                </div>
+                <div id="table-murid-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto">Memuat data dari Spreadsheet...</div>
             </div>
-        </div>
 
-        <div id="page-murid" class="page-content">
-            <h2 class="text-2xl mb-4 text-emerald-800">Data Murid (Dari Spreadsheet)</h2>
-            <div id="table-murid-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto">Memuat data dari Spreadsheet...</div>
-        </div>
+            <div id="page-absen" class="page-content">
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+                    <h2 class="text-2xl text-emerald-800">Absen Kunjungan</h2>
+                    <button onclick="tambahAbsenManual()" id="btn-tambah-absen" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-sm transition">➕ Tambah Absen</button>
+                </div>
+                <div id="table-absen-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto">Memuat data absen...</div>
+            </div>
 
-        <div id="page-absen" class="page-content">
-            <h2 class="text-2xl mb-4 text-emerald-800">Absen Kunjungan</h2>
-            <div id="table-absen-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto">Memuat data absen...</div>
-        </div>
+            <div id="page-transaksi" class="page-content">
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+                    <h2 class="text-2xl text-emerald-800">Data Peminjaman Buku</h2>
+                    <button onclick="tambahTransaksiManual()" id="btn-tambah-transaksi" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm transition">➕ Tambah Peminjaman</button>
+                </div>
+                <div id="table-transaksi-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto">Memuat data transaksi...</div>
+            </div>
+        </main>
+    </div>
 
-        <div id="page-transaksi" class="page-content">
-            <h2 class="text-2xl mb-4 text-emerald-800">Data Peminjaman Buku</h2>
-            <div id="table-transaksi-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto">Memuat data transaksi...</div>
-        </div>
-    </main>
+    <footer class="bg-white border-t border-emerald-100 py-4 text-center text-xs text-gray-500 mt-8">
+        Perpus Ceria • SDN Ceria &copy; 2026
+    </footer>
 
     <script>
         const SPREADSHEET_ID = "1RFxZ6uY1CrDSxKd6GeMLSOD7QwZBd66jqZsvxfnkbXk";
         let appData = { murid: [], absensi: [], transaksi: [] };
+        let isAdminLoggedIn = localStorage.getItem('perpus_admin_logged') === 'true';
 
-        async function fetchSpreadsheetData() {
+        window.addEventListener('DOMContentLoaded', () => {
+            updateAdminUI();
+            loadAllData();
+        });
+
+        async function fetchSheetCSV(sheetName) {
             try {
-                // Tarik data dari Tab 'murid'
-                const resMurid = await fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=murid`);
-                if (resMurid.ok) {
-                    const text = await resMurid.text();
-                    appData.murid = parseGvizJSON(text, true); // true untuk melewati baris header pertama
-                }
-
-                // Tarik data dari Tab 'absen'
-                const resAbsen = await fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=absen`);
-                if (resAbsen.ok) {
-                    const text = await resAbsen.text();
-                    appData.absensi = parseGvizJSON(text, true);
-                }
-
-                // Tarik data dari Tab 'pinjam'
-                const resPinjam = await fetch(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=pinjam`);
-                if (resPinjam.ok) {
-                    const text = await resPinjam.text();
-                    appData.transaksi = parseGvizJSON(text, true);
-                }
-
-                render();
+                const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+                const response = await fetch(url);
+                if (!response.ok) return [];
+                const csvText = await response.text();
+                return parseCSV(csvText);
             } catch (err) {
-                console.error("Gagal mengambil data spreadsheet:", err);
-                showModal("Peringatan", "Gagal memuat data dari Spreadsheet. Pastikan link Google Sheet sudah disetel ke 'Siapa saja yang memiliki link' (Public).");
+                console.error(`Gagal memuat tab ${sheetName}:`, err);
+                return [];
             }
         }
 
-        function parseGvizJSON(responseText, skipHeader = false) {
-            try {
-                const jsonString = responseText.match(/(?<=["']table["']\s*:\s*).*(?=}\s*\);\s*$)/s)?.[0] || responseText.substring(47).slice(0, -2);
-                const json = JSON.parse(jsonString);
-                const rows = json.table.rows;
-                let list = [];
+        function parseCSV(text) {
+            let lines = text.split('\n');
+            let result = [];
+            for (let i = 1; i < lines.length; i++) {
+                let line = lines[i].trim();
+                if (!line) continue;
                 
-                rows.forEach((r, index) => {
-                    if (skipHeader && index === 0) return; // Lewati baris pertama (header)
-                    if (!r || !r.c) return;
-                    const cols = r.c.map(cell => cell ? (cell.f || cell.v || '') : '');
-                    if (cols[0] !== '') { 
-                        list.push({ col1: cols[0], col2: cols[1], col3: cols[2], col4: cols[3] || '' });
+                let row = [];
+                let inQuotes = false;
+                let entry = '';
+                for (let char of line) {
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        row.push(entry.trim().replace(/^"|"$/g, ''));
+                        entry = '';
+                    } else {
+                        entry += char;
                     }
-                });
-                return list;
-            } catch (e) {
-                return [];
+                }
+                row.push(entry.trim().replace(/^"|"$/g, ''));
+                
+                if (row[0] && row[0] !== '') {
+                    result.push({
+                        col1: row[0] || '',
+                        col2: row[1] || '',
+                        col3: row[2] || '',
+                        col4: row[3] || ''
+                    });
+                }
             }
+            return result;
+        }
+
+        async function loadAllData() {
+            showModal("Memuat Data", "Sedang mengambil data terbaru dari Google Spreadsheet...");
+            appData.murid = await fetchSheetCSV('murid');
+            appData.absensi = await fetchSheetCSV('absen');
+            appData.transaksi = await fetchSheetCSV('pinjam');
+            render();
+            closeModal();
         }
 
         function showModal(title, message) {
@@ -130,11 +209,176 @@
             document.getElementById('custom-modal').classList.add('hidden');
         }
 
+        function openLoginModal() {
+            document.getElementById('login-modal').classList.remove('hidden');
+            document.getElementById('admin-password-input').value = '';
+        }
+
+        function closeLoginModal() {
+            document.getElementById('login-modal').classList.add('hidden');
+        }
+
+        function handleAdminLogin(event) {
+            event.preventDefault();
+            const pass = document.getElementById('admin-password-input').value;
+            if (pass === '123') {
+                isAdminLoggedIn = true;
+                localStorage.setItem('perpus_admin_logged', 'true');
+                closeLoginModal();
+                updateAdminUI();
+                showModal("Berhasil", "Anda berhasil masuk sebagai Admin.");
+            } else {
+                showModal("Gagal", "Kata sandi salah! Gunakan sandi: 123");
+            }
+        }
+
+        function logoutAdmin() {
+            isAdminLoggedIn = false;
+            localStorage.removeItem('perpus_admin_logged');
+            updateAdminUI();
+            showModal("Informasi", "Anda telah keluar dari mode Admin.");
+        }
+
+        function updateAdminUI() {
+            const btnLogin = document.getElementById('btn-login-admin');
+            const btnLogout = document.getElementById('btn-logout-admin');
+            const banner = document.getElementById('admin-status-banner');
+            const btnTambahMurid = document.getElementById('btn-tambah-murid');
+            const btnTambahAbsen = document.getElementById('btn-tambah-absen');
+            const btnTambahTransaksi = document.getElementById('btn-tambah-transaksi');
+
+            if (isAdminLoggedIn) {
+                if (btnLogin) btnLogin.classList.add('hidden');
+                if (btnLogout) btnLogout.classList.remove('hidden');
+                if (banner) banner.classList.remove('hidden');
+                if (btnTambahMurid) btnTambahMurid.classList.remove('hidden');
+                if (btnTambahAbsen) btnTambahAbsen.classList.remove('hidden');
+                if (btnTambahTransaksi) btnTambahTransaksi.classList.remove('hidden');
+            } else {
+                if (btnLogin) btnLogin.classList.remove('hidden');
+                if (btnLogout) btnLogout.classList.add('hidden');
+                if (banner) banner.classList.add('hidden');
+                if (btnTambahMurid) btnTambahMurid.classList.add('hidden');
+                if (btnTambahAbsen) btnTambahAbsen.classList.add('hidden');
+                if (btnTambahTransaksi) btnTambahTransaksi.classList.add('hidden');
+            }
+            render();
+        }
+
         function showPage(id) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active-page'));
             document.getElementById('page-' + id).classList.add('active-page');
         }
         
+        function openFormMuridModal(index = -1) {
+            if (!isAdminLoggedIn) {
+                openLoginModal();
+                return;
+            }
+            document.getElementById('murid-index').value = index;
+            if (index > -1) {
+                document.getElementById('form-murid-title').innerText = "Edit Data Murid";
+                document.getElementById('input-nama-murid').value = appData.murid[index].col1;
+                document.getElementById('input-nis-murid').value = appData.murid[index].col2;
+                document.getElementById('input-kelas-murid').value = appData.murid[index].col3;
+            } else {
+                document.getElementById('form-murid-title').innerText = "Tambah Data Murid";
+                document.getElementById('input-nama-murid').value = '';
+                document.getElementById('input-nis-murid').value = '';
+                document.getElementById('input-kelas-murid').value = '';
+            }
+            document.getElementById('form-murid-modal').classList.remove('hidden');
+        }
+
+        function closeFormMuridModal() {
+            document.getElementById('form-murid-modal').classList.add('hidden');
+        }
+
+        function saveMurid(event) {
+            event.preventDefault();
+            const index = parseInt(document.getElementById('murid-index').value);
+            const nama = document.getElementById('input-nama-murid').value;
+            const nis = document.getElementById('input-nis-murid').value;
+            const kelas = document.getElementById('input-kelas-murid').value;
+
+            if (index > -1) {
+                appData.murid[index].col1 = nama;
+                appData.murid[index].col2 = nis;
+                appData.murid[index].col3 = kelas;
+            } else {
+                appData.murid.push({ col1: nama, col2: nis, col3: kelas, col4: '' });
+            }
+            closeFormMuridModal();
+            render();
+            showModal("Berhasil", "Data murid berhasil disimpan secara lokal.");
+        }
+
+        function deleteMurid(index) {
+            if (!isAdminLoggedIn) {
+                openLoginModal();
+                return;
+            }
+            if (confirm("Apakah Anda yakin ingin menghapus data murid ini?")) {
+                appData.murid.splice(index, 1);
+                render();
+                showModal("Berhasil", "Data murid berhasil dihapus.");
+            }
+        }
+
+        function tambahAbsenManual() {
+            if (!isAdminLoggedIn) {
+                openLoginModal();
+                return;
+            }
+            const nama = prompt("Masukkan Nama Murid:");
+            if (!nama) return;
+            const nis = prompt("Masukkan NIS Murid:");
+            if (!nis) return;
+            const waktu = new Date().toLocaleString('id-ID');
+            appData.absensi.unshift({ col1: nama, col2: nis, col3: waktu, col4: '' });
+            render();
+            showModal("Berhasil", "Absen kunjungan berhasil ditambahkan.");
+        }
+
+        function deleteAbsen(index) {
+            if (!isAdminLoggedIn) {
+                openLoginModal();
+                return;
+            }
+            if (confirm("Hapus data absen ini?")) {
+                appData.absensi.splice(index, 1);
+                render();
+            }
+        }
+
+        function tambahTransaksiManual() {
+            if (!isAdminLoggedIn) {
+                openLoginModal();
+                return;
+            }
+            const nama = prompt("Masukkan Nama Peminjam:");
+            if (!nama) return;
+            const nis = prompt("Masukkan NIS:");
+            if (!nis) return;
+            const buku = prompt("Judul Buku:");
+            if (!buku) return;
+            const tanggal = new Date().toLocaleDateString('id-ID');
+            appData.transaksi.unshift({ col1: nama, col2: nis, col3: buku, col4: tanggal });
+            render();
+            showModal("Berhasil", "Peminjaman buku berhasil ditambahkan.");
+        }
+
+        function deleteTransaksi(index) {
+            if (!isAdminLoggedIn) {
+                openLoginModal();
+                return;
+            }
+            if (confirm("Hapus data transaksi ini?")) {
+                appData.transaksi.splice(index, 1);
+                render();
+            }
+        }
+
         function render() {
             document.getElementById('stat-murid').innerText = appData.murid.length;
             document.getElementById('stat-pinjam').innerText = appData.transaksi.length;
@@ -142,30 +386,51 @@
             
             // Render Tabel Murid
             const containerMurid = document.getElementById('table-murid-container');
-            let htmlMurid = `<table class="w-full text-left border-collapse"><thead><tr class="bg-emerald-50"><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Kelas</th><th class="p-2">QR Code</th></tr></thead><tbody>`;
+            let htmlMurid = `<table class="w-full text-left border-collapse"><thead><tr class="bg-emerald-50"><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Kelas</th><th class="p-2">QR Code</th>`;
+            if (isAdminLoggedIn) htmlMurid += `<th class="p-2 text-center">Aksi Admin</th>`;
+            htmlMurid += `</tr></thead><tbody>`;
+
             if (appData.murid.length === 0) {
-                htmlMurid += `<tr><td colspan="4" class="p-4 text-center text-gray-500">Tidak ada data di tab 'murid' atau spreadsheet belum dipublikasikan.</td></tr>`;
+                let colspan = isAdminLoggedIn ? 5 : 4;
+                htmlMurid += `<tr><td colspan="${colspan}" class="p-4 text-center text-gray-500">Tidak ada data di tab 'murid' atau spreadsheet belum dipublikasikan.</td></tr>`;
             } else {
-                appData.murid.forEach(m => {
-                    htmlMurid += `<tr class="border-b"><td class="p-2">${m.col1}</td><td class="p-2">${m.col2}</td><td class="p-2">${m.col3}</td><td class="p-2"><div id="qr-${m.col2}"></div></td></tr>`;
+                appData.murid.forEach((m, idx) => {
+                    htmlMurid += `<tr class="border-b"><td class="p-2">${m.col1}</td><td class="p-2">${m.col2}</td><td class="p-2">${m.col3}</td><td class="p-2"><div id="qr-${m.col2}-${idx}"></div></td>`;
+                    if (isAdminLoggedIn) {
+                        htmlMurid += `<td class="p-2 text-center space-x-1">
+                            <button onclick="openFormMuridModal(${idx})" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs">Edit</button>
+                            <button data-action="delete-murid" data-index="${idx}" class="btn-del-murid bg-rose-500 hover:bg-rose-600 text-white px-2 py-1 rounded text-xs">Hapus</button>
+                        </td>`;
+                    }
+                    htmlMurid += `</tr>`;
                 });
             }
             htmlMurid += `</tbody></table>`;
             containerMurid.innerHTML = htmlMurid;
 
-            appData.murid.forEach(m => {
-                const el = document.getElementById(`qr-${m.col2}`);
+            appData.murid.forEach((m, idx) => {
+                const el = document.getElementById(`qr-${m.col2}-${idx}`);
                 if (el && el.innerHTML === '' && m.col2) new QRCode(el, { text: String(m.col2), width: 40, height: 40 });
             });
 
             // Render Tabel Absen
             const containerAbsen = document.getElementById('table-absen-container');
-            let htmlAbsen = `<table class="w-full text-left border-collapse"><thead><tr class="bg-emerald-50"><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Waktu</th></tr></thead><tbody>`;
+            let htmlAbsen = `<table class="w-full text-left border-collapse"><thead><tr class="bg-emerald-50"><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Waktu</th>`;
+            if (isAdminLoggedIn) htmlAbsen += `<th class="p-2 text-center">Aksi Admin</th>`;
+            htmlAbsen += `</tr></thead><tbody>`;
+
             if (appData.absensi.length === 0) {
-                htmlAbsen += `<tr><td colspan="3" class="p-4 text-center text-gray-500">Belum ada data di tab 'absen'.</td></tr>`;
+                let colspan = isAdminLoggedIn ? 4 : 3;
+                htmlAbsen += `<tr><td colspan="${colspan}" class="p-4 text-center text-gray-500">Belum ada data di tab 'absen'.</td></tr>`;
             } else {
-                appData.absensi.forEach(a => {
-                    htmlAbsen += `<tr class="border-b"><td class="p-2">${a.col1}</td><td class="p-2">${a.col2}</td><td class="p-2">${a.col3}</td></tr>`;
+                appData.absensi.forEach((a, idx) => {
+                    htmlAbsen += `<tr class="border-b"><td class="p-2">${a.col1}</td><td class="p-2">${a.col2}</td><td class="p-2">${a.col3}</td>`;
+                    if (isAdminLoggedIn) {
+                        htmlAbsen += `<td class="p-2 text-center">
+                            <button data-action="delete-absen" data-index="${idx}" class="btn-del-absen bg-rose-500 hover:bg-rose-600 text-white px-2 py-1 rounded text-xs">Hapus</button>
+                        </td>`;
+                    }
+                    htmlAbsen += `</tr>`;
                 });
             }
             htmlAbsen += `</tbody></table>`;
@@ -173,20 +438,40 @@
 
             // Render Tabel Transaksi
             const containerTransaksi = document.getElementById('table-transaksi-container');
-            let htmlTransaksi = `<table class="w-full text-left border-collapse"><thead><tr class="bg-blue-50"><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Buku</th><th class="p-2">Tanggal</th></tr></thead><tbody>`;
+            let htmlTransaksi = `<table class="w-full text-left border-collapse"><thead><tr class="bg-blue-50"><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Buku</th><th class="p-2">Tanggal</th>`;
+            if (isAdminLoggedIn) htmlTransaksi += `<th class="p-2 text-center">Aksi Admin</th>`;
+            htmlTransaksi += `</tr></thead><tbody>`;
+
             if (appData.transaksi.length === 0) {
-                htmlTransaksi += `<tr><td colspan="4" class="p-4 text-center text-gray-500">Belum ada data di tab 'pinjam'.</td></tr>`;
+                let colspan = isAdminLoggedIn ? 5 : 4;
+                htmlTransaksi += `<tr><td colspan="${colspan}" class="p-4 text-center text-gray-500">Belum ada data di tab 'pinjam'.</td></tr>`;
             } else {
-                appData.transaksi.forEach(t => {
-                    htmlTransaksi += `<tr class="border-b"><td class="p-2">${t.col1}</td><td class="p-2">${t.col2}</td><td class="p-2">${t.col3}</td><td class="p-2">${t.col4}</td></tr>`;
+                appData.transaksi.forEach((t, idx) => {
+                    htmlTransaksi += `<tr class="border-b"><td class="p-2">${t.col1}</td><td class="p-2">${t.col2}</td><td class="p-2">${t.col3}</td><td class="p-2">${t.col4}</td>`;
+                    if (isAdminLoggedIn) {
+                        htmlTransaksi += `<td class="p-2 text-center">
+                            <button data-action="delete-transaksi" data-index="${idx}" class="btn-del-transaksi bg-rose-500 hover:bg-rose-600 text-white px-2 py-1 rounded text-xs">Hapus</button>
+                        </td>`;
+                    }
+                    htmlTransaksi += `</tr>`;
                 });
             }
             htmlTransaksi += `</tbody></table>`;
             containerTransaksi.innerHTML = htmlTransaksi;
-        }
 
-        // Ambil data otomatis saat pertama kali dibuka
-        fetchSpreadsheetData();
+            // Bind listener untuk tombol hapus agar stabil
+            if (isAdminLoggedIn) {
+                document.querySelectorAll('.btn-del-murid').forEach(btn => {
+                    btn.addEventListener('click', () => deleteMurid(parseInt(btn.getAttribute('data-index'))));
+                });
+                document.querySelectorAll('.btn-del-absen').forEach(btn => {
+                    btn.addEventListener('click', () => deleteAbsen(parseInt(btn.getAttribute('data-index'))));
+                });
+                document.querySelectorAll('.btn-del-transaksi').forEach(btn => {
+                    btn.addEventListener('click', () => deleteTransaksi(parseInt(btn.getAttribute('data-index'))));
+                });
+            }
+        }
     </script>
 </body>
 </html>
