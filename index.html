@@ -164,6 +164,7 @@
 
     <script>
         const SPREADSHEET_ID = "1RFxZ6uY1CrDSxKd6GeMLSOD7QwZBd66jqZsvxfnkbXk";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXTR1Z5glM8LO5VvCw5oCUDpKajmPQYY9BzMweLtd0E4EUNnWKjvWSNgchOUZWQspy/exec";
         let appData = { murid: [], absensi: [], transaksi: [] };
         let isAdminLoggedIn = localStorage.getItem('perpus_admin_logged') === 'true';
         let html5QrCode = null;
@@ -193,62 +194,40 @@
             for (let i = 1; i < lines.length; i++) {
                 let line = lines[i].trim();
                 if (!line) continue;
-                
-        // FUNGSI RENDER (PENTING: Ini yang membuat data muncul di layar)
-        function render() {
-            const filterMurid = document.getElementById('filter-murid').value.toLowerCase();
-            const containerMurid = document.getElementById('table-murid-container');
-            
-            // Render Tabel Murid
-            let htmlMurid = `<table class="w-full text-sm text-left">
-                <thead class="bg-emerald-50 text-emerald-800"><tr><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Kelas</th></tr></thead>
-                <tbody>`;
-            appData.murid.filter(m => m.col1.toLowerCase().includes(filterMurid) || m.col2.includes(filterMurid)).forEach((m, i) => {
-                htmlMurid += `<tr class="border-b">
-                    <td class="p-2">${m.col1}</td><td class="p-2">${m.col2}</td><td class="p-2">${m.col3}</td>
-                </tr>`;
-            });
-            htmlMurid += `</tbody></table>`;
-            containerMurid.innerHTML = htmlMurid;
-
-            // Update Statistik
-            document.getElementById('stat-murid').innerText = appData.murid.length;
-            document.getElementById('stat-absen').innerText = appData.absensi.length;
-            document.getElementById('stat-pinjam').innerText = appData.transaksi.length;
-        }
-
-        // FUNGSI TAMBAHAN (Stub agar tidak error saat diklik)
-        function tambahAbsenManual() { alert("Fitur Tambah Manual sedang dalam pengembangan."); }
-        function tambahTransaksiManual() { alert("Fitur Tambah Manual sedang dalam pengembangan."); }
-
+                let row = [];
                 let inQuotes = false;
                 let entry = '';
                 for (let char of line) {
-                    if (char === '"') {
-                        inQuotes = !inQuotes;
-                    } else if (char === ',' && !inQuotes) {
+                    if (char === '"') inQuotes = !inQuotes;
+                    else if (char === ',' && !inQuotes) {
                         row.push(entry.trim().replace(/^"|"$/g, ''));
                         entry = '';
-                    } else {
-                        entry += char;
-                    }
+                    } else entry += char;
                 }
                 row.push(entry.trim().replace(/^"|"$/g, ''));
-                
                 if (row[0] && row[0] !== '') {
-                    result.push({
-                        col1: row[0] || '',
-                        col2: row[1] || '',
-                        col3: row[2] || '',
-                        col4: row[3] || ''
-                    });
+                    result.push({ col1: row[0] || '', col2: row[1] || '', col3: row[2] || '', col4: row[3] || '' });
                 }
             }
             return result;
         }
 
+        function render() {
+            const filterMurid = document.getElementById('filter-murid').value.toLowerCase();
+            const containerMurid = document.getElementById('table-murid-container');
+            let htmlMurid = `<table class="w-full text-sm text-left"><thead class="bg-emerald-50 text-emerald-800"><tr><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Kelas</th></tr></thead><tbody>`;
+            appData.murid.filter(m => m.col1.toLowerCase().includes(filterMurid) || m.col2.includes(filterMurid)).forEach((m) => {
+                htmlMurid += `<tr class="border-b"><td class="p-2">${m.col1}</td><td class="p-2">${m.col2}</td><td class="p-2">${m.col3}</td></tr>`;
+            });
+            htmlMurid += `</tbody></table>`;
+            containerMurid.innerHTML = htmlMurid;
+            document.getElementById('stat-murid').innerText = appData.murid.length;
+            document.getElementById('stat-absen').innerText = appData.absensi.length;
+            document.getElementById('stat-pinjam').innerText = appData.transaksi.length;
+        }
+
         async function loadAllData() {
-            showModal("Memuat Data", "Sedang mengambil data terbaru dari Google Spreadsheet...");
+            showModal("Memuat Data", "Sedang mengambil data terbaru...");
             appData.murid = await fetchSheetCSV('murid');
             appData.absensi = await fetchSheetCSV('absen');
             appData.transaksi = await fetchSheetCSV('pinjam');
@@ -262,78 +241,58 @@
             document.getElementById('custom-modal').classList.remove('hidden');
         }
 
-        function closeModal() {
-            document.getElementById('custom-modal').classList.add('hidden');
-        }
+        function closeModal() { document.getElementById('custom-modal').classList.add('hidden'); }
 
         function openLoginModal() {
             document.getElementById('login-modal').classList.remove('hidden');
             document.getElementById('admin-password-input').value = '';
-            document.getElementById('login-error-msg').classList.add('hidden');
         }
 
-        function closeLoginModal() {
-            document.getElementById('login-modal').classList.add('hidden');
-            document.getElementById('login-error-msg').classList.add('hidden');
-        }
+        function closeLoginModal() { document.getElementById('login-modal').classList.add('hidden'); }
 
         function handleAdminLogin(event) {
             event.preventDefault();
-            const pass = document.getElementById('admin-password-input').value;
-            const errorMsg = document.getElementById('login-error-msg');
-            
-            if (pass === '123') {
+            if (document.getElementById('admin-password-input').value === '123') {
                 isAdminLoggedIn = true;
                 localStorage.setItem('perpus_admin_logged', 'true');
                 closeLoginModal();
                 updateAdminUI();
-                showModal("Berhasil", "Anda berhasil masuk sebagai Admin.");
-            } else {
-                errorMsg.classList.remove('hidden');
-                document.getElementById('admin-password-input').classList.add('border-rose-500');
-            }
+            } else document.getElementById('login-error-msg').classList.remove('hidden');
         }
 
         function logoutAdmin() {
             isAdminLoggedIn = false;
             localStorage.removeItem('perpus_admin_logged');
             updateAdminUI();
-            showModal("Informasi", "Anda telah keluar dari mode Admin.");
         }
 
         function updateAdminUI() {
-            const btnLogin = document.getElementById('btn-login-admin');
-            const btnLogout = document.getElementById('btn-logout-admin');
-            const btnSync = document.getElementById('btn-sync');
-            const banner = document.getElementById('admin-status-banner');
-            const btnTambahMurid = document.getElementById('btn-tambah-murid');
-            const btnTambahAbsen = document.getElementById('btn-tambah-absen');
-            const btnTambahTransaksi = document.getElementById('btn-tambah-transaksi');
-            const btnScanAbsen = document.getElementById('btn-scan-absen');
-            const btnScanTransaksi = document.getElementById('btn-scan-transaksi');
-
+            const adminElements = [
+                'btn-login-admin', 'btn-logout-admin', 'btn-sync', 'admin-status-banner', 
+                'btn-tambah-murid', 'btn-tambah-absen', 'btn-tambah-transaksi', 
+                'btn-scan-absen', 'btn-scan-transaksi'
+            ];
             if (isAdminLoggedIn) {
-                if (btnLogin) btnLogin.classList.add('hidden');
-                if (btnLogout) btnLogout.classList.remove('hidden');
-                if (btnSync) btnSync.classList.remove('hidden');
-                if (banner) banner.classList.remove('hidden');
-                if (btnTambahMurid) btnTambahMurid.classList.remove('hidden');
-                if (btnTambahAbsen) btnTambahAbsen.classList.remove('hidden');
-                if (btnTambahTransaksi) btnTambahTransaksi.classList.remove('hidden');
-                if (btnScanAbsen) btnScanAbsen.classList.remove('hidden');
-                if (btnScanTransaksi) btnScanTransaksi.classList.remove('hidden');
+                document.getElementById('btn-login-admin')?.classList.add('hidden');
+                document.getElementById('btn-logout-admin')?.classList.remove('hidden');
+                document.getElementById('btn-sync')?.classList.remove('hidden');
+                document.getElementById('admin-status-banner')?.classList.remove('hidden');
+                document.getElementById('btn-tambah-murid')?.classList.remove('hidden');
+                document.getElementById('btn-tambah-absen')?.classList.remove('hidden');
+                document.getElementById('btn-tambah-transaksi')?.classList.remove('hidden');
+                document.getElementById('btn-scan-absen')?.classList.remove('hidden');
+                document.getElementById('btn-scan-transaksi')?.classList.remove('hidden');
             } else {
-                if (btnLogin) btnLogin.classList.remove('hidden');
-                if (btnLogout) btnLogout.classList.add('hidden');
-                if (btnSync) btnSync.classList.add('hidden');
-                if (banner) banner.classList.add('hidden');
-                if (btnTambahMurid) btnTambahMurid.classList.add('hidden');
-                if (btnTambahAbsen) btnTambahAbsen.classList.add('hidden');
-                if (btnTambahTransaksi) btnTambahTransaksi.classList.add('hidden');
-                if (btnScanAbsen) btnScanAbsen.classList.add('hidden');
-                if (btnScanTransaksi) btnScanTransaksi.classList.add('hidden');
+                document.getElementById('btn-login-admin')?.classList.remove('hidden');
+                document.getElementById('btn-logout-admin')?.classList.add('hidden');
+                document.getElementById('btn-sync')?.classList.add('hidden');
+                document.getElementById('admin-status-banner')?.classList.add('hidden');
+                document.getElementById('btn-tambah-murid')?.classList.add('hidden');
+                document.getElementById('btn-tambah-absen')?.classList.add('hidden');
+                document.getElementById('btn-tambah-transaksi')?.classList.add('hidden');
+                document.getElementById('btn-scan-absen')?.classList.add('hidden');
+                document.getElementById('btn-scan-transaksi')?.classList.add('hidden');
             }
-            render();
         }
 
         function showPage(id) {
@@ -342,84 +301,21 @@
         }
 
         function openScannerModal(target) {
-            if (!isAdminLoggedIn) {
-                openLoginModal();
-                return;
-            }
-            activeScannerTarget = target;
-            document.getElementById('scanner-title').innerText = target === 'absen' ? '📷 Scan Barcode untuk Absen' : '📷 Scan Barcode untuk Pinjam';
-            document.getElementById('scanner-modal').classList.remove('hidden');
-            
-            setTimeout(() => {
-                if (!html5QrCode) {
-                    html5QrCode = new Html5Qrcode("reader");
-                }
-                html5QrCode.start(
-                    { facingMode: "environment" },
-                    { fps: 10, qrbox: { width: 250, height: 250 } },
-                    onScanSuccess,
-                    onScanFailure
-                ).catch(err => {
-                    console.error("Gagal membuka kamera:", err);
-                    alert("Tidak dapat mengakses kamera perangkat.");
-                    closeScannerModal();
-                });
-            }, 300);
-        }
-
-        function closeScannerModal() {
-            if (html5QrCode && html5QrCode.isScanning) {
-                html5QrCode.stop().then(() => {
-                    document.getElementById('scanner-modal').classList.add('hidden');
-                }).catch(err => {
-                    document.getElementById('scanner-modal').classList.add('hidden');
-                });
-            } else {
-                document.getElementById('scanner-modal').classList.add('hidden');
-            }
-        }
-
-        function onScanSuccess(decodedText, decodedResult) {
-            closeScannerModal();
-            const nisScanned = decodedText.trim();
-            const muridDitemukan = appData.murid.find(m => m.col2.trim() === nisScanned);
-            
-            if (!muridDitemukan) {
-                showModal("Gagal", `NIS / Barcode "${nisScanned}" tidak ditemukan di Data Murid!`);
-                return;
-            }
-
-            if (activeScannerTarget === 'absen') {
-                const waktu = new Date().toLocaleString('id-ID');
-                appData.absensi.unshift({ col1: muridDitemukan.col1, col2: muridDitemukan.col2, col3: waktu, col4: '' });
-                render();
-                showModal("Absen Berhasil", `Kehadiran ${muridDitemukan.col1} berhasil dicatat.`);
-            } else if (activeScannerTarget === 'transaksi') {
-                const buku = prompt(`Masukkan Judul Buku yang dipinjam oleh ${muridDitemukan.col1}:`);
-                if (!buku) return;
-                const tanggal = new Date().toLocaleDateString('id-ID');
-                appData.transaksi.unshift({ col1: muridDitemukan.col1, col2: muridDitemukan.col2, col3: buku, col4: tanggal });
-                render();
-                showModal("Pinjam Berhasil", `Peminjaman "${buku}" oleh ${muridDitemukan.col1} berhasil.`);
-            }
-        }
-
-        function onScanFailure(error) {}
-
-        function openFormMuridModal(index = -1) {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
-            document.getElementById('murid-index').value = index;
-            if (index > -1) {
-                document.getElementById('form-murid-title').innerText = "Edit Data Murid";
-                document.getElementById('input-nama-murid').value = appData.murid[index].col1;
-                document.getElementById('input-nis-murid').value = appData.murid[index].col2;
-                document.getElementById('input-kelas-murid').value = appData.murid[index].col3;
-            } else {
-                document.getElementById('form-murid-title').innerText = "Tambah Data Murid";
-                document.getElementById('input-nama-murid').value = '';
-                document.getElementById('input-nis-murid').value = '';
-                document.getElementById('input-kelas-murid').value = '';
-            }
+            activeScannerTarget = target;
+            document.getElementById('scanner-modal').classList.remove('hidden');
+            if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
+                html5QrCode.stop();
+                closeScannerModal();
+                showModal("Hasil Scan", "NIS terdeteksi: " + text);
+            }).catch(e => console.error(e));
+        }
+
+        function closeScannerModal() { document.getElementById('scanner-modal').classList.add('hidden'); }
+
+        function openFormMuridModal() {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
             document.getElementById('form-murid-modal').classList.remove('hidden');
         }
 
@@ -427,30 +323,20 @@
 
         function saveMurid(event) {
             event.preventDefault();
-            const index = parseInt(document.getElementById('murid-index').value);
             const nama = document.getElementById('input-nama-murid').value;
             const nis = document.getElementById('input-nis-murid').value;
             const kelas = document.getElementById('input-kelas-murid').value;
-
-            // URL Web App dari hasil Deployment Anda
-            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXTR1Z5glM8LO5VvCw5oCUDpKajmPQYY9BzMweLtd0E4EUNnWKjvWSNgchOUZWQspy/exec";
-
-            showModal("Menyimpan", "Sedang mengirim data ke Spreadsheet...");
-
+            showModal("Menyimpan", "Sedang mengirim data...");
             fetch(`${SCRIPT_URL}?action=add&sheetName=murid`, {
                 method: 'POST',
                 mode: 'no-cors',
                 body: JSON.stringify([nama, nis, kelas, ""])
             }).then(() => {
                 closeFormMuridModal();
-                loadAllData(); // Refresh data dari server
-                showModal("Berhasil", "Data berhasil disimpan ke Spreadsheet!");
-            }).catch(err => {
-                console.error(err);
-                showModal("Gagal", "Terjadi kesalahan saat menyimpan data.");
-            });
+                loadAllData();
+                showModal("Berhasil", "Data tersimpan!");
+            }).catch(() => showModal("Gagal", "Gagal menyimpan data."));
         }
-        // ... sisa kode lainnya ...
     </script>
 </body>
 </html>
