@@ -13,6 +13,11 @@
         h1, h2, h3 { font-family: 'Fredoka One', cursive; }
         .page-content { display: none; }
         .active-page { display: block; }
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { position: absolute; left: 0; top: 0; width: 100%; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between">
@@ -75,6 +80,35 @@
                     <button type="submit" class="bg-emerald-600 text-white w-1/2 py-2 rounded-lg hover:bg-emerald-700 transition">Simpan</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Cetak Kartu Peserta / Anggota -->
+    <div id="print-card-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-sm text-center shadow-2xl">
+            <h3 class="text-xl mb-4 text-emerald-800">🖨️ Cetak Kartu Anggota</h3>
+            <div id="print-area" class="bg-gradient-to-br from-emerald-500 to-teal-700 text-white p-4 rounded-xl shadow-md text-left mb-4 relative overflow-hidden">
+                <div class="flex justify-between items-start border-b border-emerald-400 pb-2 mb-3">
+                    <div>
+                        <h4 class="font-bold text-sm">SDN 1 PARIGI</h4>
+                        <p class="text-[10px] text-emerald-100">KARTU PERPUSTAKAAN</p>
+                    </div>
+                    <span class="text-xs bg-white text-emerald-800 px-2 py-0.5 rounded-full font-bold" id="card-kelas">Kelas -</span>
+                </div>
+                <div class="mb-3">
+                    <p class="text-[10px] text-emerald-200">NAMA SISWA</p>
+                    <p class="font-bold text-base truncate" id="card-nama">-</p>
+                    <p class="text-[10px] text-emerald-200 mt-1">NIS</p>
+                    <p class="font-mono font-semibold text-sm" id="card-nis">-</p>
+                </div>
+                <div class="flex justify-center bg-white p-2 rounded-lg w-24 h-24 mx-auto">
+                    <div id="qrcode-container" class="flex items-center justify-center"></div>
+                </div>
+            </div>
+            <div class="flex space-x-2">
+                <button type="button" onclick="closePrintCardModal()" class="bg-gray-300 text-gray-700 w-1/2 py-2 rounded-lg hover:bg-gray-400 transition">Tutup</button>
+                <button type="button" onclick="window.print()" class="bg-emerald-600 text-white w-1/2 py-2 rounded-lg hover:bg-emerald-700 transition">Cetak</button>
+            </div>
         </div>
     </div>
 
@@ -216,25 +250,27 @@
             const filterMurid = document.getElementById('filter-murid').value.toLowerCase();
             const containerMurid = document.getElementById('table-murid-container');
             
-            let htmlMurid = `<table class="w-full text-sm text-left"><thead class="bg-emerald-50 text-emerald-800"><tr><th class="p-2">Nama</th>`;
+            let htmlMurid = `<table class="w-full text-sm text-left"><thead class="bg-emerald-50 text-emerald-800"><tr><th class="p-2">No</th><th class="p-2">Nama</th>`;
             if (isAdminLoggedIn) {
                 htmlMurid += `<th class="p-2">NIS</th>`;
             }
             htmlMurid += `<th class="p-2">Kelas</th>`;
             if (isAdminLoggedIn) {
-                htmlMurid += `<th class="p-2 text-center">Aksi</th>`;
+                htmlMurid += `<th class="p-2 text-center">Aksi / Cetak Kartu</th>`;
             }
             htmlMurid += `</tr></thead><tbody>`;
 
+            let noUrut = 1;
             appData.murid.forEach((m, index) => {
                 if (m.col1.toLowerCase().includes(filterMurid) || m.col2.includes(filterMurid) || m.col3.toLowerCase().includes(filterMurid)) {
-                    htmlMurid += `<tr class="border-b"><td class="p-2">${m.col1}</td>`;
+                    htmlMurid += `<tr class="border-b"><td class="p-2">${noUrut++}</td><td class="p-2">${m.col1}</td>`;
                     if (isAdminLoggedIn) {
                         htmlMurid += `<td class="p-2">${m.col2}</td>`;
                     }
                     htmlMurid += `<td class="p-2">${m.col3}</td>`;
                     if (isAdminLoggedIn) {
                         htmlMurid += `<td class="p-2 text-center">
+                            <button onclick="openPrintCardModal('${encodeURIComponent(m.col1)}', '${encodeURIComponent(m.col2)}', '${encodeURIComponent(m.col3)}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs mr-1 transition">🖨️ Cetak Kartu</button>
                             <button onclick="editMurid(${index})" class="bg-amber-500 hover:bg-amber-600 text-white px-2 py-1 rounded text-xs mr-1 transition">Edit</button>
                             <button onclick="hapusData('murid', ${index})" class="bg-rose-600 hover:bg-rose-700 text-white px-2 py-1 rounded text-xs transition">Hapus</button>
                         </td>`;
@@ -248,7 +284,7 @@
             const filterAbsen = document.getElementById('filter-absen').value.toLowerCase();
             const containerAbsen = document.getElementById('table-absen-container');
             
-            let htmlAbsen = `<table class="w-full text-sm text-left"><thead class="bg-blue-50 text-blue-800"><tr><th class="p-2">Nama</th>`;
+            let htmlAbsen = `<table class="w-full text-sm text-left"><thead class="bg-blue-50 text-blue-800"><tr><th class="p-2">No</th><th class="p-2">Nama</th>`;
             if (isAdminLoggedIn) {
                 htmlAbsen += `<th class="p-2">NIS</th>`;
             }
@@ -258,9 +294,10 @@
             }
             htmlAbsen += `</tr></thead><tbody>`;
 
+            let noAbsen = 1;
             appData.absensi.forEach((a, index) => {
                 if (a.col1.toLowerCase().includes(filterAbsen) || a.col2.includes(filterAbsen) || a.col3.toLowerCase().includes(filterAbsen)) {
-                    htmlAbsen += `<tr class="border-b"><td class="p-2">${a.col1}</td>`;
+                    htmlAbsen += `<tr class="border-b"><td class="p-2">${noAbsen++}</td><td class="p-2">${a.col1}</td>`;
                     if (isAdminLoggedIn) {
                         htmlAbsen += `<td class="p-2">${a.col2}</td>`;
                     }
@@ -280,7 +317,7 @@
             const filterTransaksi = document.getElementById('filter-transaksi').value.toLowerCase();
             const containerTransaksi = document.getElementById('table-transaksi-container');
             
-            let htmlTransaksi = `<table class="w-full text-sm text-left"><thead class="bg-orange-50 text-orange-800"><tr><th class="p-2">Nama</th>`;
+            let htmlTransaksi = `<table class="w-full text-sm text-left"><thead class="bg-orange-50 text-orange-800"><tr><th class="p-2">No</th><th class="p-2">Nama</th>`;
             if (isAdminLoggedIn) {
                 htmlTransaksi += `<th class="p-2">NIS</th>`;
             }
@@ -290,10 +327,11 @@
             }
             htmlTransaksi += `</tr></thead><tbody>`;
 
+            let noTransaksi = 1;
             appData.transaksi.forEach((t, index) => {
                 let nisPinjam = t.col4 || t.col2 || '';
                 if (t.col1.toLowerCase().includes(filterTransaksi) || t.col2.toLowerCase().includes(filterTransaksi) || t.col3.toLowerCase().includes(filterTransaksi) || (t.col4 && t.col4.includes(filterTransaksi))) {
-                    htmlTransaksi += `<tr class="border-b"><td class="p-2">${t.col1}</td>`;
+                    htmlTransaksi += `<tr class="border-b"><td class="p-2">${noTransaksi++}</td><td class="p-2">${t.col1}</td>`;
                     if (isAdminLoggedIn) {
                         htmlTransaksi += `<td class="p-2">${nisPinjam}</td>`;
                         htmlTransaksi += `<td class="p-2">${t.col2}</td>`;
@@ -388,6 +426,30 @@
         function showPage(id) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active-page'));
             document.getElementById('page-' + id).classList.add('active-page');
+        }
+
+        function openPrintCardModal(namaEncoded, nisEncoded, kelasEncoded) {
+            const nama = decodeURIComponent(namaEncoded);
+            const nis = decodeURIComponent(nisEncoded);
+            const kelas = decodeURIComponent(kelasEncoded);
+
+            document.getElementById('card-nama').innerText = nama;
+            document.getElementById('card-nis').innerText = nis;
+            document.getElementById('card-kelas').innerText = "Kelas " + kelas;
+
+            const qrContainer = document.getElementById('qrcode-container');
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, {
+                text: nis,
+                width: 80,
+                height: 80
+            });
+
+            document.getElementById('print-card-modal').classList.remove('hidden');
+        }
+
+        function closePrintCardModal() {
+            document.getElementById('print-card-modal').classList.add('hidden');
         }
 
         function openScannerModal(target) {
@@ -503,7 +565,6 @@
             let payload = [nama, nis, kelas, ""];
 
             if (index >= 0) {
-                // Jika edit, kirimkan perintah edit beserta nomor baris (index + 2 karena baris 1 header di Sheets)
                 url = `${SCRIPT_URL}?action=edit&sheetName=murid&row=${index + 2}`;
             }
 
@@ -578,7 +639,6 @@
             if (confirm("Apakah Anda yakin ingin menghapus data ini dari Spreadsheet?")) {
                 showModal("Menghapus", "Sedang menghapus data dari Spreadsheet...");
                 
-                // Kirim request hapus ke Google Apps Script (row = index + 2 karena baris 1 header)
                 fetch(`${SCRIPT_URL}?action=delete&sheetName=${sheetName}&row=${index + 2}`, {
                     method: 'POST',
                     mode: 'no-cors'
