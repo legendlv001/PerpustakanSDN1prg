@@ -121,7 +121,7 @@
                     <button onclick="openFormMuridModal()" id="btn-tambah-murid" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-sm transition">➕ Tambah Murid</button>
                 </div>
                 <div class="mb-4">
-                    <input type="text" id="filter-murid" oninput="render()" placeholder="🔍 Cari nama, NIS, atau kelas..." class="w-full md:w-80 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
+                    <input type="text" id="filter-murid" oninput="render()" placeholder="🔍 Cari nama atau kelas..." class="w-full md:w-80 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
                 </div>
                 <div id="table-murid-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data dari Spreadsheet...</div>
             </div>
@@ -130,13 +130,12 @@
                 <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
                     <h2 class="text-2xl text-emerald-800">📋 Absen Kunjungan</h2>
                     <div class="flex flex-wrap gap-2 relative z-10">
-                        <!-- Tambahkan z-10 agar tombol selalu berada di atas elemen lain -->
                         <button onclick="openScannerModal('absen')" id="btn-scan-absen" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm transition relative z-20">📷 Scan Barcode</button>
                         <button onclick="tambahAbsenManual()" id="btn-tambah-absen" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-sm transition relative z-20">➕ Tambah Manual</button>
                     </div>
                 </div>
                 <div class="mb-4">
-                    <input type="text" id="filter-absen" oninput="render()" placeholder="🔍 Cari berdasarkan nama, NIS, atau waktu..." class="w-full md:w-80 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
+                    <input type="text" id="filter-absen" oninput="render()" placeholder="🔍 Cari berdasarkan nama atau waktu..." class="w-full md:w-80 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
                 </div>
                 <div id="table-absen-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data absen...</div>
             </div>
@@ -145,13 +144,12 @@
                 <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
                     <h2 class="text-2xl text-emerald-800">📖 Data Peminjaman Buku</h2>
                     <div class="flex flex-wrap gap-2 relative z-10">
-                        <!-- Tambahkan z-10 agar tombol selalu berada di atas elemen lain -->
                         <button onclick="openScannerModal('transaksi')" id="btn-scan-transaksi" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm transition relative z-20">📷 Scan Barcode</button>
                         <button onclick="tambahTransaksiManual()" id="btn-tambah-transaksi" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-sm transition relative z-20">➕ Tambah Manual</button>
                     </div>
                 </div>
                 <div class="mb-4">
-                    <input type="text" id="filter-transaksi" oninput="render()" placeholder="🔍 Cari berdasarkan nama, NIS, buku, atau tanggal..." class="w-full md:w-80 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
+                    <input type="text" id="filter-transaksi" oninput="render()" placeholder="🔍 Cari berdasarkan nama, buku, atau tanggal..." class="w-full md:w-80 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
                 </div>
                 <div id="table-transaksi-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data transaksi...</div>
             </div>
@@ -217,27 +215,101 @@
         function render() {
             const filterMurid = document.getElementById('filter-murid').value.toLowerCase();
             const containerMurid = document.getElementById('table-murid-container');
-            let htmlMurid = `<table class="w-full text-sm text-left"><thead class="bg-emerald-50 text-emerald-800"><tr><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Kelas</th></tr></thead><tbody>`;
-            appData.murid.filter(m => m.col1.toLowerCase().includes(filterMurid) || m.col2.includes(filterMurid)).forEach((m) => {
-                htmlMurid += `<tr class="border-b"><td class="p-2">${m.col1}</td><td class="p-2">${m.col2}</td><td class="p-2">${m.col3}</td></tr>`;
+            
+            let htmlMurid = `<table class="w-full text-sm text-left"><thead class="bg-emerald-50 text-emerald-800"><tr><th class="p-2">Nama</th>`;
+            if (isAdminLoggedIn) {
+                htmlMurid += `<th class="p-2">NIS</th>`;
+            }
+            htmlMurid += `<th class="p-2">Kelas</th>`;
+            if (isAdminLoggedIn) {
+                htmlMurid += `<th class="p-2 text-center">Aksi</th>`;
+            }
+            htmlMurid += `</tr></thead><tbody>`;
+
+            appData.murid.forEach((m, index) => {
+                if (m.col1.toLowerCase().includes(filterMurid) || m.col2.includes(filterMurid) || m.col3.toLowerCase().includes(filterMurid)) {
+                    htmlMurid += `<tr class="border-b"><td class="p-2">${m.col1}</td>`;
+                    if (isAdminLoggedIn) {
+                        htmlMurid += `<td class="p-2">${m.col2}</td>`;
+                    }
+                    htmlMurid += `<td class="p-2">${m.col3}</td>`;
+                    if (isAdminLoggedIn) {
+                        htmlMurid += `<td class="p-2 text-center">
+                            <button onclick="editMurid(${index})" class="bg-amber-500 hover:bg-amber-600 text-white px-2 py-1 rounded text-xs mr-1 transition">Edit</button>
+                            <button onclick="hapusData('murid', ${index})" class="bg-rose-600 hover:bg-rose-700 text-white px-2 py-1 rounded text-xs transition">Hapus</button>
+                        </td>`;
+                    }
+                    htmlMurid += `</tr>`;
+                }
             });
             htmlMurid += `</tbody></table>`;
             containerMurid.innerHTML = htmlMurid;
 
             const filterAbsen = document.getElementById('filter-absen').value.toLowerCase();
             const containerAbsen = document.getElementById('table-absen-container');
-            let htmlAbsen = `<table class="w-full text-sm text-left"><thead class="bg-blue-50 text-blue-800"><tr><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Waktu</th></tr></thead><tbody>`;
-            appData.absensi.filter(a => a.col1.toLowerCase().includes(filterAbsen) || a.col2.includes(filterAbsen)).forEach((a) => {
-                htmlAbsen += `<tr class="border-b"><td class="p-2">${a.col1}</td><td class="p-2">${a.col2}</td><td class="p-2">${a.col3}</td></tr>`;
+            
+            let htmlAbsen = `<table class="w-full text-sm text-left"><thead class="bg-blue-50 text-blue-800"><tr><th class="p-2">Nama</th>`;
+            if (isAdminLoggedIn) {
+                htmlAbsen += `<th class="p-2">NIS</th>`;
+            }
+            htmlAbsen += `<th class="p-2">Waktu</th>`;
+            if (isAdminLoggedIn) {
+                htmlAbsen += `<th class="p-2 text-center">Aksi</th>`;
+            }
+            htmlAbsen += `</tr></thead><tbody>`;
+
+            appData.absensi.forEach((a, index) => {
+                if (a.col1.toLowerCase().includes(filterAbsen) || a.col2.includes(filterAbsen) || a.col3.toLowerCase().includes(filterAbsen)) {
+                    htmlAbsen += `<tr class="border-b"><td class="p-2">${a.col1}</td>`;
+                    if (isAdminLoggedIn) {
+                        htmlAbsen += `<td class="p-2">${a.col2}</td>`;
+                    }
+                    htmlAbsen += `<td class="p-2">${a.col3}</td>`;
+                    if (isAdminLoggedIn) {
+                        htmlAbsen += `<td class="p-2 text-center">
+                            <button onclick="editAbsen(${index})" class="bg-amber-500 hover:bg-amber-600 text-white px-2 py-1 rounded text-xs mr-1 transition">Edit</button>
+                            <button onclick="hapusData('absen', ${index})" class="bg-rose-600 hover:bg-rose-700 text-white px-2 py-1 rounded text-xs transition">Hapus</button>
+                        </td>`;
+                    }
+                    htmlAbsen += `</tr>`;
+                }
             });
             htmlAbsen += `</tbody></table>`;
             containerAbsen.innerHTML = htmlAbsen;
 
             const filterTransaksi = document.getElementById('filter-transaksi').value.toLowerCase();
             const containerTransaksi = document.getElementById('table-transaksi-container');
-            let htmlTransaksi = `<table class="w-full text-sm text-left"><thead class="bg-orange-50 text-orange-800"><tr><th class="p-2">Nama</th><th class="p-2">Buku</th><th class="p-2">Tanggal</th></tr></thead><tbody>`;
-            appData.transaksi.filter(t => t.col1.toLowerCase().includes(filterTransaksi) || t.col2.includes(filterTransaksi)).forEach((t) => {
-                htmlTransaksi += `<tr class="border-b"><td class="p-2">${t.col1}</td><td class="p-2">${t.col2}</td><td class="p-2">${t.col3}</td></tr>`;
+            
+            let htmlTransaksi = `<table class="w-full text-sm text-left"><thead class="bg-orange-50 text-orange-800"><tr><th class="p-2">Nama</th>`;
+            if (isAdminLoggedIn) {
+                htmlTransaksi += `<th class="p-2">NIS</th>`;
+            }
+            htmlTransaksi += `<th class="p-2">Buku</th><th class="p-2">Tanggal</th>`;
+            if (isAdminLoggedIn) {
+                htmlTransaksi += `<th class="p-2 text-center">Aksi</th>`;
+            }
+            htmlTransaksi += `</tr></thead><tbody>`;
+
+            appData.transaksi.forEach((t, index) => {
+                let nisPinjam = t.col4 || t.col2 || '';
+                if (t.col1.toLowerCase().includes(filterTransaksi) || t.col2.toLowerCase().includes(filterTransaksi) || t.col3.toLowerCase().includes(filterTransaksi) || (t.col4 && t.col4.includes(filterTransaksi))) {
+                    htmlTransaksi += `<tr class="border-b"><td class="p-2">${t.col1}</td>`;
+                    if (isAdminLoggedIn) {
+                        htmlTransaksi += `<td class="p-2">${nisPinjam}</td>`;
+                        htmlTransaksi += `<td class="p-2">${t.col2}</td>`;
+                        htmlTransaksi += `<td class="p-2">${t.col3}</td>`;
+                    } else {
+                        htmlTransaksi += `<td class="p-2">${t.col2}</td>`;
+                        htmlTransaksi += `<td class="p-2">${t.col3}</td>`;
+                    }
+                    if (isAdminLoggedIn) {
+                        htmlTransaksi += `<td class="p-2 text-center">
+                            <button onclick="editTransaksi(${index})" class="bg-amber-500 hover:bg-amber-600 text-white px-2 py-1 rounded text-xs mr-1 transition">Edit</button>
+                            <button onclick="hapusData('pinjam', ${index})" class="bg-rose-600 hover:bg-rose-700 text-white px-2 py-1 rounded text-xs transition">Hapus</button>
+                        </td>`;
+                    }
+                    htmlTransaksi += `</tr>`;
+                }
             });
             htmlTransaksi += `</tbody></table>`;
             containerTransaksi.innerHTML = htmlTransaksi;
@@ -278,6 +350,7 @@
                 localStorage.setItem('perpus_admin_logged', 'true');
                 closeLoginModal();
                 updateAdminUI();
+                render(); 
             } else document.getElementById('login-error-msg').classList.remove('hidden');
         }
 
@@ -285,14 +358,10 @@
             isAdminLoggedIn = false;
             localStorage.removeItem('perpus_admin_logged');
             updateAdminUI();
+            render(); 
         }
 
         function updateAdminUI() {
-            const adminElements = [
-                'btn-login-admin', 'btn-logout-admin', 'btn-sync', 'admin-status-banner', 
-                'btn-tambah-murid', 'btn-tambah-absen', 'btn-tambah-transaksi', 
-                'btn-scan-absen', 'btn-scan-transaksi'
-            ];
             if (isAdminLoggedIn) {
                 document.getElementById('btn-login-admin')?.classList.add('hidden');
                 document.getElementById('btn-logout-admin')?.classList.remove('hidden');
@@ -326,44 +395,51 @@
             activeScannerTarget = target;
             document.getElementById('scanner-modal').classList.remove('hidden');
             if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+            
             html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
                 html5QrCode.stop();
                 closeScannerModal();
-                showModal("Hasil Scan", "NIS terdeteksi: " + text);
+                if (target === 'absen') {
+                    prosesAbsenByNIS(text.trim());
+                } else if (target === 'transaksi') {
+                    prosesTransaksiByNIS(text.trim());
+                }
             }).catch(e => console.error(e));
         }
 
-        function closeScannerModal() { document.getElementById('scanner-modal').classList.add('hidden'); }
+        function closeScannerModal() { 
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().catch(e => console.log(e));
+            }
+            document.getElementById('scanner-modal').classList.add('hidden'); 
+        }
 
-        function openFormMuridModal() {
+        function openFormMuridModal(isEdit = false) {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
+            if (!isEdit) {
+                document.getElementById('murid-index').value = "-1";
+                document.getElementById('input-nama-murid').value = "";
+                document.getElementById('input-nis-murid').value = "";
+                document.getElementById('input-kelas-murid').value = "";
+                document.getElementById('form-murid-title').innerText = "Tambah Murid";
+            }
             document.getElementById('form-murid-modal').classList.remove('hidden');
         }
 
         function closeFormMuridModal() { document.getElementById('form-murid-modal').classList.add('hidden'); }
-        // Fungsi bantu untuk mengirim data ke Google Sheet
-        async function kirimDataKeSheet(sheetName, dataArray) {
-            try {
-                const response = await fetch(`${SCRIPT_URL}?action=add&sheetName=${sheetName}`, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify(dataArray)
-                });
-                return true;
-            } catch (error) {
-                console.error("Error:", error);
-                return false;
+
+        async function prosesAbsenByNIS(nisInput) {
+            if (!nisInput) return;
+            const muridDitemukan = appData.murid.find(m => m.col2.toString().trim() === nisInput.toString().trim());
+
+            if (!muridDitemukan) {
+                showModal("Gagal", "NIS " + nisInput + " tidak terdaftar dalam Data Murid!");
+                return;
             }
-        } // ADDED: Closing brace for kirimDataKeSheet
 
-        function tambahAbsenManual() {
-            if (!isAdminLoggedIn) { openLoginModal(); return; }
-            const nama = prompt("Masukkan Nama Murid:");
-            const nis = prompt("Masukkan NIS:");
-            if (!nama || !nis) return;
-
-            showModal("Menyimpan", "Sedang mengirim data...");
-            const data = [nama, nis, new Date().toLocaleString()];
+            const namaMurid = muridDitemukan.col1;
+            showModal("Menyimpan", "Sedang mengirim data absen untuk " + namaMurid + "...");
+            const data = [namaMurid, nisInput, new Date().toLocaleString()];
             
             fetch(`${SCRIPT_URL}?action=add&sheetName=absen`, {
                 method: 'POST',
@@ -371,19 +447,31 @@
                 body: JSON.stringify(data)
             }).then(() => {
                 loadAllData();
-                showModal("Berhasil", "Data absen tersimpan!");
+                showModal("Berhasil", "Absen berhasil dicatat untuk: " + namaMurid);
             }).catch(err => showModal("Gagal", "Error: " + err));
         }
 
-        function tambahTransaksiManual() {
+        function tambahAbsenManual() {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
-            const nama = prompt("Masukkan Nama Murid:");
-            const nis = prompt("Masukkan NIS:");
-            const buku = prompt("Masukkan Judul Buku:");
-            if (!nama || !nis || !buku) return;
+            const nis = prompt("Masukkan NIS Murid:");
+            if (!nis) return;
+            prosesAbsenByNIS(nis.trim());
+        }
+
+        async function prosesTransaksiByNIS(nisInput) {
+            if (!nisInput) return;
+            const muridDitemukan = appData.murid.find(m => m.col2.toString().trim() === nisInput.toString().trim());
+            if (!muridDitemukan) {
+                showModal("Gagal", "NIS " + nisInput + " tidak terdaftar dalam Data Murid!");
+                return;
+            }
+
+            const nama = muridDitemukan.col1;
+            const buku = prompt("Masukkan Judul Buku untuk " + nama + ":");
+            if (!buku) return;
 
             showModal("Menyimpan", "Sedang mengirim data...");
-            const data = [nama, buku, new Date().toLocaleDateString(), nis];
+            const data = [nama, buku, new Date().toLocaleDateString(), nisInput];
             
             fetch(`${SCRIPT_URL}?action=add&sheetName=pinjam`, {
                 method: 'POST',
@@ -391,25 +479,114 @@
                 body: JSON.stringify(data)
             }).then(() => {
                 loadAllData();
-                showModal("Berhasil", "Data peminjaman tersimpan!");
+                showModal("Berhasil", "Data peminjaman tersimpan untuk " + nama + "!");
             }).catch(err => showModal("Gagal", "Error: " + err));
+        }
+
+        function tambahTransaksiManual() {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            const nis = prompt("Masukkan NIS Murid:");
+            if (!nis) return;
+            prosesTransaksiByNIS(nis.trim());
         }
 
         function saveMurid(event) {
             event.preventDefault();
+            const index = parseInt(document.getElementById('murid-index').value);
             const nama = document.getElementById('input-nama-murid').value;
             const nis = document.getElementById('input-nis-murid').value;
             const kelas = document.getElementById('input-kelas-murid').value;
-            showModal("Menyimpan", "Sedang mengirim data...");
-            fetch(`${SCRIPT_URL}?action=add&sheetName=murid`, {
+            
+            showModal("Menyimpan", "Sedang mengirim data ke Spreadsheet...");
+
+            let url = `${SCRIPT_URL}?action=add&sheetName=murid`;
+            let payload = [nama, nis, kelas, ""];
+
+            if (index >= 0) {
+                // Jika edit, kirimkan perintah edit beserta nomor baris (index + 2 karena baris 1 header di Sheets)
+                url = `${SCRIPT_URL}?action=edit&sheetName=murid&row=${index + 2}`;
+            }
+
+            fetch(url, {
                 method: 'POST',
                 mode: 'no-cors',
-                body: JSON.stringify([nama, nis, kelas, ""])
+                body: JSON.stringify(payload)
             }).then(() => {
                 closeFormMuridModal();
                 loadAllData();
-                showModal("Berhasil", "Data tersimpan!");
-            }).catch(() => showModal("Gagal", "Gagal menyimpan data."));
+                showModal("Berhasil", "Data berhasil diperbarui di Spreadsheet!");
+            }).catch(() => showModal("Gagal", "Gagal menyimpan data ke Spreadsheet."));
+        }
+
+        function editMurid(index) {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            const m = appData.murid[index];
+            document.getElementById('murid-index').value = index;
+            document.getElementById('input-nama-murid').value = m.col1;
+            document.getElementById('input-nis-murid').value = m.col2;
+            document.getElementById('input-kelas-murid').value = m.col3;
+            document.getElementById('form-murid-title').innerText = "Edit Murid";
+            openFormMuridModal(true);
+        }
+
+        function editAbsen(index) {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            const a = appData.absensi[index];
+            const namaBaru = prompt("Edit Nama:", a.col1);
+            if (namaBaru === null) return;
+            const nisBaru = prompt("Edit NIS:", a.col2);
+            if (nisBaru === null) return;
+            const waktuBaru = prompt("Edit Waktu:", a.col3);
+            if (waktuBaru === null) return;
+
+            showModal("Menyimpan", "Memperbarui data absen di Spreadsheet...");
+            fetch(`${SCRIPT_URL}?action=edit&sheetName=absen&row=${index + 2}`, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify([namaBaru, nisBaru, waktuBaru])
+            }).then(() => {
+                loadAllData();
+                showModal("Berhasil", "Data absen berhasil diperbarui!");
+            }).catch(() => showModal("Gagal", "Gagal memperbarui data."));
+        }
+
+        function editTransaksi(index) {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            const t = appData.transaksi[index];
+            const namaBaru = prompt("Edit Nama:", t.col1);
+            if (namaBaru === null) return;
+            const bukuBaru = prompt("Edit Buku:", t.col2);
+            if (bukuBaru === null) return;
+            const tglBaru = prompt("Edit Tanggal:", t.col3);
+            if (tglBaru === null) return;
+            const nisBaru = prompt("Edit NIS:", t.col4 || '');
+            if (nisBaru === null) return;
+
+            showModal("Menyimpan", "Memperbarui data peminjaman di Spreadsheet...");
+            fetch(`${SCRIPT_URL}?action=edit&sheetName=pinjam&row=${index + 2}`, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify([namaBaru, bukuBaru, tglBaru, nisBaru])
+            }).then(() => {
+                loadAllData();
+                showModal("Berhasil", "Data peminjaman berhasil diperbarui!");
+            }).catch(() => showModal("Gagal", "Gagal memperbarui data."));
+        }
+
+        function hapusData(sheetName, index) {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            if (confirm("Apakah Anda yakin ingin menghapus data ini dari Spreadsheet?")) {
+                showModal("Menghapus", "Sedang menghapus data dari Spreadsheet...");
+                
+                // Kirim request hapus ke Google Apps Script (row = index + 2 karena baris 1 header)
+                fetch(`${SCRIPT_URL}?action=delete&sheetName=${sheetName}&row=${index + 2}`, {
+                    method: 'POST',
+                    mode: 'no-cors'
+                }).then(() => {
+                    loadAllData();
+                    showModal("Berhasil", "Data berhasil dihapus!");
+                }).catch(() => showModal("Gagal", "Gagal menghapus data."));
+            }
         }
     </script>
 </body>
