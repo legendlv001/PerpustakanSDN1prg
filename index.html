@@ -123,7 +123,7 @@
                 <div class="mb-4">
                     <input type="text" id="filter-murid" oninput="render()" placeholder="🔍 Cari nama, NIS, atau kelas..." class="w-full md:w-80 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
                 </div>
-                <div id="table-murid-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto">Memuat data dari Spreadsheet...</div>
+                <div id="table-murid-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data dari Spreadsheet...</div>
             </div>
 
             <div id="page-absen" class="page-content">
@@ -137,7 +137,7 @@
                 <div class="mb-4">
                     <input type="text" id="filter-absen" oninput="render()" placeholder="🔍 Cari berdasarkan nama, NIS, atau waktu..." class="w-full md:w-80 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
                 </div>
-                <div id="table-absen-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto">Memuat data absen...</div>
+                <div id="table-absen-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data absen...</div>
             </div>
 
             <div id="page-transaksi" class="page-content">
@@ -151,7 +151,7 @@
                 <div class="mb-4">
                     <input type="text" id="filter-transaksi" oninput="render()" placeholder="🔍 Cari berdasarkan nama, NIS, buku, atau tanggal..." class="w-full md:w-80 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
                 </div>
-                <div id="table-transaksi-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto">Memuat data transaksi...</div>
+                <div id="table-transaksi-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data transaksi...</div>
             </div>
         </main>
     </div>
@@ -164,7 +164,7 @@
 
     <script>
         const SPREADSHEET_ID = "1RFxZ6uY1CrDSxKd6GeMLSOD7QwZBd66jqZsvxfnkbXk";
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXTR1Z5glM8LO5VvCw5oCUDpKajmPQYY9BzMweLtd0E4EUNnWKjvWSNgchOUZWQspy/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwvtnecdenKcq031QhORE651cQ3FW4V82DUubAwFyHjlL25mvHXxZJa65RROPTgtw12/exec";
         let appData = { murid: [], absensi: [], transaksi: [] };
         let isAdminLoggedIn = localStorage.getItem('perpus_admin_logged') === 'true';
         let html5QrCode = null;
@@ -213,6 +213,7 @@
         }
 
         function render() {
+            // 1. Render Data Murid
             const filterMurid = document.getElementById('filter-murid').value.toLowerCase();
             const containerMurid = document.getElementById('table-murid-container');
             let htmlMurid = `<table class="w-full text-sm text-left"><thead class="bg-emerald-50 text-emerald-800"><tr><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Kelas</th></tr></thead><tbody>`;
@@ -221,6 +222,28 @@
             });
             htmlMurid += `</tbody></table>`;
             containerMurid.innerHTML = htmlMurid;
+
+            // 2. Render Data Absen
+            const filterAbsen = document.getElementById('filter-absen').value.toLowerCase();
+            const containerAbsen = document.getElementById('table-absen-container');
+            let htmlAbsen = `<table class="w-full text-sm text-left"><thead class="bg-blue-50 text-blue-800"><tr><th class="p-2">Nama</th><th class="p-2">NIS</th><th class="p-2">Waktu</th></tr></thead><tbody>`;
+            appData.absensi.filter(a => a.col1.toLowerCase().includes(filterAbsen) || a.col2.includes(filterAbsen)).forEach((a) => {
+                htmlAbsen += `<tr class="border-b"><td class="p-2">${a.col1}</td><td class="p-2">${a.col2}</td><td class="p-2">${a.col3}</td></tr>`;
+            });
+            htmlAbsen += `</tbody></table>`;
+            containerAbsen.innerHTML = htmlAbsen;
+
+            // 3. Render Data Transaksi
+            const filterTransaksi = document.getElementById('filter-transaksi').value.toLowerCase();
+            const containerTransaksi = document.getElementById('table-transaksi-container');
+            let htmlTransaksi = `<table class="w-full text-sm text-left"><thead class="bg-orange-50 text-orange-800"><tr><th class="p-2">Nama</th><th class="p-2">Buku</th><th class="p-2">Tanggal</th></tr></thead><tbody>`;
+            appData.transaksi.filter(t => t.col1.toLowerCase().includes(filterTransaksi) || t.col2.includes(filterTransaksi)).forEach((t) => {
+                htmlTransaksi += `<tr class="border-b"><td class="p-2">${t.col1}</td><td class="p-2">${t.col2}</td><td class="p-2">${t.col3}</td></tr>`;
+            });
+            htmlTransaksi += `</tbody></table>`;
+            containerTransaksi.innerHTML = htmlTransaksi;
+
+            // Update Statistik
             document.getElementById('stat-murid').innerText = appData.murid.length;
             document.getElementById('stat-absen').innerText = appData.absensi.length;
             document.getElementById('stat-pinjam').innerText = appData.transaksi.length;
@@ -320,6 +343,58 @@
         }
 
         function closeFormMuridModal() { document.getElementById('form-murid-modal').classList.add('hidden'); }
+
+        // Fungsi bantu untuk mengirim data ke Google Sheet
+        async function kirimDataKeSheet(sheetName, dataArray) {
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=add&sheetName=${sheetName}`, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(dataArray)
+                });
+                return true;
+            } catch (error) {
+                console.error("Error:", error);
+                return false;
+            }
+        }
+
+        function tambahAbsenManual() {
+            const nama = prompt("Masukkan Nama Murid:");
+            const nis = prompt("Masukkan NIS:");
+            if (!nama || !nis) return;
+
+            showModal("Menyimpan", "Sedang mengirim data...");
+            const data = [nama, nis, new Date().toLocaleString()];
+            
+            fetch(`${SCRIPT_URL}?action=add&sheetName=absen`, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify(data)
+            }).then(() => {
+                loadAllData();
+                showModal("Berhasil", "Data absen tersimpan!");
+            }).catch(err => showModal("Gagal", "Error: " + err));
+        }
+
+        function tambahTransaksiManual() {
+            const nama = prompt("Masukkan Nama Murid:");
+            const nis = prompt("Masukkan NIS:");
+            const buku = prompt("Masukkan Judul Buku:");
+            if (!nama || !nis || !buku) return;
+
+            showModal("Menyimpan", "Sedang mengirim data...");
+            const data = [nama, buku, new Date().toLocaleDateString(), nis];
+            
+            fetch(`${SCRIPT_URL}?action=add&sheetName=pinjam`, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify(data)
+            }).then(() => {
+                loadAllData();
+                showModal("Berhasil", "Data peminjaman tersimpan!");
+            }).catch(err => showModal("Gagal", "Error: " + err));
+        }
 
         function saveMurid(event) {
             event.preventDefault();
