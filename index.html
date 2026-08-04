@@ -302,7 +302,7 @@
             }
             htmlMurid += `<th class="p-2">Kelas</th>`;
             if (isAdminLoggedIn) {
-                htmlMurid += `<th class="p-2 text-center">Aksi / Kartu Foto</th>`;
+                htmlMurid += `<th class="p-2 text-center">Aksi / Cetak Kartu</th>`;
             }
             htmlMurid += `</tr></thead><tbody>`;
 
@@ -367,7 +367,7 @@
             if (isAdminLoggedIn) {
                 htmlTransaksi += `<th class="p-2">NIS</th>`;
             }
-            htmlTransaksi += `<th class="p-2">Buku</th><th class="p-2">Tanggal</th><th class="p-2">Status</th>`;
+            htmlTransaksi += `<th class="p-2">Buku</th><th class="p-2">Tanggal</th><th class="p-2 text-center">Status</th>`;
             if (isAdminLoggedIn) {
                 htmlTransaksi += `<th class="p-2 text-center">Aksi</th>`;
             }
@@ -379,18 +379,17 @@
                 let statusPinjam = t.col5 ? t.col5 : 'Belum Dikembalikan';
                 
                 if (t.col1.toLowerCase().includes(filterTransaksi) || t.col2.toLowerCase().includes(filterTransaksi) || t.col3.toLowerCase().includes(filterTransaksi) || nisPinjam.includes(filterTransaksi) || statusPinjam.toLowerCase().includes(filterTransaksi)) {
-                    let badgeColor = statusPinjam === 'Sudah Dikembalikan' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
                     
                     htmlTransaksi += `<tr class="border-b"><td class="p-2">${noTransaksi++}</td><td class="p-2">${t.col1}</td>`;
                     if (isAdminLoggedIn) {
                         htmlTransaksi += `<td class="p-2">${nisPinjam}</td>`;
                         htmlTransaksi += `<td class="p-2">${t.col2}</td>`;
                         htmlTransaksi += `<td class="p-2">${t.col3}</td>`;
-                        htmlTransaksi += `<td class="p-2"><span class="px-2 py-1 rounded text-xs font-semibold ${badgeColor}">${statusPinjam}</span></td>`;
+                        htmlTransaksi += `<td class="p-2 text-center font-medium">${statusPinjam}</td>`;
                     } else {
                         htmlTransaksi += `<td class="p-2">${t.col2}</td>`;
                         htmlTransaksi += `<td class="p-2">${t.col3}</td>`;
-                        htmlTransaksi += `<td class="p-2"><span class="px-2 py-1 rounded text-xs font-semibold ${badgeColor}">${statusPinjam}</span></td>`;
+                        htmlTransaksi += `<td class="p-2 text-center font-medium">${statusPinjam}</td>`;
                     }
                     if (isAdminLoggedIn) {
                         htmlTransaksi += `<td class="p-2 text-center">`;
@@ -633,7 +632,6 @@
 
             const nama = muridDitemukan.col1;
             showModal("Menyimpan", "Sedang mengirim data...");
-            // Urutan Kolom: [Nama, Judul Buku, Tanggal Pinjam, NIS, Status Pengembalian]
             const data = [nama, bukuInput, new Date().toLocaleDateString(), nisInput, "Belum Dikembalikan"];
             
             fetch(`${SCRIPT_URL}?action=add&sheetName=pinjam`, {
