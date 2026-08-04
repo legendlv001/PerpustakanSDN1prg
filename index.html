@@ -280,7 +280,13 @@
                 }
                 row.push(entry.trim().replace(/^"|"$/g, ''));
                 if (row[0] && row[0] !== '') {
-                    result.push({ col1: row[0] || '', col2: row[1] || '', col3: row[2] || '', col4: row[3] || '' });
+                    result.push({ 
+                        col1: row[0] || '', 
+                        col2: row[1] || '', 
+                        col3: row[2] || '', 
+                        col4: row[3] || '', 
+                        col5: row[4] || '' 
+                    });
                 }
             }
             return result;
@@ -361,7 +367,7 @@
             if (isAdminLoggedIn) {
                 htmlTransaksi += `<th class="p-2">NIS</th>`;
             }
-            htmlTransaksi += `<th class="p-2">Buku</th><th class="p-2">Tanggal</th>`;
+            htmlTransaksi += `<th class="p-2">Buku</th><th class="p-2">Tanggal</th><th class="p-2">Status</th>`;
             if (isAdminLoggedIn) {
                 htmlTransaksi += `<th class="p-2 text-center">Aksi</th>`;
             }
@@ -369,19 +375,29 @@
 
             let noTransaksi = 1;
             appData.transaksi.forEach((t, index) => {
-                let nisPinjam = t.col4 || t.col2 || '';
-                if (t.col1.toLowerCase().includes(filterTransaksi) || t.col2.toLowerCase().includes(filterTransaksi) || t.col3.toLowerCase().includes(filterTransaksi) || (t.col4 && t.col4.includes(filterTransaksi))) {
+                let nisPinjam = t.col4 || '';
+                let statusPinjam = t.col5 ? t.col5 : 'Belum Dikembalikan';
+                
+                if (t.col1.toLowerCase().includes(filterTransaksi) || t.col2.toLowerCase().includes(filterTransaksi) || t.col3.toLowerCase().includes(filterTransaksi) || nisPinjam.includes(filterTransaksi) || statusPinjam.toLowerCase().includes(filterTransaksi)) {
+                    let badgeColor = statusPinjam === 'Sudah Dikembalikan' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
+                    
                     htmlTransaksi += `<tr class="border-b"><td class="p-2">${noTransaksi++}</td><td class="p-2">${t.col1}</td>`;
                     if (isAdminLoggedIn) {
                         htmlTransaksi += `<td class="p-2">${nisPinjam}</td>`;
                         htmlTransaksi += `<td class="p-2">${t.col2}</td>`;
                         htmlTransaksi += `<td class="p-2">${t.col3}</td>`;
+                        htmlTransaksi += `<td class="p-2"><span class="px-2 py-1 rounded text-xs font-semibold ${badgeColor}">${statusPinjam}</span></td>`;
                     } else {
                         htmlTransaksi += `<td class="p-2">${t.col2}</td>`;
                         htmlTransaksi += `<td class="p-2">${t.col3}</td>`;
+                        htmlTransaksi += `<td class="p-2"><span class="px-2 py-1 rounded text-xs font-semibold ${badgeColor}">${statusPinjam}</span></td>`;
                     }
                     if (isAdminLoggedIn) {
-                        htmlTransaksi += `<td class="p-2 text-center">
+                        htmlTransaksi += `<td class="p-2 text-center">`;
+                        if (statusPinjam !== 'Sudah Dikembalikan') {
+                            htmlTransaksi += `<button onclick="ubahStatusKembali(${index})" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs mr-1 transition">✔️ Kembalikan</button>`;
+                        }
+                        htmlTransaksi += `
                             <button onclick="editTransaksi(${index})" class="bg-amber-500 hover:bg-amber-600 text-white px-2 py-1 rounded text-xs mr-1 transition">Edit</button>
                             <button onclick="hapusData('pinjam', ${index})" class="bg-rose-600 hover:bg-rose-700 text-white px-2 py-1 rounded text-xs transition">Hapus</button>
                         </td>`;
@@ -617,7 +633,8 @@
 
             const nama = muridDitemukan.col1;
             showModal("Menyimpan", "Sedang mengirim data...");
-            const data = [nama, bukuInput, new Date().toLocaleDateString(), nisInput];
+            // Urutan Kolom: [Nama, Judul Buku, Tanggal Pinjam, NIS, Status Pengembalian]
+            const data = [nama, bukuInput, new Date().toLocaleDateString(), nisInput, "Belum Dikembalikan"];
             
             fetch(`${SCRIPT_URL}?action=add&sheetName=pinjam`, {
                 method: 'POST',
@@ -699,16 +716,38 @@
             if (tglBaru === null) return;
             const nisBaru = prompt("Edit NIS:", t.col4 || '');
             if (nisBaru === null) return;
+            const statusBaru = prompt("Edit Status (Belum Dikembalikan / Sudah Dikembalikan):", t.col5 || 'Belum Dikembalikan');
+            if (statusBaru === null) return;
 
             showModal("Menyimpan", "Memperbarui data peminjaman di Spreadsheet...");
             fetch(`${SCRIPT_URL}?action=edit&sheetName=pinjam&row=${index + 2}`, {
                 method: 'POST',
                 mode: 'no-cors',
-                body: JSON.stringify([namaBaru, bukuBaru, tglBaru, nisBaru])
+                body: JSON.stringify([namaBaru, bukuBaru, tglBaru, nisBaru, statusBaru])
             }).then(() => {
                 loadAllData();
                 showModal("Berhasil", "Data peminjaman berhasil diperbarui!");
             }).catch(() => showModal("Gagal", "Gagal memperbarui data."));
+        }
+
+        function ubahStatusKembali(index) {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            const t = appData.transaksi[index];
+            const nama = t.col1;
+            const buku = t.col2;
+            const tgl = t.col3;
+            const nis = t.col4 || '';
+            const status = "Sudah Dikembalikan";
+
+            showModal("Menyimpan", "Memperbarui status pengembalian...");
+            fetch(`${SCRIPT_URL}?action=edit&sheetName=pinjam&row=${index + 2}`, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify([nama, buku, tgl, nis, status])
+            }).then(() => {
+                loadAllData();
+                showModal("Berhasil", "Buku berhasil dikembalikan!");
+            }).catch(() => showModal("Gagal", "Gagal memperbarui status."));
         }
 
         function hapusData(sheetName, index) {
