@@ -658,12 +658,16 @@
             if (confirm("Apakah Anda yakin ingin menghapus data ini dari Spreadsheet?")) {
                 showModal("Menghapus", "Sedang menghapus data dari Spreadsheet...");
                 
+                // Mengirimkan body JSON kosong agar e.postData.contents tidak null di Google Apps Script
                 fetch(`${SCRIPT_URL}?action=delete&sheetName=${sheetName}&row=${index + 2}`, {
                     method: 'POST',
-                    mode: 'no-cors'
+                    mode: 'no-cors',
+                    body: JSON.stringify({})
                 }).then(() => {
-                    loadAllData();
-                    showModal("Berhasil", "Data berhasil dihapus!");
+                    setTimeout(() => {
+                        loadAllData();
+                        showModal("Berhasil", "Data berhasil dihapus!");
+                    }, 1000);
                 }).catch(() => showModal("Gagal", "Gagal menghapus data."));
             }
         }
