@@ -7,17 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f0fdf4; }
         h1, h2, h3 { font-family: 'Fredoka One', cursive; }
         .page-content { display: none; }
         .active-page { display: block; }
-        @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area { position: absolute; left: 0; top: 0; width: 100%; }
-        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between">
@@ -86,28 +82,34 @@
     <!-- Modal Cetak Kartu Peserta / Anggota -->
     <div id="print-card-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 rounded-2xl w-full max-w-sm text-center shadow-2xl">
-            <h3 class="text-xl mb-4 text-emerald-800">🖨️ Cetak Kartu Anggota</h3>
-            <div id="print-area" class="bg-gradient-to-br from-emerald-500 to-teal-700 text-white p-4 rounded-xl shadow-md text-left mb-4 relative overflow-hidden">
-                <div class="flex justify-between items-start border-b border-emerald-400 pb-2 mb-3">
-                    <div>
-                        <h4 class="font-bold text-sm">SDN 1 PARIGI</h4>
-                        <p class="text-[10px] text-emerald-100">KARTU PERPUSTAKAAN</p>
-                    </div>
-                    <span class="text-xs bg-white text-emerald-800 px-2 py-0.5 rounded-full font-bold" id="card-kelas">Kelas -</span>
+            <h3 class="text-xl mb-4 text-emerald-800">🖼️ Kartu Anggota</h3>
+            
+            <!-- Desain Kartu Minimalis -->
+            <div id="print-area" class="bg-white border-2 border-gray-200 text-gray-900 p-6 rounded-xl shadow-sm mb-4 flex flex-col items-center justify-center space-y-4">
+                <div class="w-full text-center border-b pb-2">
+                    <h4 class="font-bold text-lg">SDN 1 PARIGI</h4>
+                    <p class="text-xs text-gray-500 uppercase tracking-widest">Kartu Perpustakaan</p>
                 </div>
-                <div class="mb-3">
-                    <p class="text-[10px] text-emerald-200">NAMA SISWA</p>
-                    <p class="font-bold text-base truncate" id="card-nama">-</p>
-                    <p class="text-[10px] text-emerald-200 mt-1">NIS</p>
-                    <p class="font-mono font-semibold text-sm" id="card-nis">-</p>
+                
+                <div class="w-full flex flex-col items-center text-center space-y-1">
+                    <p class="text-[10px] uppercase text-gray-400 font-bold">Nama</p>
+                    <p class="font-bold text-lg" id="card-nama">-</p>
+                    
+                    <p class="text-[10px] uppercase text-gray-400 font-bold mt-2">NIS</p>
+                    <p class="font-mono text-md" id="card-nis">-</p>
+                    
+                    <p class="text-[10px] uppercase text-gray-400 font-bold mt-2">Kelas</p>
+                    <p class="font-medium text-sm" id="card-kelas">-</p>
                 </div>
-                <div class="flex justify-center bg-white p-2 rounded-lg w-24 h-24 mx-auto">
-                    <div id="qrcode-container" class="flex items-center justify-center"></div>
+
+                <div class="w-full flex justify-center pt-2">
+                    <div id="qrcode-container" class="border p-1 bg-white"></div>
                 </div>
             </div>
+
             <div class="flex space-x-2">
                 <button type="button" onclick="closePrintCardModal()" class="bg-gray-300 text-gray-700 w-1/2 py-2 rounded-lg hover:bg-gray-400 transition">Tutup</button>
-                <button type="button" onclick="window.print()" class="bg-emerald-600 text-white w-1/2 py-2 rounded-lg hover:bg-emerald-700 transition">Cetak</button>
+                <button type="button" onclick="downloadCardImage()" class="bg-emerald-600 text-white w-1/2 py-2 rounded-lg hover:bg-emerald-700 transition">📥 Unduh</button>
             </div>
         </div>
     </div>
@@ -256,7 +258,7 @@
             }
             htmlMurid += `<th class="p-2">Kelas</th>`;
             if (isAdminLoggedIn) {
-                htmlMurid += `<th class="p-2 text-center">Aksi / Cetak Kartu</th>`;
+                htmlMurid += `<th class="p-2 text-center">Aksi / Kartu Foto</th>`;
             }
             htmlMurid += `</tr></thead><tbody>`;
 
@@ -437,19 +439,36 @@
             document.getElementById('card-nis').innerText = nis;
             document.getElementById('card-kelas').innerText = "Kelas " + kelas;
 
-            const qrContainer = document.getElementById('qrcode-container');
-            qrContainer.innerHTML = "";
-            new QRCode(qrContainer, {
-                text: nis,
-                width: 80,
-                height: 80
-            });
+        const qrContainer = document.getElementById('qrcode-container');
+        qrContainer.innerHTML = "";
+        new QRCode(qrContainer, {
+            text: nis,
+            width: 90,
+            height: 90,
+            correctLevel: QRCode.CorrectLevel.H
+        });
 
-            document.getElementById('print-card-modal').classList.remove('hidden');
-        }
+        document.getElementById('print-card-modal').classList.remove('hidden');
+    }
 
         function closePrintCardModal() {
             document.getElementById('print-card-modal').classList.add('hidden');
+        }
+
+        function downloadCardImage() {
+            const cardElement = document.getElementById('print-area');
+            // Menambahkan konfigurasi agar rendering lebih akurat
+            html2canvas(cardElement, { 
+                scale: 3, 
+                useCORS: true, 
+                allowTaint: true,
+                backgroundColor: null 
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Kartu_Perpus_${document.getElementById('card-nis').innerText}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
         }
 
         function openScannerModal(target) {
