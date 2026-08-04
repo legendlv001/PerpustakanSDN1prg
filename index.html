@@ -79,6 +79,44 @@
         </div>
     </div>
 
+    <!-- Modal Form Tambah Absen Manual -->
+    <div id="form-absen-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-md text-left shadow-2xl">
+            <h3 class="text-xl mb-4 text-emerald-800 text-center">📋 Tambah Absen Manual</h3>
+            <form onsubmit="saveAbsenManual(event)">
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-700 mb-1">NIS Siswa</label>
+                    <input type="text" id="input-nis-absen" placeholder="Masukkan NIS Siswa" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                </div>
+                <div class="flex space-x-2">
+                    <button type="button" onclick="closeFormAbsenModal()" class="bg-gray-300 text-gray-700 w-1/2 py-2 rounded-lg hover:bg-gray-400 transition">Batal</button>
+                    <button type="submit" class="bg-emerald-600 text-white w-1/2 py-2 rounded-lg hover:bg-emerald-700 transition">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Form Tambah Transaksi / Pinjam Manual -->
+    <div id="form-transaksi-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-md text-left shadow-2xl">
+            <h3 class="text-xl mb-4 text-emerald-800 text-center">📖 Tambah Peminjaman Buku</h3>
+            <form onsubmit="saveTransaksiManual(event)">
+                <div class="mb-3">
+                    <label class="block text-sm text-gray-700 mb-1">NIS Siswa</label>
+                    <input type="text" id="input-nis-transaksi" placeholder="Masukkan NIS Siswa" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-700 mb-1">Judul Buku</label>
+                    <input type="text" id="input-buku-transaksi" placeholder="Masukkan Judul Buku" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                </div>
+                <div class="flex space-x-2">
+                    <button type="button" onclick="closeFormTransaksiModal()" class="bg-gray-300 text-gray-700 w-1/2 py-2 rounded-lg hover:bg-gray-400 transition">Batal</button>
+                    <button type="submit" class="bg-emerald-600 text-white w-1/2 py-2 rounded-lg hover:bg-emerald-700 transition">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Modal Cetak Kartu Peserta / Anggota -->
     <div id="print-card-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 rounded-2xl w-full max-w-sm text-center shadow-2xl">
@@ -167,7 +205,7 @@
                     <h2 class="text-2xl text-emerald-800">📋 Absen Kunjungan</h2>
                     <div class="flex flex-wrap gap-2 relative z-10">
                         <button onclick="openScannerModal('absen')" id="btn-scan-absen" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm transition relative z-20">📷 Scan Barcode</button>
-                        <button onclick="tambahAbsenManual()" id="btn-tambah-absen" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-sm transition relative z-20">➕ Tambah Manual</button>
+                        <button onclick="openFormAbsenModal()" id="btn-tambah-absen" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-sm transition relative z-20">➕ Tambah Manual</button>
                     </div>
                 </div>
                 <div class="mb-4">
@@ -181,7 +219,7 @@
                     <h2 class="text-2xl text-emerald-800">📖 Data Peminjaman Buku</h2>
                     <div class="flex flex-wrap gap-2 relative z-10">
                         <button onclick="openScannerModal('transaksi')" id="btn-scan-transaksi" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm transition relative z-20">📷 Scan Barcode</button>
-                        <button onclick="tambahTransaksiManual()" id="btn-tambah-transaksi" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-sm transition relative z-20">➕ Tambah Manual</button>
+                        <button onclick="openFormTransaksiModal()" id="btn-tambah-transaksi" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-sm transition relative z-20">➕ Tambah Manual</button>
                     </div>
                 </div>
                 <div class="mb-4">
@@ -439,17 +477,17 @@
             document.getElementById('card-nis').innerText = nis;
             document.getElementById('card-kelas').innerText = "Kelas " + kelas;
 
-        const qrContainer = document.getElementById('qrcode-container');
-        qrContainer.innerHTML = "";
-        new QRCode(qrContainer, {
-            text: nis,
-            width: 90,
-            height: 90,
-            correctLevel: QRCode.CorrectLevel.H
-        });
+            const qrContainer = document.getElementById('qrcode-container');
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, {
+                text: nis,
+                width: 90,
+                height: 90,
+                correctLevel: QRCode.CorrectLevel.H
+            });
 
-        document.getElementById('print-card-modal').classList.remove('hidden');
-    }
+            document.getElementById('print-card-modal').classList.remove('hidden');
+        }
 
         function closePrintCardModal() {
             document.getElementById('print-card-modal').classList.add('hidden');
@@ -457,7 +495,6 @@
 
         function downloadCardImage() {
             const cardElement = document.getElementById('print-area');
-            // Menambahkan konfigurasi agar rendering lebih akurat
             html2canvas(cardElement, { 
                 scale: 3, 
                 useCORS: true, 
@@ -509,6 +546,44 @@
 
         function closeFormMuridModal() { document.getElementById('form-murid-modal').classList.add('hidden'); }
 
+        // Fungsi Form Absen Manual
+        function openFormAbsenModal() {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            document.getElementById('input-nis-absen').value = "";
+            document.getElementById('form-absen-modal').classList.remove('hidden');
+        }
+
+        function closeFormAbsenModal() {
+            document.getElementById('form-absen-modal').classList.add('hidden');
+        }
+
+        function saveAbsenManual(event) {
+            event.preventDefault();
+            const nis = document.getElementById('input-nis-absen').value.trim();
+            closeFormAbsenModal();
+            prosesAbsenByNIS(nis);
+        }
+
+        // Fungsi Form Transaksi / Pinjam Manual
+        function openFormTransaksiModal() {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            document.getElementById('input-nis-transaksi').value = "";
+            document.getElementById('input-buku-transaksi').value = "";
+            document.getElementById('form-transaksi-modal').classList.remove('hidden');
+        }
+
+        function closeFormTransaksiModal() {
+            document.getElementById('form-transaksi-modal').classList.add('hidden');
+        }
+
+        function saveTransaksiManual(event) {
+            event.preventDefault();
+            const nis = document.getElementById('input-nis-transaksi').value.trim();
+            const buku = document.getElementById('input-buku-transaksi').value.trim();
+            closeFormTransaksiModal();
+            prosesTransaksiByBukuDanNIS(nis, buku);
+        }
+
         async function prosesAbsenByNIS(nisInput) {
             if (!nisInput) return;
             const muridDitemukan = appData.murid.find(m => m.col2.toString().trim() === nisInput.toString().trim());
@@ -532,15 +607,8 @@
             }).catch(err => showModal("Gagal", "Error: " + err));
         }
 
-        function tambahAbsenManual() {
-            if (!isAdminLoggedIn) { openLoginModal(); return; }
-            const nis = prompt("Masukkan NIS Murid:");
-            if (!nis) return;
-            prosesAbsenByNIS(nis.trim());
-        }
-
-        async function prosesTransaksiByNIS(nisInput) {
-            if (!nisInput) return;
+        async function prosesTransaksiByBukuDanNIS(nisInput, bukuInput) {
+            if (!nisInput || !bukuInput) return;
             const muridDitemukan = appData.murid.find(m => m.col2.toString().trim() === nisInput.toString().trim());
             if (!muridDitemukan) {
                 showModal("Gagal", "NIS " + nisInput + " tidak terdaftar dalam Data Murid!");
@@ -548,11 +616,8 @@
             }
 
             const nama = muridDitemukan.col1;
-            const buku = prompt("Masukkan Judul Buku untuk " + nama + ":");
-            if (!buku) return;
-
             showModal("Menyimpan", "Sedang mengirim data...");
-            const data = [nama, buku, new Date().toLocaleDateString(), nisInput];
+            const data = [nama, bukuInput, new Date().toLocaleDateString(), nisInput];
             
             fetch(`${SCRIPT_URL}?action=add&sheetName=pinjam`, {
                 method: 'POST',
@@ -562,13 +627,6 @@
                 loadAllData();
                 showModal("Berhasil", "Data peminjaman tersimpan untuk " + nama + "!");
             }).catch(err => showModal("Gagal", "Error: " + err));
-        }
-
-        function tambahTransaksiManual() {
-            if (!isAdminLoggedIn) { openLoginModal(); return; }
-            const nis = prompt("Masukkan NIS Murid:");
-            if (!nis) return;
-            prosesTransaksiByNIS(nis.trim());
         }
 
         function saveMurid(event) {
@@ -658,7 +716,6 @@
             if (confirm("Apakah Anda yakin ingin menghapus data ini dari Spreadsheet?")) {
                 showModal("Menghapus", "Sedang menghapus data dari Spreadsheet...");
                 
-                // Mengirimkan body JSON kosong agar e.postData.contents tidak null di Google Apps Script
                 fetch(`${SCRIPT_URL}?action=delete&sheetName=${sheetName}&row=${index + 2}`, {
                     method: 'POST',
                     mode: 'no-cors',
