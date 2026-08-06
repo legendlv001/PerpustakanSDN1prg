@@ -348,7 +348,7 @@
             if (isAdminLoggedIn) {
                 htmlAbsen += `<th class="p-2">NIS</th>`;
             }
-            htmlAbsen += `<th class="p-2">Waktu</th>`;
+            htmlAbsen += `<th class="p-2">Kelas</th><th class="p-2">Waktu</th>`;
             if (isAdminLoggedIn) {
                 htmlAbsen += `<th class="p-2 text-center">Aksi</th>`;
             }
@@ -356,12 +356,19 @@
 
             let noAbsen = 1;
             appData.absensi.forEach((a, index) => {
-                if (a.col1.toLowerCase().includes(filterAbsen) || a.col2.includes(filterAbsen) || a.col3.toLowerCase().includes(filterAbsen)) {
+                let nisAbsen = a.col2 || '';
+                let kelasAbsen = a.col4 || '';
+                if (!kelasAbsen) {
+                    let foundM = appData.murid.find(m => m.col2.toString().trim() === nisAbsen.toString().trim());
+                    if (foundM) kelasAbsen = foundM.col3;
+                }
+
+                if (a.col1.toLowerCase().includes(filterAbsen) || nisAbsen.includes(filterAbsen) || kelasAbsen.toLowerCase().includes(filterAbsen) || a.col3.toLowerCase().includes(filterAbsen)) {
                     htmlAbsen += `<tr class="border-b"><td class="p-2">${noAbsen++}</td><td class="p-2">${a.col1}</td>`;
                     if (isAdminLoggedIn) {
-                        htmlAbsen += `<td class="p-2">${a.col2}</td>`;
+                        htmlAbsen += `<td class="p-2">${nisAbsen}</td>`;
                     }
-                    htmlAbsen += `<td class="p-2">${a.col3}</td>`;
+                    htmlAbsen += `<td class="p-2">${kelasAbsen || '-'}</td><td class="p-2">${a.col3}</td>`;
                     if (isAdminLoggedIn) {
                         htmlAbsen += `<td class="p-2 text-center">
                             <button onclick="editAbsen(${index})" class="bg-amber-500 hover:bg-amber-600 text-white px-2 py-1 rounded text-xs mr-1 transition">Edit</button>
@@ -381,7 +388,7 @@
             if (isAdminLoggedIn) {
                 htmlTransaksi += `<th class="p-2">NIS</th>`;
             }
-            htmlTransaksi += `<th class="p-2">Buku</th><th class="p-2">Tanggal</th><th class="p-2 text-center">Status</th>`;
+            htmlTransaksi += `<th class="p-2">Kelas</th><th class="p-2">Buku</th><th class="p-2">Tanggal</th><th class="p-2 text-center">Status</th>`;
             if (isAdminLoggedIn) {
                 htmlTransaksi += `<th class="p-2 text-center">Aksi</th>`;
             }
@@ -390,17 +397,24 @@
             let noTransaksi = 1;
             appData.transaksi.forEach((t, index) => {
                 let nisPinjam = t.col4 || '';
+                let kelasPinjam = t.col6 || '';
+                if (!kelasPinjam) {
+                    let foundM = appData.murid.find(m => m.col2.toString().trim() === nisPinjam.toString().trim());
+                    if (foundM) kelasPinjam = foundM.col3;
+                }
                 let statusPinjam = t.col5 ? t.col5 : 'Belum Dikembalikan';
                 
-                if (t.col1.toLowerCase().includes(filterTransaksi) || t.col2.toLowerCase().includes(filterTransaksi) || t.col3.toLowerCase().includes(filterTransaksi) || nisPinjam.includes(filterTransaksi) || statusPinjam.toLowerCase().includes(filterTransaksi)) {
+                if (t.col1.toLowerCase().includes(filterTransaksi) || t.col2.toLowerCase().includes(filterTransaksi) || t.col3.toLowerCase().includes(filterTransaksi) || nisPinjam.includes(filterTransaksi) || kelasPinjam.toLowerCase().includes(filterTransaksi) || statusPinjam.toLowerCase().includes(filterTransaksi)) {
                     
                     htmlTransaksi += `<tr class="border-b"><td class="p-2">${noTransaksi++}</td><td class="p-2">${t.col1}</td>`;
                     if (isAdminLoggedIn) {
                         htmlTransaksi += `<td class="p-2">${nisPinjam}</td>`;
+                        htmlTransaksi += `<td class="p-2">${kelasPinjam || '-'}</td>`;
                         htmlTransaksi += `<td class="p-2">${t.col2}</td>`;
                         htmlTransaksi += `<td class="p-2">${t.col3}</td>`;
                         htmlTransaksi += `<td class="p-2 text-center font-medium">${statusPinjam}</td>`;
                     } else {
+                        htmlTransaksi += `<td class="p-2">${kelasPinjam || '-'}</td>`;
                         htmlTransaksi += `<td class="p-2">${t.col2}</td>`;
                         htmlTransaksi += `<td class="p-2">${t.col3}</td>`;
                         htmlTransaksi += `<td class="p-2 text-center font-medium">${statusPinjam}</td>`;
@@ -623,8 +637,9 @@
             }
 
             const namaMurid = muridDitemukan.col1;
+            const kelasMurid = muridDitemukan.col3;
             showModal("Menyimpan", "Sedang mengirim data absen untuk " + namaMurid + "...");
-            const data = [namaMurid, nisInput, new Date().toLocaleString()];
+            const data = [namaMurid, nisInput, new Date().toLocaleString(), kelasMurid];
             
             fetch(`${SCRIPT_URL}?action=add&sheetName=absen`, {
                 method: 'POST',
@@ -632,7 +647,30 @@
                 body: JSON.stringify(data)
             }).then(() => {
                 loadAllData();
-                showModal("Berhasil", "Absen berhasil dicatat untuk: " + namaMurid);
+                showModal("Berhasil", "Absen berhasil dicatat untuk: " + namaMurid + " (Kelas " + kelasMurid + ")");
+            }).catch(err => showModal("Gagal", "Error: " + err));
+        }
+
+        async function prosesTransaksiByBukuDanNIS(nisInput, bukuInput) {
+            if (!nisInput || !bukuInput) return;
+            const muridDitemukan = appData.murid.find(m => m.col2.toString().trim() === nisInput.toString().trim());
+            if (!muridDitemukan) {
+                showModal("Gagal", "NIS " + nisInput + " tidak terdaftar dalam Data Murid!");
+                return;
+            }
+
+            const nama = muridDitemukan.col1;
+            const kelas = muridDitemukan.col3;
+            showModal("Menyimpan", "Sedang mengirim data...");
+            const data = [nama, bukuInput, new Date().toLocaleDateString(), nisInput, "Belum Dikembalikan", kelas];
+            
+            fetch(`${SCRIPT_URL}?action=add&sheetName=pinjam`, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify(data)
+            }).then(() => {
+                loadAllData();
+                showModal("Berhasil", "Data peminjaman tersimpan untuk " + nama + " (Kelas " + kelas + ")!");
             }).catch(err => showModal("Gagal", "Error: " + err));
         }
 
@@ -705,12 +743,20 @@
             if (nisBaru === null) return;
             const waktuBaru = prompt("Edit Waktu:", a.col3);
             if (waktuBaru === null) return;
+            
+            let defaultKelas = a.col4 || '';
+            if (!defaultKelas) {
+                let foundM = appData.murid.find(m => m.col2.toString().trim() === nisBaru.toString().trim());
+                if (foundM) defaultKelas = foundM.col3;
+            }
+            const kelasBaru = prompt("Edit Kelas:", defaultKelas);
+            if (kelasBaru === null) return;
 
             showModal("Menyimpan", "Memperbarui data absen di Spreadsheet...");
             fetch(`${SCRIPT_URL}?action=edit&sheetName=absen&row=${index + 2}`, {
                 method: 'POST',
                 mode: 'no-cors',
-                body: JSON.stringify([namaBaru, nisBaru, waktuBaru])
+                body: JSON.stringify([namaBaru, nisBaru, waktuBaru, kelasBaru])
             }).then(() => {
                 loadAllData();
                 showModal("Berhasil", "Data absen berhasil diperbarui!");
@@ -731,11 +777,19 @@
             const statusBaru = prompt("Edit Status (Belum Dikembalikan / Sudah Dikembalikan):", t.col5 || 'Belum Dikembalikan');
             if (statusBaru === null) return;
 
+            let defaultKelas = t.col6 || '';
+            if (!defaultKelas) {
+                let foundM = appData.murid.find(m => m.col2.toString().trim() === nisBaru.toString().trim());
+                if (foundM) defaultKelas = foundM.col3;
+            }
+            const kelasBaru = prompt("Edit Kelas:", defaultKelas);
+            if (kelasBaru === null) return;
+
             showModal("Menyimpan", "Memperbarui data peminjaman di Spreadsheet...");
             fetch(`${SCRIPT_URL}?action=edit&sheetName=pinjam&row=${index + 2}`, {
                 method: 'POST',
                 mode: 'no-cors',
-                body: JSON.stringify([namaBaru, bukuBaru, tglBaru, nisBaru, statusBaru])
+                body: JSON.stringify([namaBaru, bukuBaru, tglBaru, nisBaru, statusBaru, kelasBaru])
             }).then(() => {
                 loadAllData();
                 showModal("Berhasil", "Data peminjaman berhasil diperbarui!");
@@ -750,12 +804,13 @@
             const tgl = t.col3;
             const nis = t.col4 || '';
             const status = "Sudah Dikembalikan";
+            const kelas = t.col6 || '';
 
             showModal("Menyimpan", "Memperbarui status pengembalian...");
             fetch(`${SCRIPT_URL}?action=edit&sheetName=pinjam&row=${index + 2}`, {
                 method: 'POST',
                 mode: 'no-cors',
-                body: JSON.stringify([nama, buku, tgl, nis, status])
+                body: JSON.stringify([nama, buku, tgl, nis, status, kelas])
             }).then(() => {
                 loadAllData();
                 showModal("Berhasil", "Buku berhasil dikembalikan!");
