@@ -32,7 +32,6 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between">
 
-    <!-- Notifikasi Modal Kustom -->
     <div id="custom-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 rounded-2xl w-full max-w-sm text-center shadow-2xl">
             <h3 id="modal-title" class="text-xl mb-2 text-emerald-800">Informasi</h3>
@@ -41,7 +40,6 @@
         </div>
     </div>
 
-    <!-- Modal Login Admin -->
     <div id="login-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 rounded-2xl w-full max-w-sm text-center shadow-2xl">
             <h3 class="text-xl mb-2 text-emerald-800">🔐 Login Admin</h3>
@@ -57,7 +55,6 @@
         </div>
     </div>
 
-    <!-- Modal Scan Barcode Kamera -->
     <div id="scanner-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 rounded-2xl w-full max-w-md text-center shadow-2xl">
             <h3 id="scanner-title" class="text-xl mb-2 text-emerald-800">📷 Scan Barcode / NIS</h3>
@@ -67,7 +64,6 @@
         </div>
     </div>
 
-    <!-- Modal Form Tambah/Edit Data Murid -->
     <div id="form-murid-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 rounded-2xl w-full max-w-md text-left shadow-2xl">
             <h3 id="form-murid-title" class="text-xl mb-4 text-emerald-800 text-center">Form Murid</h3>
@@ -93,7 +89,6 @@
         </div>
     </div>
 
-    <!-- Modal Form Tambah Absen Manual -->
     <div id="form-absen-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 rounded-2xl w-full max-w-md text-left shadow-2xl">
             <h3 class="text-xl mb-4 text-emerald-800 text-center">📋 Tambah Absen Manual</h3>
@@ -110,7 +105,6 @@
         </div>
     </div>
 
-    <!-- Modal Form Tambah Transaksi / Pinjam Manual -->
     <div id="form-transaksi-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 rounded-2xl w-full max-w-md text-left shadow-2xl">
             <h3 class="text-xl mb-4 text-emerald-800 text-center">📖 Tambah Peminjaman Buku</h3>
@@ -131,12 +125,10 @@
         </div>
     </div>
 
-    <!-- Modal Cetak Kartu Peserta / Anggota -->
     <div id="print-card-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 rounded-2xl w-full max-w-sm text-center shadow-2xl">
             <h3 class="text-xl mb-4 text-emerald-800">🖼️ Kartu Anggota</h3>
             
-            <!-- Desain Kartu Minimalis Vertikal -->
             <div id="print-area" class="bg-white border-2 border-gray-200 text-gray-900 p-6 rounded-xl shadow-sm mb-4 flex flex-col items-center justify-center space-y-4">
                 <div class="w-full text-center border-b pb-2">
                     <h4 class="font-bold text-lg">SDN 1 PARIGI</h4>
@@ -169,13 +161,16 @@
     <div>
         <nav class="bg-emerald-600 text-white p-4 shadow-lg sticky top-0 z-40">
             <div class="container mx-auto flex flex-wrap justify-between items-center gap-2">
-                <h1 class="text-2xl">📚 PERPUS SDN 1 PARIGI</h1>
+                <div class="flex items-center space-x-2 md:space-x-3">
+                    <h1 class="text-xl md:text-2xl whitespace-nowrap">📚 PERPUS SDN 1 PARIGI</h1>
+                    <span id="connection-badge" class="bg-emerald-800 text-emerald-100 text-[9px] md:text-[10px] px-1.5 py-0.5 rounded font-medium border border-emerald-500/50 hidden shadow-inner">Offline</span>
+                </div>
                 <div id="nav-buttons" class="flex flex-wrap items-center gap-2">
                     <button onclick="showPage('dashboard')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">🏠 Beranda</button>
                     <button onclick="showPage('murid')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">👨‍🎓 Murid</button>
                     <button onclick="showPage('absen')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">📋 Absen</button>
                     <button onclick="showPage('transaksi')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">📖 Pinjam</button>
-                    <button onclick="loadAllData()" id="btn-sync" class="hidden bg-emerald-700 hover:bg-emerald-800 px-3 py-1 rounded transition text-sm">🔄 Sinkron</button>
+                    <button onclick="manualSync()" id="btn-sync" class="hidden bg-emerald-700 hover:bg-emerald-800 px-3 py-1 rounded transition text-sm">🔄 Sinkron (<span id="offline-queue-count">0</span>)</button>
                     <div id="auth-nav-container">
                         <button onclick="openLoginModal()" id="btn-login-admin" class="bg-amber-500 hover:bg-amber-600 px-3 py-1 rounded transition text-sm font-semibold">🔐 Login Admin</button>
                         <button onclick="logoutAdmin()" id="btn-logout-admin" class="hidden bg-rose-600 hover:bg-rose-700 px-3 py-1 rounded transition text-sm font-semibold">🚪 Logout Admin</button>
@@ -197,7 +192,7 @@
                 <div id="admin-status-banner" class="mt-8 bg-amber-50 border border-amber-200 p-4 rounded-xl text-amber-800 flex justify-between items-center hidden">
                     <div>
                         <h4 class="font-bold">⚠️ Mode Admin Aktif</h4>
-                        <p class="text-sm">Anda memiliki akses penuh untuk menambah, mengedit, dan menghapus data pada sistem.</p>
+                        <p class="text-sm">Anda memiliki akses penuh untuk menambah, mengedit, dan menghapus data pada sistem (didukung offline-first sync).</p>
                     </div>
                     <span class="bg-amber-200 text-amber-900 text-xs px-2.5 py-1 rounded-full font-semibold">Admin</span>
                 </div>
@@ -211,7 +206,7 @@
                 <div class="mb-4">
                     <input type="text" id="filter-murid" oninput="render()" placeholder="🔍 Cari nama atau kelas..." class="w-full md:w-80 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
                 </div>
-                <div id="table-murid-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data dari Spreadsheet...</div>
+                <div id="table-murid-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data...</div>
             </div>
 
             <div id="page-absen" class="page-content">
@@ -223,7 +218,7 @@
                     </div>
                 </div>
                 <div class="mb-4">
-                    <input type="text" id="filter-absen" oninput="render()" placeholder="🔍 Cari berdasarkan nama atau waktu..." class="w-full md:w-80 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
+                    <input type="text" id="filter-absen" oninput="render()" placeholder="🔍 Cari berdasarkan nama, kelas, atau waktu..." class="w-full md:w-80 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
                 </div>
                 <div id="table-absen-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data absen...</div>
             </div>
@@ -237,7 +232,7 @@
                     </div>
                 </div>
                 <div class="mb-4">
-                    <input type="text" id="filter-transaksi" oninput="render()" placeholder="🔍 Cari berdasarkan nama, buku, atau tanggal..." class="w-full md:w-80 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
+                    <input type="text" id="filter-transaksi" oninput="render()" placeholder="🔍 Cari berdasarkan nama, buku, kelas, atau tanggal..." class="w-full md:w-80 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
                 </div>
                 <div id="table-transaksi-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data transaksi...</div>
             </div>
@@ -246,33 +241,72 @@
 
     <footer class="bg-white border-t border-emerald-100 py-2 overflow-hidden text-xs text-gray-500 mt-8">
         <marquee behavior="scroll" direction="left" scrollamount="4">
-            PERPUS SDN 1 PARIGI &copy; 2026 — Selamat Datang dan Selamat Membaca! Tingkatkan Literasi Melalui Perpustakaan Sekolah.
+            PERPUS SDN 1 PARIGI &copy; 2026 — Sistem Perpustakaan Offline-First dengan Sinkronisasi Otomatis. Selamat Membaca!
         </marquee>
     </footer>
 
     <script>
         const SPREADSHEET_ID = "1RFxZ6uY1CrDSxKd6GeMLSOD7QwZBd66jqZsvxfnkbXk";
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6wvTMY2c9rZkKnu_Z5PdjaSDlUpyOgnAGl94awsD1cNoky9uEY8DZ8NEOhwOmCQ/exec";
-        let appData = { murid: [], absensi: [], transaksi: [] };
+        
+        let appData = { 
+            murid: JSON.parse(localStorage.getItem('perpus_cache_murid')) || [], 
+            absensi: JSON.parse(localStorage.getItem('perpus_cache_absen')) || [], 
+            transaksi: JSON.parse(localStorage.getItem('perpus_cache_pinjam')) || [] 
+        };
+
+        let offlineQueue = JSON.parse(localStorage.getItem('perpus_offline_queue')) || [];
         let isAdminLoggedIn = localStorage.getItem('perpus_admin_logged') === 'true';
         let html5QrCode = null;
         let activeScannerTarget = '';
+        let isOnline = navigator.onLine;
 
         window.addEventListener('DOMContentLoaded', () => {
             updateAdminUI();
+            updateConnectionStatus();
+            render();
             loadAllData();
+
+            window.addEventListener('online', () => {
+                isOnline = true;
+                updateConnectionStatus();
+                processOfflineQueue();
+            });
+
+            window.addEventListener('offline', () => {
+                isOnline = false;
+                updateConnectionStatus();
+            });
         });
+
+        function updateConnectionStatus() {
+            const badge = document.getElementById('connection-badge');
+            const queueCountSpan = document.getElementById('offline-queue-count');
+            queueCountSpan.innerText = offlineQueue.length;
+            
+            if (navigator.onLine) {
+                badge.classList.add('hidden');
+                if (offlineQueue.length > 0) {
+                    processOfflineQueue();
+                }
+            } else {
+                badge.classList.remove('hidden');
+            }
+        }
 
         async function fetchSheetCSV(sheetName) {
             try {
                 const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
-                const response = await fetch(url);
-                if (!response.ok) return [];
+                const response = await fetch(url, { cache: 'no-store' });
+                if (!response.ok) throw new Error('Network response not ok');
                 const csvText = await response.text();
-                return parseCSV(csvText);
+                const parsed = parseCSV(csvText);
+                localStorage.setItem(`perpus_cache_${sheetName}`, JSON.stringify(parsed));
+                return parsed;
             } catch (err) {
-                console.error(`Gagal memuat tab ${sheetName}:`, err);
-                return [];
+                console.warn(`Menggunakan data cache offline untuk tab ${sheetName}:`, err);
+                const cached = localStorage.getItem(`perpus_cache_${sheetName}`);
+                return cached ? JSON.parse(cached) : [];
             }
         }
 
@@ -299,7 +333,8 @@
                         col2: row[1] || '', 
                         col3: row[2] || '', 
                         col4: row[3] || '', 
-                        col5: row[4] || '' 
+                        col5: row[4] || '',
+                        col6: row[5] || ''
                     });
                 }
             }
@@ -441,12 +476,70 @@
         }
 
         async function loadAllData() {
-            showModal("Memuat Data", "Sedang mengambil data terbaru...");
-            appData.murid = await fetchSheetCSV('murid');
-            appData.absensi = await fetchSheetCSV('absen');
-            appData.transaksi = await fetchSheetCSV('pinjam');
-            render();
+            if (navigator.onLine) {
+                appData.murid = await fetchSheetCSV('murid');
+                appData.absensi = await fetchSheetCSV('absen');
+                appData.transaksi = await fetchSheetCSV('pinjam');
+                render();
+            }
+        }
+
+        async function manualSync() {
+            if (!navigator.onLine) {
+                showModal("Mode Offline", "Tidak ada koneksi internet. Sinkronisasi akan otomatis berjalan saat terhubung.");
+                return;
+            }
+            showModal("Sinkronisasi", "Sedang menyinkronkan data offline ke server...");
+            await processOfflineQueue();
+            await loadAllData();
             closeModal();
+            showModal("Berhasil", "Semua data offline berhasil disinkronkan!");
+        }
+
+        async function processOfflineQueue() {
+            if (offlineQueue.length === 0) return;
+            let remainingQueue = [];
+            for (let item of offlineQueue) {
+                try {
+                    let url = `${SCRIPT_URL}?action=${item.action}&sheetName=${item.sheetName}`;
+                    if (item.row) url += `&row=${item.row}`;
+                    
+                    await fetch(url, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: JSON.stringify(item.payload)
+                    });
+                } catch (e) {
+                    console.error("Gagal sinkron item:", e);
+                    remainingQueue.push(item);
+                }
+            }
+            offlineQueue = remainingQueue;
+            localStorage.setItem('perpus_offline_queue', JSON.stringify(offlineQueue));
+            updateConnectionStatus();
+        }
+
+        function queueOrSendRequest(action, sheetName, payload, row = null) {
+            if (navigator.onLine) {
+                let url = `${SCRIPT_URL}?action=${action}&sheetName=${sheetName}`;
+                if (row) url += `&row=${row}`;
+
+                fetch(url, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(payload)
+                }).then(() => {
+                    setTimeout(() => loadAllData(), 1500);
+                }).catch(() => {
+                    offlineQueue.push({ action, sheetName, payload, row });
+                    localStorage.setItem('perpus_offline_queue', JSON.stringify(offlineQueue));
+                    updateConnectionStatus();
+                });
+            } else {
+                offlineQueue.push({ action, sheetName, payload, row });
+                localStorage.setItem('perpus_offline_queue', JSON.stringify(offlineQueue));
+                updateConnectionStatus();
+            }
         }
 
         function showModal(title, message) {
@@ -589,7 +682,6 @@
 
         function closeFormMuridModal() { document.getElementById('form-murid-modal').classList.add('hidden'); }
 
-        // Fungsi Form Absen Manual
         function openFormAbsenModal() {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             document.getElementById('input-nis-absen').value = "";
@@ -607,7 +699,6 @@
             prosesAbsenByNIS(nis);
         }
 
-        // Fungsi Form Transaksi / Pinjam Manual
         function openFormTransaksiModal() {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             document.getElementById('input-nis-transaksi').value = "";
@@ -627,7 +718,7 @@
             prosesTransaksiByBukuDanNIS(nis, buku);
         }
 
-        async function prosesAbsenByNIS(nisInput) {
+        function prosesAbsenByNIS(nisInput) {
             if (!nisInput) return;
             const muridDitemukan = appData.murid.find(m => m.col2.toString().trim() === nisInput.toString().trim());
 
@@ -638,20 +729,17 @@
 
             const namaMurid = muridDitemukan.col1;
             const kelasMurid = muridDitemukan.col3;
-            showModal("Menyimpan", "Sedang mengirim data absen untuk " + namaMurid + "...");
-            const data = [namaMurid, nisInput, new Date().toLocaleString(), kelasMurid];
+            const waktuStr = new Date().toLocaleString();
             
-            fetch(`${SCRIPT_URL}?action=add&sheetName=absen`, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify(data)
-            }).then(() => {
-                loadAllData();
-                showModal("Berhasil", "Absen berhasil dicatat untuk: " + namaMurid + " (Kelas " + kelasMurid + ")");
-            }).catch(err => showModal("Gagal", "Error: " + err));
+            appData.absensi.unshift({ col1: namaMurid, col2: nisInput, col3: waktuStr, col4: kelasMurid });
+            localStorage.setItem('perpus_cache_absen', JSON.stringify(appData.absensi));
+            render();
+
+            queueOrSendRequest('add', 'absen', [namaMurid, nisInput, waktuStr, kelasMurid]);
+            showModal("Berhasil", "Absen berhasil dicatat untuk: " + namaMurid + " (Kelas " + kelasMurid + ")");
         }
 
-        async function prosesTransaksiByBukuDanNIS(nisInput, bukuInput) {
+        function prosesTransaksiByBukuDanNIS(nisInput, bukuInput) {
             if (!nisInput || !bukuInput) return;
             const muridDitemukan = appData.murid.find(m => m.col2.toString().trim() === nisInput.toString().trim());
             if (!muridDitemukan) {
@@ -661,39 +749,21 @@
 
             const nama = muridDitemukan.col1;
             const kelas = muridDitemukan.col3;
-            showModal("Menyimpan", "Sedang mengirim data...");
-            const data = [nama, bukuInput, new Date().toLocaleDateString(), nisInput, "Belum Dikembalikan", kelas];
+            const tglStr = new Date().toLocaleDateString();
             
-            fetch(`${SCRIPT_URL}?action=add&sheetName=pinjam`, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify(data)
-            }).then(() => {
-                loadAllData();
-                showModal("Berhasil", "Data peminjaman tersimpan untuk " + nama + " (Kelas " + kelas + ")!");
-            }).catch(err => showModal("Gagal", "Error: " + err));
+            appData.transaksi.unshift({ col1: nama, col2: bukuInput, col3: tglStr, col4: nisInput, col5: "Belum Dikembalikan", col6: kelas });
+            localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
+            render();
+
+            queueOrSendRequest('add', 'pinjam', [nama, bukuInput, tglStr, nisInput, "Belum Dikembalikan", kelas]);
+            showModal("Berhasil", "Data peminjaman tersimpan untuk " + nama + " (Kelas " + kelas + ")!");
         }
 
-        async function prosesTransaksiByBukuDanNIS(nisInput, bukuInput) {
-            if (!nisInput || !bukuInput) return;
-            const muridDitemukan = appData.murid.find(m => m.col2.toString().trim() === nisInput.toString().trim());
-            if (!muridDitemukan) {
-                showModal("Gagal", "NIS " + nisInput + " tidak terdaftar dalam Data Murid!");
-                return;
+        function prosesTransaksiByNIS(nisInput) {
+            const bukuInput = prompt("Masukkan Judul Buku yang Dipinjam:", "Buku Cerita");
+            if (bukuInput) {
+                prosesTransaksiByBukuDanNIS(nisInput, bukuInput);
             }
-
-            const nama = muridDitemukan.col1;
-            showModal("Menyimpan", "Sedang mengirim data...");
-            const data = [nama, bukuInput, new Date().toLocaleDateString(), nisInput, "Belum Dikembalikan"];
-            
-            fetch(`${SCRIPT_URL}?action=add&sheetName=pinjam`, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify(data)
-            }).then(() => {
-                loadAllData();
-                showModal("Berhasil", "Data peminjaman tersimpan untuk " + nama + "!");
-            }).catch(err => showModal("Gagal", "Error: " + err));
         }
 
         function saveMurid(event) {
@@ -703,24 +773,19 @@
             const nis = document.getElementById('input-nis-murid').value;
             const kelas = document.getElementById('input-kelas-murid').value;
             
-            showModal("Menyimpan", "Sedang mengirim data ke Spreadsheet...");
-
-            let url = `${SCRIPT_URL}?action=add&sheetName=murid`;
             let payload = [nama, nis, kelas, ""];
-
             if (index >= 0) {
-                url = `${SCRIPT_URL}?action=edit&sheetName=murid&row=${index + 2}`;
+                appData.murid[index] = { col1: nama, col2: nis, col3: kelas };
+                queueOrSendRequest('edit', 'murid', payload, index + 2);
+            } else {
+                appData.murid.push({ col1: nama, col2: nis, col3: kelas });
+                queueOrSendRequest('add', 'murid', payload);
             }
 
-            fetch(url, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify(payload)
-            }).then(() => {
-                closeFormMuridModal();
-                loadAllData();
-                showModal("Berhasil", "Data berhasil diperbarui di Spreadsheet!");
-            }).catch(() => showModal("Gagal", "Gagal menyimpan data ke Spreadsheet."));
+            localStorage.setItem('perpus_cache_murid', JSON.stringify(appData.murid));
+            closeFormMuridModal();
+            render();
+            showModal("Berhasil", "Data murid berhasil disimpan secara offline/online!");
         }
 
         function editMurid(index) {
@@ -752,15 +817,12 @@
             const kelasBaru = prompt("Edit Kelas:", defaultKelas);
             if (kelasBaru === null) return;
 
-            showModal("Menyimpan", "Memperbarui data absen di Spreadsheet...");
-            fetch(`${SCRIPT_URL}?action=edit&sheetName=absen&row=${index + 2}`, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify([namaBaru, nisBaru, waktuBaru, kelasBaru])
-            }).then(() => {
-                loadAllData();
-                showModal("Berhasil", "Data absen berhasil diperbarui!");
-            }).catch(() => showModal("Gagal", "Gagal memperbarui data."));
+            appData.absensi[index] = { col1: namaBaru, col2: nisBaru, col3: waktuBaru, col4: kelasBaru };
+            localStorage.setItem('perpus_cache_absen', JSON.stringify(appData.absensi));
+            render();
+
+            queueOrSendRequest('edit', 'absen', [namaBaru, nisBaru, waktuBaru, kelasBaru], index + 2);
+            showModal("Berhasil", "Data absen berhasil diperbarui!");
         }
 
         function editTransaksi(index) {
@@ -785,53 +847,39 @@
             const kelasBaru = prompt("Edit Kelas:", defaultKelas);
             if (kelasBaru === null) return;
 
-            showModal("Menyimpan", "Memperbarui data peminjaman di Spreadsheet...");
-            fetch(`${SCRIPT_URL}?action=edit&sheetName=pinjam&row=${index + 2}`, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify([namaBaru, bukuBaru, tglBaru, nisBaru, statusBaru, kelasBaru])
-            }).then(() => {
-                loadAllData();
-                showModal("Berhasil", "Data peminjaman berhasil diperbarui!");
-            }).catch(() => showModal("Gagal", "Gagal memperbarui data."));
+            appData.transaksi[index] = { col1: namaBaru, col2: bukuBaru, col3: tglBaru, col4: nisBaru, col5: statusBaru, col6: kelasBaru };
+            localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
+            render();
+
+            queueOrSendRequest('edit', 'pinjam', [namaBaru, bukuBaru, tglBaru, nisBaru, statusBaru, kelasBaru], index + 2);
+            showModal("Berhasil", "Data peminjaman berhasil diperbarui!");
         }
 
         function ubahStatusKembali(index) {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             const t = appData.transaksi[index];
-            const nama = t.col1;
-            const buku = t.col2;
-            const tgl = t.col3;
-            const nis = t.col4 || '';
-            const status = "Sudah Dikembalikan";
-            const kelas = t.col6 || '';
+            t.col5 = "Sudah Dikembalikan";
+            localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
+            render();
 
-            showModal("Menyimpan", "Memperbarui status pengembalian...");
-            fetch(`${SCRIPT_URL}?action=edit&sheetName=pinjam&row=${index + 2}`, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify([nama, buku, tgl, nis, status, kelas])
-            }).then(() => {
-                loadAllData();
-                showModal("Berhasil", "Buku berhasil dikembalikan!");
-            }).catch(() => showModal("Gagal", "Gagal memperbarui status."));
+            queueOrSendRequest('edit', 'pinjam', [t.col1, t.col2, t.col3, t.col4 || '', "Sudah Dikembalikan", t.col6 || ''], index + 2);
+            showModal("Berhasil", "Buku berhasil dikembalikan!");
         }
 
         function hapusData(sheetName, index) {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
-            if (confirm("Apakah Anda yakin ingin menghapus data ini dari Spreadsheet?")) {
-                showModal("Menghapus", "Sedang menghapus data dari Spreadsheet...");
-                
-                fetch(`${SCRIPT_URL}?action=delete&sheetName=${sheetName}&row=${index + 2}`, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify({})
-                }).then(() => {
-                    setTimeout(() => {
-                        loadAllData();
-                        showModal("Berhasil", "Data berhasil dihapus!");
-                    }, 1000);
-                }).catch(() => showModal("Gagal", "Gagal menghapus data."));
+            if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+                if (sheetName === 'murid') appData.murid.splice(index, 1);
+                else if (sheetName === 'absen') appData.absensi.splice(index, 1);
+                else if (sheetName === 'pinjam') appData.transaksi.splice(index, 1);
+
+                localStorage.setItem('perpus_cache_murid', JSON.stringify(appData.murid));
+                localStorage.setItem('perpus_cache_absen', JSON.stringify(appData.absensi));
+                localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
+                render();
+
+                queueOrSendRequest('delete', sheetName, {}, index + 2);
+                showModal("Berhasil", "Data berhasil dihapus!");
             }
         }
     </script>
