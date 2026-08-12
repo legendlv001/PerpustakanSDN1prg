@@ -45,7 +45,13 @@
             <h3 class="text-xl mb-2 text-emerald-800">🔐 Login Admin</h3>
             <p class="text-gray-600 mb-4 text-sm">Masukkan kata sandi admin untuk mengakses fitur ubah/edit data.</p>
             <form onsubmit="handleAdminLogin(event)">
-                <input type="password" id="admin-password-input" placeholder="Masukkan kata sandi" class="w-full px-3 py-2 border rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                <input type="password" id="admin-password-input" placeholder="Masukkan kata sandi" class="w-full px-3 py-2 border rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                
+                <div class="flex items-center mb-3 text-left">
+                    <input type="checkbox" id="remember-admin-checkbox" class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500">
+                    <label for="remember-admin-checkbox" class="ml-2 text-sm text-gray-700 cursor-pointer select-none">Ingat Saya (Remember Me)</label>
+                </div>
+
                 <p id="login-error-msg" class="text-rose-600 text-xs text-left mb-4 hidden">Kata sandi yang Anda masukkan salah. Silakan coba lagi.</p>
                 <div class="flex space-x-2 mt-2">
                     <button type="button" onclick="closeLoginModal()" class="bg-gray-300 text-gray-700 w-1/2 py-2 rounded-lg hover:bg-gray-400 transition">Batal</button>
@@ -241,7 +247,7 @@
 
     <footer class="bg-white border-t border-emerald-100 py-2 overflow-hidden text-xs text-gray-500 mt-8">
         <marquee behavior="scroll" direction="left" scrollamount="4">
-            PERPUS SDN 1 PARIGI &copy; 2026 — Sistem Perpustakaan Offline-First dengan Sinkronisasi Otomatis. Selamat Membaca!
+            PERPUSTAKAN SDN 1 PARIGI &copy; 2026 — Sistem Perpustakaan Web Online. Selamat Membaca!
         </marquee>
     </footer>
 
@@ -262,6 +268,12 @@
         let isOnline = navigator.onLine;
 
         window.addEventListener('DOMContentLoaded', () => {
+            const rememberStatus = localStorage.getItem('perpus_admin_remember') === 'true';
+            if (rememberStatus) {
+                isAdminLoggedIn = true;
+                localStorage.setItem('perpus_admin_logged', 'true');
+            }
+
             updateAdminUI();
             updateConnectionStatus();
             render();
@@ -559,18 +571,31 @@
 
         function handleAdminLogin(event) {
             event.preventDefault();
-            if (document.getElementById('admin-password-input').value === '123') {
+            const passwordInput = document.getElementById('admin-password-input').value;
+            const rememberChecked = document.getElementById('remember-admin-checkbox').checked;
+
+            if (passwordInput === '123') {
                 isAdminLoggedIn = true;
                 localStorage.setItem('perpus_admin_logged', 'true');
+                
+                if (rememberChecked) {
+                    localStorage.setItem('perpus_admin_remember', 'true');
+                } else {
+                    localStorage.removeItem('perpus_admin_remember');
+                }
+
                 closeLoginModal();
                 updateAdminUI();
                 render(); 
-            } else document.getElementById('login-error-msg').classList.remove('hidden');
+            } else {
+                document.getElementById('login-error-msg').classList.remove('hidden');
+            }
         }
 
         function logoutAdmin() {
             isAdminLoggedIn = false;
             localStorage.removeItem('perpus_admin_logged');
+            localStorage.removeItem('perpus_admin_remember');
             updateAdminUI();
             render(); 
         }
