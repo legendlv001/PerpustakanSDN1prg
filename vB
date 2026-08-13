@@ -64,8 +64,10 @@
     <div id="scanner-modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 rounded-2xl w-full max-w-md text-center shadow-2xl">
             <h3 id="scanner-title" class="text-xl mb-2 text-emerald-800">📷 Scan Barcode / NIS</h3>
-            <p class="text-gray-600 mb-3 text-sm">Arahkan kamera ke QR Code / Barcode NIS Murid.</p>
-            <div id="reader" class="w-full overflow-hidden rounded-xl border mb-4"></div>
+            <p id="scanner-subtitle" class="text-gray-600 mb-3 text-sm">Arahkan kamera ke QR Code / Barcode NIS Murid.</p>
+            <div id="reader" class="w-full overflow-hidden rounded-xl border mb-4 bg-black min-h-[250px] flex items-center justify-center">
+                <span class="text-gray-400 text-xs">Memuat kamera...</span>
+            </div>
             <button onclick="closeScannerModal()" class="bg-rose-600 text-white w-full py-2 rounded-lg hover:bg-rose-700 transition">Tutup Kamera</button>
         </div>
     </div>
@@ -97,15 +99,74 @@
 
     <div id="form-absen-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 rounded-2xl w-full max-w-md text-left shadow-2xl">
-            <h3 class="text-xl mb-4 text-emerald-800 text-center">📋 Tambah Absen Manual</h3>
+            <h3 class="text-xl mb-4 text-emerald-800 text-center">📋 Tambah Absen Kunjungan</h3>
             <form onsubmit="saveAbsenManual(event)">
-                <div class="mb-4">
+                <div class="mb-3">
                     <label class="block text-sm text-gray-700 mb-1">NIS Siswa</label>
                     <input type="text" id="input-nis-absen" placeholder="Masukkan NIS Siswa" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-700 mb-1">Kegiatan / Aktivitas</label>
+                    <input type="text" id="input-kegiatan-absen" value="Membaca / Berhitung" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 font-medium" readonly>
+                    <p class="text-xs text-gray-500 mt-1">Kegiatan default otomatis: Membaca / Berhitung</p>
                 </div>
                 <div class="flex space-x-2">
                     <button type="button" onclick="closeFormAbsenModal()" class="bg-gray-300 text-gray-700 w-1/2 py-2 rounded-lg hover:bg-gray-400 transition">Batal</button>
                     <button type="submit" class="bg-emerald-600 text-white w-1/2 py-2 rounded-lg hover:bg-emerald-700 transition">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="form-tugas-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-lg text-left shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h3 class="text-xl mb-4 text-purple-800 text-center font-bold">📌 Sesi Tugas Perpustakaan Multi-Siswa</h3>
+            <form onsubmit="saveTugasBatch(event)">
+                <div class="mb-3">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Deskripsi / Detail Tugas</label>
+                    <input type="text" id="input-deskripsi-tugas" placeholder="Contoh: Merapikan Rak Buku / Mengerjakan Tugas Perpustakaan" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Pilih Metode Input Siswa</label>
+                    <div class="flex gap-4 mb-3">
+                        <label class="flex items-center text-sm cursor-pointer">
+                            <input type="radio" name="metode_tugas" value="scan" checked onclick="toggleTugasMethod('scan')" class="mr-2 text-purple-600 focus:ring-purple-500"> 📷 Scan Barcode / QR
+                        </label>
+                        <label class="flex items-center text-sm cursor-pointer">
+                            <input type="radio" name="metode_tugas" value="manual" onclick="toggleTugasMethod('manual')" class="mr-2 text-purple-600 focus:ring-purple-500"> ✍️ Ketik NIS Manual
+                        </label>
+                    </div>
+
+                    <!-- Scan Mode Container -->
+                    <div id="tugas-scan-section" class="border p-3 rounded-xl bg-purple-50/50 mb-3 text-center">
+                        <p class="text-xs text-gray-600 mb-2">Arahkan kamera untuk memindai siswa satu per satu. Siswa yang terpindai akan masuk ke daftar di bawah.</p>
+                        <button type="button" onclick="startTugasScanner()" class="bg-purple-600 hover:bg-purple-700 text-white text-xs px-3 py-1.5 rounded-lg shadow transition">🎥 Buka Kamera Scanner</button>
+                        <div id="tugas-reader-container" class="mt-3 hidden">
+                            <div id="tugas-reader" class="w-full overflow-hidden rounded-xl border bg-black min-h-[220px] flex items-center justify-center"></div>
+                            <button type="button" onclick="stopTugasScanner()" class="mt-2 bg-rose-600 hover:bg-rose-700 text-white text-xs px-3 py-1 rounded">Tutup Kamera</button>
+                        </div>
+                    </div>
+
+                    <!-- Manual Mode Container -->
+                    <div id="tugas-manual-section" class="border p-3 rounded-xl bg-purple-50/50 mb-3 hidden">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Masukkan Daftar NIS (Pisahkan dengan koma, spasi, atau baris baru)</label>
+                        <textarea id="input-nis-batch" rows="3" placeholder="Contoh: 101, 102, 105" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm font-mono"></textarea>
+                        <button type="button" onclick="tambahNisBatchManual()" class="mt-2 bg-purple-700 hover:bg-purple-800 text-white text-xs px-3 py-1.5 rounded transition">➕ Tambahkan ke Daftar</button>
+                    </div>
+
+                    <!-- Daftar Siswa Terpilih (Batch) -->
+                    <div class="mt-3">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Daftar Siswa Terpilih (<span id="count-selected-siswa">0</span>)</label>
+                        <div id="selected-siswa-container" class="border rounded-xl p-2 max-h-36 overflow-y-auto bg-gray-50 text-sm space-y-1">
+                            <p class="text-gray-400 text-xs italic text-center py-2">Belum ada siswa yang dipilih.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-2 pt-2 border-t">
+                    <button type="button" onclick="closeFormTugasModal()" class="bg-gray-300 text-gray-700 w-1/2 py-2 rounded-lg hover:bg-gray-400 transition text-sm font-medium">Batal</button>
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white w-1/2 py-2 rounded-lg hover:bg-purple-800 transition text-sm font-medium">Simpan Tugas Massal</button>
                 </div>
             </form>
         </div>
@@ -198,7 +259,7 @@
                 <div id="admin-status-banner" class="mt-8 bg-amber-50 border border-amber-200 p-4 rounded-xl text-amber-800 flex justify-between items-center hidden">
                     <div>
                         <h4 class="font-bold">⚠️ Mode Admin Aktif</h4>
-                        <p class="text-sm">Anda memiliki akses penuh untuk menambah, mengedit, dan menghapus data pada sistem (didukung offline-first sync).</p>
+                        <p class="text-sm">Anda memiliki akses penuh untuk menambah, mengedit, dan menghapus data absensi otomatis (Membaca / Berhitung) serta catatan sesi tugas.</p>
                     </div>
                     <span class="bg-amber-200 text-amber-900 text-xs px-2.5 py-1 rounded-full font-semibold">Admin</span>
                 </div>
@@ -217,14 +278,15 @@
 
             <div id="page-absen" class="page-content">
                 <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
-                    <h2 class="text-2xl text-emerald-800">📋 Absen Kunjungan</h2>
+                    <h2 class="text-2xl text-emerald-800">📋 Absen Kunjungan & Sesi Tugas</h2>
                     <div class="flex flex-wrap gap-2 relative z-10">
-                        <button onclick="openScannerModal('absen')" id="btn-scan-absen" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm transition relative z-20">📷 Scan Barcode</button>
-                        <button onclick="openFormAbsenModal()" id="btn-tambah-absen" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-sm transition relative z-20">➕ Tambah Manual</button>
+                        <button onclick="openScannerModal('absen')" id="btn-scan-absen" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm transition relative z-20">📷 Scan Absen</button>
+                        <button onclick="openFormAbsenModal()" id="btn-tambah-absen" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-sm transition relative z-20">➕ Tambah Absen</button>
+                        <button onclick="openFormTugasModal()" id="btn-tambah-tugas" class="hidden bg-purple-700 hover:bg-purple-800 text-white px-3 py-1.5 rounded-lg text-sm transition relative z-20">📌 Tambah Tugas</button>
                     </div>
                 </div>
                 <div class="mb-4">
-                    <input type="text" id="filter-absen" oninput="render()" placeholder="🔍 Cari berdasarkan nama, kelas, atau waktu..." class="w-full md:w-80 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
+                    <input type="text" id="filter-absen" oninput="render()" placeholder="🔍 Cari berdasarkan nama, kelas, kegiatan/tugas, atau waktu..." class="w-full md:w-80 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
                 </div>
                 <div id="table-absen-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data absen...</div>
             </div>
@@ -265,7 +327,9 @@
         let isAdminLoggedIn = localStorage.getItem('perpus_admin_logged') === 'true';
         let html5QrCode = null;
         let activeScannerTarget = '';
-        let isOnline = navigator.onLine;
+        let temporaryTaskDescription = ''; // Menyimpan jenis tugas aktif untuk sesi scan/tugas
+        let batchSelectedMurid = []; // Menyimpan daftar murid yang dipilih dalam satu sesi tugas massal
+        let html5TugasQrCode = null;
 
         window.addEventListener('DOMContentLoaded', () => {
             const rememberStatus = localStorage.getItem('perpus_admin_remember') === 'true';
@@ -395,7 +459,7 @@
             if (isAdminLoggedIn) {
                 htmlAbsen += `<th class="p-2">NIS</th>`;
             }
-            htmlAbsen += `<th class="p-2">Kelas</th><th class="p-2">Waktu</th>`;
+            htmlAbsen += `<th class="p-2">Kelas</th><th class="p-2">Kegiatan / Tugas</th><th class="p-2">Waktu</th>`;
             if (isAdminLoggedIn) {
                 htmlAbsen += `<th class="p-2 text-center">Aksi</th>`;
             }
@@ -404,18 +468,27 @@
             let noAbsen = 1;
             appData.absensi.forEach((a, index) => {
                 let nisAbsen = a.col2 || '';
-                let kelasAbsen = a.col4 || '';
+                let waktuAbsen = a.col3 || '';
+                let kegiatanAbsen = a.col4 || 'Membaca / Berhitung';
+                let kelasAbsen = a.col5 || '';
+
+                if (!kelasAbsen && a.col4 && !a.col4.includes('/') && !a.col4.includes('Membaca') && !a.col4.includes('Berhitung')) {
+                    kelasAbsen = a.col4;
+                    kegiatanAbsen = 'Membaca / Berhitung';
+                }
+
                 if (!kelasAbsen) {
                     let foundM = appData.murid.find(m => m.col2.toString().trim() === nisAbsen.toString().trim());
                     if (foundM) kelasAbsen = foundM.col3;
                 }
 
-                if (a.col1.toLowerCase().includes(filterAbsen) || nisAbsen.includes(filterAbsen) || kelasAbsen.toLowerCase().includes(filterAbsen) || a.col3.toLowerCase().includes(filterAbsen)) {
+                if (a.col1.toLowerCase().includes(filterAbsen) || nisAbsen.includes(filterAbsen) || kelasAbsen.toLowerCase().includes(filterAbsen) || kegiatanAbsen.toLowerCase().includes(filterAbsen) || waktuAbsen.toLowerCase().includes(filterAbsen)) {
+                    let badgeColor = (kegiatanAbsen === 'Membaca / Berhitung') ? 'bg-emerald-100 text-emerald-800' : 'bg-purple-100 text-purple-800';
                     htmlAbsen += `<tr class="border-b"><td class="p-2">${noAbsen++}</td><td class="p-2">${a.col1}</td>`;
                     if (isAdminLoggedIn) {
                         htmlAbsen += `<td class="p-2">${nisAbsen}</td>`;
                     }
-                    htmlAbsen += `<td class="p-2">${kelasAbsen || '-'}</td><td class="p-2">${a.col3}</td>`;
+                    htmlAbsen += `<td class="p-2">${kelasAbsen || '-'}</td><td class="p-2"><span class="${badgeColor} text-xs px-2 py-0.5 rounded-full font-medium">${kegiatanAbsen}</span></td><td class="p-2">${waktuAbsen}</td>`;
                     if (isAdminLoggedIn) {
                         htmlAbsen += `<td class="p-2 text-center">
                             <button onclick="editAbsen(${index})" class="bg-amber-500 hover:bg-amber-600 text-white px-2 py-1 rounded text-xs mr-1 transition">Edit</button>
@@ -608,8 +681,9 @@
                 document.getElementById('admin-status-banner')?.classList.remove('hidden');
                 document.getElementById('btn-tambah-murid')?.classList.remove('hidden');
                 document.getElementById('btn-tambah-absen')?.classList.remove('hidden');
-                document.getElementById('btn-tambah-transaksi')?.classList.remove('hidden');
+                document.getElementById('btn-tambah-tugas')?.classList.remove('hidden');
                 document.getElementById('btn-scan-absen')?.classList.remove('hidden');
+                document.getElementById('btn-tambah-transaksi')?.classList.remove('hidden');
                 document.getElementById('btn-scan-transaksi')?.classList.remove('hidden');
             } else {
                 document.getElementById('btn-login-admin')?.classList.remove('hidden');
@@ -618,8 +692,9 @@
                 document.getElementById('admin-status-banner')?.classList.add('hidden');
                 document.getElementById('btn-tambah-murid')?.classList.add('hidden');
                 document.getElementById('btn-tambah-absen')?.classList.add('hidden');
-                document.getElementById('btn-tambah-transaksi')?.classList.add('hidden');
+                document.getElementById('btn-tambah-tugas')?.classList.add('hidden');
                 document.getElementById('btn-scan-absen')?.classList.add('hidden');
+                document.getElementById('btn-tambah-transaksi')?.classList.add('hidden');
                 document.getElementById('btn-scan-transaksi')?.classList.add('hidden');
             }
         }
@@ -672,23 +747,67 @@
         function openScannerModal(target) {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             activeScannerTarget = target;
-            document.getElementById('scanner-modal').classList.remove('hidden');
-            if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
             
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (text) => {
-                html5QrCode.stop();
-                closeScannerModal();
-                if (target === 'absen') {
-                    prosesAbsenByNIS(text.trim());
-                } else if (target === 'transaksi') {
-                    prosesTransaksiByNIS(text.trim());
+            const titleEl = document.getElementById('scanner-title');
+            const subTitleEl = document.getElementById('scanner-subtitle');
+
+            titleEl.innerText = "📷 Scan Barcode / NIS (Absen)";
+            subTitleEl.innerText = "Arahkan kamera ke QR Code / Barcode NIS Murid.";
+
+            document.getElementById('scanner-modal').classList.remove('hidden');
+            
+            // Beri jeda sedikit agar elemen modal render sempurna sebelum inisialisasi Html5Qrcode
+            setTimeout(() => {
+                if (!html5QrCode) {
+                    html5QrCode = new Html5Qrcode("reader");
                 }
-            }).catch(e => console.error(e));
+                
+                const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+                html5QrCode.start(
+                    { facingMode: "environment" }, 
+                    config, 
+                    (text) => {
+                        const scannedVal = text.trim();
+                        stopActiveScannerAndProcess(scannedVal);
+                    },
+                    (errorMessage) => {
+                        // Abaikan error frame scan reguler agar tidak memenuhi console
+                    }
+                ).catch(err => {
+                    console.error("Gagal memulai kamera:", err);
+                    showModal("Akses Kamera", "Gagal membuka kamera. Pastikan izin kamera telah diberikan di browser.");
+                });
+            }, 300);
+        }
+
+        function stopActiveScannerAndProcess(nis) {
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    closeScannerModal();
+                    if (activeScannerTarget === 'absen') {
+                        prosesAbsenByNIS(nis, "Membaca / Berhitung");
+                    } else if (activeScannerTarget === 'transaksi') {
+                        prosesTransaksiByNIS(nis);
+                    }
+                }).catch(e => {
+                    console.error("Gagal menghentikan scanner:", e);
+                    closeScannerModal();
+                });
+            } else {
+                closeScannerModal();
+                if (activeScannerTarget === 'absen') {
+                    prosesAbsenByNIS(nis, "Membaca / Berhitung");
+                } else if (activeScannerTarget === 'transaksi') {
+                    prosesTransaksiByNIS(nis);
+                }
+            }
         }
 
         function closeScannerModal() { 
-            if (html5QrCode && html5QrCode.isScanning) {
-                html5QrCode.stop().catch(e => console.log(e));
+            if (html5QrCode) {
+                if (html5QrCode.isScanning) {
+                    html5QrCode.stop().catch(e => console.log(e));
+                }
             }
             document.getElementById('scanner-modal').classList.add('hidden'); 
         }
@@ -710,6 +829,7 @@
         function openFormAbsenModal() {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             document.getElementById('input-nis-absen').value = "";
+            document.getElementById('input-kegiatan-absen').value = "Membaca / Berhitung";
             document.getElementById('form-absen-modal').classList.remove('hidden');
         }
 
@@ -721,7 +841,154 @@
             event.preventDefault();
             const nis = document.getElementById('input-nis-absen').value.trim();
             closeFormAbsenModal();
-            prosesAbsenByNIS(nis);
+            prosesAbsenByNIS(nis, "Membaca / Berhitung");
+        }
+
+        function openFormTugasModal() {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            document.getElementById('input-deskripsi-tugas').value = "";
+            document.getElementById('input-nis-batch').value = "";
+            batchSelectedMurid = [];
+            renderBatchMuridList();
+            toggleTugasMethod('scan');
+            document.querySelector('input[name="metode_tugas"][value="scan"]').checked = true;
+            document.getElementById('form-tugas-modal').classList.remove('hidden');
+        }
+
+        function closeFormTugasModal() {
+            stopTugasScanner();
+            document.getElementById('form-tugas-modal').classList.add('hidden');
+        }
+
+        function toggleTugasMethod(method) {
+            const scanSec = document.getElementById('tugas-scan-section');
+            const manualSec = document.getElementById('tugas-manual-section');
+            if (method === 'scan') {
+                scanSec.classList.remove('hidden');
+                manualSec.classList.add('hidden');
+            } else {
+                scanSec.classList.add('hidden');
+                manualSec.classList.remove('hidden');
+                stopTugasScanner();
+            }
+        }
+
+        function startTugasScanner() {
+            const container = document.getElementById('tugas-reader-container');
+            container.classList.remove('hidden');
+            
+            setTimeout(() => {
+                if (!html5TugasQrCode) {
+                    html5TugasQrCode = new Html5Qrcode("tugas-reader");
+                }
+                
+                if (!html5TugasQrCode.isScanning) {
+                    html5TugasQrCode.start(
+                        { facingMode: "environment" }, 
+                        { fps: 10, qrbox: { width: 200, height: 200 } }, 
+                        (text) => {
+                            tambahkanSiswaKeBatch(text.trim());
+                        },
+                        (error) => {}
+                    ).catch(e => {
+                        console.error("Gagal buka kamera tugas:", e);
+                        showModal("Akses Kamera", "Gagal membuka kamera tugas. Periksa izin kamera browser Anda.");
+                    });
+                }
+            }, 300);
+        }
+
+        function stopTugasScanner() {
+            if (html5TugasQrCode && html5TugasQrCode.isScanning) {
+                html5TugasQrCode.stop().catch(e => console.log(e));
+            }
+            document.getElementById('tugas-reader-container').classList.add('hidden');
+        }
+
+        function tambahkanSiswaKeBatch(nis) {
+            if (!nis) return;
+            const muridDitemukan = appData.murid.find(m => m.col2.toString().trim() === nis.toString().trim());
+            if (!muridDitemukan) {
+                showModal("Perhatian", "NIS " + nis + " tidak terdaftar dalam Data Murid!");
+                return;
+            }
+            if (!batchSelectedMurid.some(m => m.col2.toString().trim() === nis.toString().trim())) {
+                batchSelectedMurid.push(muridDitemukan);
+                renderBatchMuridList();
+            }
+        }
+
+        function tambahNisBatchManual() {
+            const raw = document.getElementById('input-nis-batch').value;
+            if (!raw.trim()) return;
+            let listNis = raw.split(/[\s,]+/);
+            let addedCount = 0;
+            listNis.forEach(nis => {
+                let cleanNis = nis.trim();
+                if (cleanNis) {
+                    let muridDitemukan = appData.murid.find(m => m.col2.toString().trim() === cleanNis.toString().trim());
+                    if (muridDitemukan && !batchSelectedMurid.some(m => m.col2.toString().trim() === cleanNis.toString().trim())) {
+                        batchSelectedMurid.push(muridDitemukan);
+                        addedCount++;
+                    }
+                }
+            });
+            document.getElementById('input-nis-batch').value = "";
+            renderBatchMuridList();
+            showModal("Informasi", `${addedCount} siswa berhasil ditambahkan ke daftar tugas.`);
+        }
+
+        function removeBatchMurid(index) {
+            batchSelectedMurid.splice(index, 1);
+            renderBatchMuridList();
+        }
+
+        function renderBatchMuridList() {
+            const container = document.getElementById('selected-siswa-container');
+            document.getElementById('count-selected-siswa').innerText = batchSelectedMurid.length;
+            if (batchSelectedMurid.length === 0) {
+                container.innerHTML = `<p class="text-gray-400 text-xs italic text-center py-2">Belum ada siswa yang dipilih.</p>`;
+                return;
+            }
+            let html = '';
+            batchSelectedMurid.forEach((m, idx) => {
+                html += `<div class="flex justify-between items-center bg-white border px-3 py-1.5 rounded-lg shadow-xs">
+                    <div>
+                        <span class="font-semibold text-gray-800">${m.col1}</span>
+                        <span class="text-xs text-gray-500 ml-2">(NIS: ${m.col2} - Kelas ${m.col3})</span>
+                    </div>
+                    <button type="button" onclick="removeBatchMurid(${idx})" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-2 py-0.5 rounded bg-rose-50">❌</button>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function saveTugasBatch(event) {
+            event.preventDefault();
+            const deskripsi = document.getElementById('input-deskripsi-tugas').value.trim();
+            if (!deskripsi) {
+                showModal("Peringatan", "Deskripsi tugas wajib diisi!");
+                return;
+            }
+            if (batchSelectedMurid.length === 0) {
+                showModal("Peringatan", "Silakan pilih setidaknya satu siswa untuk diberi tugas!");
+                return;
+            }
+
+            stopTugasScanner();
+            closeFormTugasModal();
+
+            const waktuStr = new Date().toLocaleString();
+            const taskLabel = deskripsi;
+
+            batchSelectedMurid.forEach(m => {
+                appData.absensi.unshift({ col1: m.col1, col2: m.col2, col3: waktuStr, col4: taskLabel, col5: m.col3 });
+                queueOrSendRequest('add', 'absen', [m.col1, m.col2, waktuStr, taskLabel, m.col3]);
+            });
+
+            localStorage.setItem('perpus_cache_absen', JSON.stringify(appData.absensi));
+            render();
+            showModal("Berhasil", `Tugas "${deskripsi}" berhasil dicatat untuk ${batchSelectedMurid.length} siswa sekaligus!`);
         }
 
         function openFormTransaksiModal() {
@@ -743,7 +1010,7 @@
             prosesTransaksiByBukuDanNIS(nis, buku);
         }
 
-        function prosesAbsenByNIS(nisInput) {
+        function prosesAbsenByNIS(nisInput, kegiatanInput) {
             if (!nisInput) return;
             const muridDitemukan = appData.murid.find(m => m.col2.toString().trim() === nisInput.toString().trim());
 
@@ -756,12 +1023,12 @@
             const kelasMurid = muridDitemukan.col3;
             const waktuStr = new Date().toLocaleString();
             
-            appData.absensi.unshift({ col1: namaMurid, col2: nisInput, col3: waktuStr, col4: kelasMurid });
+            appData.absensi.unshift({ col1: namaMurid, col2: nisInput, col3: waktuStr, col4: kegiatanInput, col5: kelasMurid });
             localStorage.setItem('perpus_cache_absen', JSON.stringify(appData.absensi));
             render();
 
-            queueOrSendRequest('add', 'absen', [namaMurid, nisInput, waktuStr, kelasMurid]);
-            showModal("Berhasil", "Absen berhasil dicatat untuk: " + namaMurid + " (Kelas " + kelasMurid + ")");
+            queueOrSendRequest('add', 'absen', [namaMurid, nisInput, waktuStr, kegiatanInput, kelasMurid]);
+            showModal("Berhasil", "Dicatat untuk: " + namaMurid + " (Kelas " + kelasMurid + ") — Kegiatan: " + kegiatanInput);
         }
 
         function prosesTransaksiByBukuDanNIS(nisInput, bukuInput) {
@@ -833,8 +1100,13 @@
             if (nisBaru === null) return;
             const waktuBaru = prompt("Edit Waktu:", a.col3);
             if (waktuBaru === null) return;
+            const kegiatanBaru = prompt("Edit Kegiatan / Tugas:", a.col4 || 'Membaca / Berhitung');
+            if (kegiatanBaru === null) return;
             
-            let defaultKelas = a.col4 || '';
+            let defaultKelas = a.col5 || '';
+            if (!defaultKelas && a.col4 && (a.col4.includes('/') || a.col4.includes('Kelas'))) {
+                defaultKelas = '';
+            }
             if (!defaultKelas) {
                 let foundM = appData.murid.find(m => m.col2.toString().trim() === nisBaru.toString().trim());
                 if (foundM) defaultKelas = foundM.col3;
@@ -842,11 +1114,11 @@
             const kelasBaru = prompt("Edit Kelas:", defaultKelas);
             if (kelasBaru === null) return;
 
-            appData.absensi[index] = { col1: namaBaru, col2: nisBaru, col3: waktuBaru, col4: kelasBaru };
+            appData.absensi[index] = { col1: namaBaru, col2: nisBaru, col3: waktuBaru, col4: kegiatanBaru, col5: kelasBaru };
             localStorage.setItem('perpus_cache_absen', JSON.stringify(appData.absensi));
             render();
 
-            queueOrSendRequest('edit', 'absen', [namaBaru, nisBaru, waktuBaru, kelasBaru], index + 2);
+            queueOrSendRequest('edit', 'absen', [namaBaru, nisBaru, waktuBaru, kegiatanBaru, kelasBaru], index + 2);
             showModal("Berhasil", "Data absen berhasil diperbarui!");
         }
 
