@@ -415,11 +415,11 @@
             const filterMurid = document.getElementById('filter-murid').value.toLowerCase();
             const containerMurid = document.getElementById('table-murid-container');
             
-            let htmlMurid = `<table class="w-full text-sm text-left"><thead class="bg-emerald-50 text-emerald-800"><tr><th class="p-2">No</th><th class="p-2">Nama Siswa</th>`;
+            let htmlMurid = `<table class="w-full text-sm"><thead class="bg-emerald-50 text-emerald-800"><tr><th class="p-2 text-center">No</th><th class="p-2 text-left">Nama Siswa</th>`;
             if (isAdminLoggedIn) {
-                htmlMurid += `<th class="p-2">Kode Siswa</th>`;
+                htmlMurid += `<th class="p-2 text-center">Kode Siswa</th>`;
             }
-            htmlMurid += `<th class="p-2">Kelas</th>`;
+            htmlMurid += `<th class="p-2 text-center">Kelas</th>`;
             if (isAdminLoggedIn) {
                 htmlMurid += `<th class="p-2 text-center">Aksi / Cetak Kartu</th>`;
             }
@@ -432,11 +432,11 @@
                 let kelasMurid = m.col5 || m.col3 || '';
 
                 if (namaMurid.toLowerCase().includes(filterMurid) || kodeMurid.toLowerCase().includes(filterMurid) || kelasMurid.toLowerCase().includes(filterMurid)) {
-                    htmlMurid += `<tr class="border-b"><td class="p-2">${noUrut++}</td><td class="p-2">${namaMurid}</td>`;
+                    htmlMurid += `<tr class="border-b"><td class="p-2 text-center">${noUrut++}</td><td class="p-2 text-left">${namaMurid}</td>`;
                     if (isAdminLoggedIn) {
-                        htmlMurid += `<td class="p-2">${kodeMurid}</td>`;
+                        htmlMurid += `<td class="p-2 text-center">${kodeMurid}</td>`;
                     }
-                    htmlMurid += `<td class="p-2">${kelasMurid}</td>`;
+                    htmlMurid += `<td class="p-2 text-center">${kelasMurid}</td>`;
                     if (isAdminLoggedIn) {
                         htmlMurid += `<td class="p-2 text-center">
                             <button onclick="openPrintCardModal('${encodeURIComponent(namaMurid)}', '${encodeURIComponent(kodeMurid)}', '${encodeURIComponent(kelasMurid)}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-xs mr-1 transition">🖨️ Cetak Kartu</button>
@@ -453,11 +453,11 @@
             const filterAbsen = document.getElementById('filter-absen').value.toLowerCase();
             const containerAbsen = document.getElementById('table-absen-container');
             
-            let htmlAbsen = `<table class="w-full text-sm text-left"><thead class="bg-blue-50 text-blue-800"><tr><th class="p-2">No</th><th class="p-2">Nama Siswa</th>`;
+            let htmlAbsen = `<table class="w-full text-sm"><thead class="bg-blue-50 text-blue-800"><tr><th class="p-2 text-center">No</th><th class="p-2 text-left">Nama Siswa</th>`;
             if (isAdminLoggedIn) {
-                htmlAbsen += `<th class="p-2">Kode Siswa</th>`;
+                htmlAbsen += `<th class="p-2 text-center">Kode Siswa</th>`;
             }
-            htmlAbsen += `<th class="p-2">Kelas</th><th class="p-2">Kegiatan / Tugas</th><th class="p-2">Waktu</th>`;
+            htmlAbsen += `<th class="p-2 text-center">Kelas</th><th class="p-2 text-center">Kegiatan / Tugas</th><th class="p-2 text-center">Waktu</th>`;
             if (isAdminLoggedIn) {
                 htmlAbsen += `<th class="p-2 text-center">Aksi</th>`;
             }
@@ -482,11 +482,11 @@
 
                 if (a.col1.toLowerCase().includes(filterAbsen) || nisAbsen.includes(filterAbsen) || kelasAbsen.toLowerCase().includes(filterAbsen) || kegiatanAbsen.toLowerCase().includes(filterAbsen) || waktuAbsen.toLowerCase().includes(filterAbsen)) {
                     let badgeColor = (kegiatanAbsen === 'Membaca / Berhitung') ? 'bg-emerald-100 text-emerald-800' : 'bg-purple-100 text-purple-800';
-                    htmlAbsen += `<tr class="border-b"><td class="p-2">${noAbsen++}</td><td class="p-2">${a.col1}</td>`;
+                    htmlAbsen += `<tr class="border-b"><td class="p-2 text-center">${noAbsen++}</td><td class="p-2 text-left">${a.col1}</td>`;
                     if (isAdminLoggedIn) {
-                        htmlAbsen += `<td class="p-2">${nisAbsen}</td>`;
+                        htmlAbsen += `<td class="p-2 text-center">${nisAbsen}</td>`;
                     }
-                    htmlAbsen += `<td class="p-2">${kelasAbsen || '-'}</td><td class="p-2"><span class="${badgeColor} text-xs px-2 py-0.5 rounded-full font-medium">${kegiatanAbsen}</span></td><td class="p-2">${waktuAbsen}</td>`;
+                    htmlAbsen += `<td class="p-2 text-center">${kelasAbsen || '-'}</td><td class="p-2 text-center"><span class="${badgeColor} text-xs px-2 py-0.5 rounded-full font-medium">${kegiatanAbsen}</span></td><td class="p-2 text-center">${waktuAbsen}</td>`;
                     if (isAdminLoggedIn) {
                         htmlAbsen += `<td class="p-2 text-center">
                             <button onclick="editAbsen(${index})" class="bg-amber-500 hover:bg-amber-600 text-white px-2 py-1 rounded text-xs mr-1 transition">Edit</button>
@@ -502,11 +502,11 @@
             const filterTransaksi = document.getElementById('filter-transaksi').value.toLowerCase();
             const containerTransaksi = document.getElementById('table-transaksi-container');
             
-            let htmlTransaksi = `<table class="w-full text-sm text-left"><thead class="bg-orange-50 text-orange-800"><tr><th class="p-2">No</th><th class="p-2">Nama Siswa</th>`;
+            let htmlTransaksi = `<table class="w-full text-sm"><thead class="bg-orange-50 text-orange-800"><tr><th class="p-2 text-center">No</th><th class="p-2 text-left">Nama Siswa</th>`;
             if (isAdminLoggedIn) {
-                htmlTransaksi += `<th class="p-2">Kode Siswa</th>`;
+                htmlTransaksi += `<th class="p-2 text-center">Kode Siswa</th>`;
             }
-            htmlTransaksi += `<th class="p-2">Kelas</th><th class="p-2">Buku</th><th class="p-2">Tanggal</th><th class="p-2 text-center">Status</th>`;
+            htmlTransaksi += `<th class="p-2 text-center">Kelas</th><th class="p-2 text-left">Buku</th><th class="p-2 text-center">Tanggal</th><th class="p-2 text-center">Status</th>`;
             if (isAdminLoggedIn) {
                 htmlTransaksi += `<th class="p-2 text-center">Aksi</th>`;
             }
@@ -524,17 +524,17 @@
                 
                 if (t.col1.toLowerCase().includes(filterTransaksi) || t.col2.toLowerCase().includes(filterTransaksi) || t.col3.toLowerCase().includes(filterTransaksi) || nisPinjam.includes(filterTransaksi) || kelasPinjam.toLowerCase().includes(filterTransaksi) || statusPinjam.toLowerCase().includes(filterTransaksi)) {
                     
-                    htmlTransaksi += `<tr class="border-b"><td class="p-2">${noTransaksi++}</td><td class="p-2">${t.col1}</td>`;
+                    htmlTransaksi += `<tr class="border-b"><td class="p-2 text-center">${noTransaksi++}</td><td class="p-2 text-left">${t.col1}</td>`;
                     if (isAdminLoggedIn) {
-                        htmlTransaksi += `<td class="p-2">${nisPinjam}</td>`;
-                        htmlTransaksi += `<td class="p-2">${kelasPinjam || '-'}</td>`;
-                        htmlTransaksi += `<td class="p-2">${t.col2}</td>`;
-                        htmlTransaksi += `<td class="p-2">${t.col3}</td>`;
+                        htmlTransaksi += `<td class="p-2 text-center">${nisPinjam}</td>`;
+                        htmlTransaksi += `<td class="p-2 text-center">${kelasPinjam || '-'}</td>`;
+                        htmlTransaksi += `<td class="p-2 text-left">${t.col2}</td>`;
+                        htmlTransaksi += `<td class="p-2 text-center">${t.col3}</td>`;
                         htmlTransaksi += `<td class="p-2 text-center font-medium">${statusPinjam}</td>`;
                     } else {
-                        htmlTransaksi += `<td class="p-2">${kelasPinjam || '-'}</td>`;
-                        htmlTransaksi += `<td class="p-2">${t.col2}</td>`;
-                        htmlTransaksi += `<td class="p-2">${t.col3}</td>`;
+                        htmlTransaksi += `<td class="p-2 text-center">${kelasPinjam || '-'}</td>`;
+                        htmlTransaksi += `<td class="p-2 text-left">${t.col2}</td>`;
+                        htmlTransaksi += `<td class="p-2 text-center">${t.col3}</td>`;
                         htmlTransaksi += `<td class="p-2 text-center font-medium">${statusPinjam}</td>`;
                     }
                     if (isAdminLoggedIn) {
@@ -709,7 +709,7 @@
 
             document.getElementById('card-nama').innerText = nama;
             document.getElementById('card-nis').innerText = nis;
-            document.getElementById('card-kelas').innerText = "Kelas " + kelas;
+            document.getElementById('card-kelas').innerText = kelas;
 
             const qrContainer = document.getElementById('qrcode-container');
             qrContainer.innerHTML = "";
