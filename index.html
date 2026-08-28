@@ -222,6 +222,86 @@
         </div>
     </div>
 
+    <!-- Modal Pengaturan -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-lg text-left shadow-2xl">
+            <h3 class="text-xl mb-2 text-emerald-800 text-center">⚙️ Pengaturan</h3>
+
+            <div id="settings-password-gate">
+                <p class="text-sm text-gray-600 mb-4 text-center">Masukkan password pengaturan untuk membuka menu.</p>
+                <input type="password" id="input-settings-password" placeholder="Password Pengaturan" class="w-full px-3 py-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeSettingsModal()" class="w-1/2 bg-gray-300 text-gray-700 py-2 rounded-lg">Batal</button>
+                    <button type="button" onclick="verifySettingsPassword()" class="w-1/2 bg-emerald-600 text-white py-2 rounded-lg">🔓 Buka</button>
+                </div>
+            </div>
+
+            <div id="settings-content" class="hidden">
+            <p class="text-xs text-gray-500 mb-4 text-center">Kelola koneksi dan password aplikasi.</p>
+            <form onsubmit="saveSettings(event)">
+                <label class="block text-sm text-gray-700 mb-1">Link Google Apps Script Web App</label>
+                <input type="url" id="input-script-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3 py-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeSettingsModal()" class="w-1/2 bg-gray-300 text-gray-700 py-2 rounded-lg">Batal</button>
+                    <button type="submit" class="w-1/2 bg-emerald-600 text-white py-2 rounded-lg">💾 Simpan Link</button>
+                </div>
+            </form>
+
+            <div class="border-t mt-5 pt-4">
+                <h4 class="font-semibold text-emerald-800 mb-3">🔐 Password Saat Ini</h4>
+                <div class="bg-gray-50 border rounded-lg p-3 mb-4 text-sm space-y-2">
+                    <div class="flex justify-between gap-3"><span class="text-gray-600">Password Admin Lama</span><span id="display-old-admin-password" class="font-semibold break-all"></span></div>
+                    <div class="flex justify-between gap-3"><span class="text-gray-600">Password Pengaturan Lama</span><span id="display-old-settings-password" class="font-semibold break-all"></span></div>
+                </div>
+
+                <h4 class="font-semibold text-emerald-800 mb-3">✏️ Ubah Password</h4>
+                <div class="mb-3">
+                    <label class="block text-sm text-gray-700 mb-1">Password Admin Baru</label>
+                    <input type="password" id="input-new-admin-password" class="w-full px-3 py-2 border rounded-lg" placeholder="Password admin baru">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-700 mb-1">Password Pengaturan Baru</label>
+                    <input type="password" id="input-new-settings-password" class="w-full px-3 py-2 border rounded-lg" placeholder="Password pengaturan baru">
+                </div>
+                <button type="button" onclick="savePasswords()" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg">🔑 Simpan Password</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Tambah Dokumentasi -->
+    <div id="form-dokumentasi-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-lg text-left shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h3 class="text-xl mb-4 text-emerald-800 text-center">🗂️ Tambah Dokumentasi</h3>
+            <form onsubmit="saveDokumentasi(event)">
+                <div class="mb-3">
+                    <label class="block text-sm text-gray-700 mb-1">Judul / Keterangan</label>
+                    <input type="text" id="input-dokumentasi-judul" class="w-full px-3 py-2 border rounded-lg" required>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-sm text-gray-700 mb-1">Jenis Dokumentasi</label>
+                    <select id="input-dokumentasi-jenis" onchange="toggleDokumentasiInput()" class="w-full px-3 py-2 border rounded-lg">
+                        <option value="link">🔗 Link</option>
+                        <option value="foto">🖼️ Foto</option>
+                    </select>
+                </div>
+                <div id="dokumentasi-link-wrap" class="mb-4">
+                    <label class="block text-sm text-gray-700 mb-1">Link yang dapat dibuka</label>
+                    <input type="url" id="input-dokumentasi-link" placeholder="https://..." class="w-full px-3 py-2 border rounded-lg">
+                </div>
+                <div id="dokumentasi-foto-wrap" class="mb-4 hidden">
+                    <label class="block text-sm text-gray-700 mb-1">Pilih Foto</label>
+                    <input type="file" id="input-dokumentasi-foto" accept="image/*" class="w-full px-3 py-2 border rounded-lg bg-gray-50">
+                    <p class="text-xs text-gray-500 mt-1">Foto akan diunggah melalui Apps Script, lalu URL-nya disimpan di sheet Dokumentasi.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeFormDokumentasiModal()" class="w-1/2 bg-gray-300 text-gray-700 py-2 rounded-lg">Batal</button>
+                    <button type="submit" id="btn-simpan-dokumentasi" class="w-1/2 bg-emerald-600 text-white py-2 rounded-lg">💾 Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div>
         <nav class="bg-emerald-600 text-white p-4 shadow-lg sticky top-0 z-40">
             <div class="container mx-auto flex flex-wrap justify-between items-center gap-2">
@@ -234,6 +314,8 @@
                     <button onclick="showPage('murid')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">👨‍🎓 Murid</button>
                     <button onclick="showPage('absen')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">📋 Absen</button>
                     <button onclick="showPage('transaksi')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">📖 Pinjam</button>
+                    <button onclick="showPage('dokumentasi')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">🗂️ Dokumentasi</button>
+                    <button onclick="openSettingsModal()" id="btn-settings" class="hidden hover:bg-emerald-700 px-3 py-1 rounded transition">⚙️ Pengaturan</button>
                     <button onclick="manualSync()" id="btn-sync" class="hidden bg-emerald-700 hover:bg-emerald-800 px-3 py-1 rounded transition text-sm">🔄 Sinkron (<span id="offline-queue-count">0</span>)</button>
                     <div id="auth-nav-container">
                         <button onclick="openLoginModal()" id="btn-login-admin" class="bg-amber-500 hover:bg-amber-600 px-3 py-1 rounded transition text-sm font-semibold">🔐 Login Admin</button>
@@ -288,6 +370,17 @@
                 <div id="table-absen-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data absen...</div>
             </div>
 
+            <div id="page-dokumentasi" class="page-content">
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+                    <div>
+                        <h2 class="text-2xl text-emerald-800">🗂️ Dokumentasi</h2>
+                        <p class="text-sm text-gray-500">Link dapat dibuka langsung, sedangkan foto ditampilkan dari data yang tersimpan.</p>
+                    </div>
+                    <button onclick="openFormDokumentasiModal()" id="btn-tambah-dokumentasi" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-sm transition">➕ Tambah Dokumentasi</button>
+                </div>
+                <div id="dokumentasi-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">Memuat dokumentasi...</div>
+            </div>
+
             <div id="page-transaksi" class="page-content">
                 <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
                     <h2 class="text-2xl text-emerald-800">📖 Data Peminjaman Buku</h2>
@@ -312,12 +405,16 @@
 
     <script>
         const SPREADSHEET_ID = "1RFxZ6uY1CrDSxKd6GeMLSOD7QwZBd66jqZsvxfnkbXk";
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6wvTMY2c9rZkKnu_Z5PdjaSDlUpyOgnAGl94awsD1cNoky9uEY8DZ8NEOhwOmCQ/exec";
+        const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6wvTMY2c9rZkKnu_Z5PdjaSDlUpyOgnAGl94awsD1cNoky9uEY8DZ8NEOhwOmCQ/exec";
+        let SCRIPT_URL = localStorage.getItem('perpus_script_url') || DEFAULT_SCRIPT_URL;
+        let ADMIN_PASSWORD = localStorage.getItem('perpus_admin_password') || '123';
+        let SETTINGS_PASSWORD = localStorage.getItem('perpus_settings_password') || '456';
         
         let appData = { 
             murid: JSON.parse(localStorage.getItem('perpus_cache_murid')) || [], 
             absensi: JSON.parse(localStorage.getItem('perpus_cache_absen')) || [], 
-            transaksi: JSON.parse(localStorage.getItem('perpus_cache_pinjam')) || [] 
+            transaksi: JSON.parse(localStorage.getItem('perpus_cache_pinjam')) || [],
+            dokumentasi: JSON.parse(localStorage.getItem('perpus_cache_dokumentasi')) || [] 
         };
 
         let offlineQueue = JSON.parse(localStorage.getItem('perpus_offline_queue')) || [];
@@ -553,6 +650,25 @@
             htmlTransaksi += `</tbody></table>`;
             containerTransaksi.innerHTML = htmlTransaksi;
 
+            const dokumentasiContainer = document.getElementById('dokumentasi-container');
+            if (dokumentasiContainer) {
+                if (!appData.dokumentasi.length) {
+                    dokumentasiContainer.innerHTML = '<div class="col-span-full bg-white p-6 rounded-xl shadow-sm text-center text-gray-400">Belum ada dokumentasi.</div>';
+                } else {
+                    dokumentasiContainer.innerHTML = appData.dokumentasi.map((d, index) => {
+                        const waktu = d.col1 || '';
+                        const judul = escapeHtml(d.col2 || 'Dokumentasi');
+                        const jenis = (d.col3 || '').toLowerCase();
+                        const url = d.col4 || '';
+                        const media = jenis === 'foto'
+                            ? `<img src="${escapeAttribute(url)}" alt="${escapeAttribute(judul)}" class="w-full h-48 object-cover rounded-lg border">`
+                            : `<a href="${escapeAttribute(url)}" target="_blank" rel="noopener noreferrer" class="block bg-blue-50 border border-blue-200 text-blue-700 p-4 rounded-lg break-all hover:bg-blue-100">🔗 ${judul}<br><span class="text-xs">${escapeHtml(url)}</span></a>`;
+                        const hapus = isAdminLoggedIn ? `<button onclick="hapusDokumentasi(${index})" class="mt-3 bg-rose-600 text-white px-3 py-1 rounded text-xs">Hapus</button>` : '';
+                        return `<div class="bg-white p-4 rounded-xl shadow-sm">${media}<div class="mt-3 font-semibold text-gray-800">${judul}</div><div class="text-xs text-gray-400 mt-1">${escapeHtml(waktu)}</div>${hapus}</div>`;
+                    }).join('');
+                }
+            }
+
             document.getElementById('stat-murid').innerText = appData.murid.length;
             document.getElementById('stat-absen').innerText = appData.absensi.length;
             document.getElementById('stat-pinjam').innerText = appData.transaksi.length;
@@ -563,6 +679,7 @@
                 appData.murid = await fetchSheetCSV('murid');
                 appData.absensi = await fetchSheetCSV('absen');
                 appData.transaksi = await fetchSheetCSV('pinjam');
+                appData.dokumentasi = await fetchSheetCSV('Dokumentasi');
                 render();
             }
         }
@@ -683,6 +800,8 @@
                 document.getElementById('btn-scan-absen')?.classList.remove('hidden');
                 document.getElementById('btn-tambah-transaksi')?.classList.remove('hidden');
                 document.getElementById('btn-scan-transaksi')?.classList.remove('hidden');
+                document.getElementById('btn-tambah-dokumentasi')?.classList.remove('hidden');
+                document.getElementById('btn-settings')?.classList.remove('hidden');
             } else {
                 document.getElementById('btn-login-admin')?.classList.remove('hidden');
                 document.getElementById('btn-logout-admin')?.classList.add('hidden');
@@ -694,7 +813,147 @@
                 document.getElementById('btn-scan-absen')?.classList.add('hidden');
                 document.getElementById('btn-tambah-transaksi')?.classList.add('hidden');
                 document.getElementById('btn-scan-transaksi')?.classList.add('hidden');
+                document.getElementById('btn-tambah-dokumentasi')?.classList.add('hidden');
+                document.getElementById('btn-settings')?.classList.add('hidden');
             }
+        }
+
+
+        function escapeHtml(value) {
+            return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+        function escapeAttribute(value) { return escapeHtml(value); }
+
+        function openSettingsModal() {
+            if (!isAdminLoggedIn) { return; }
+            document.getElementById('input-script-url').value = SCRIPT_URL;
+            document.getElementById('input-settings-password').value = '';
+            document.getElementById('input-new-admin-password').value = '';
+            document.getElementById('input-new-settings-password').value = '';
+            document.getElementById('display-old-admin-password').innerText = ADMIN_PASSWORD;
+            document.getElementById('display-old-settings-password').innerText = SETTINGS_PASSWORD;
+            document.getElementById('settings-password-gate').classList.remove('hidden');
+            document.getElementById('settings-content').classList.add('hidden');
+            document.getElementById('settings-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('input-settings-password').focus(), 100);
+        }
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').classList.add('hidden');
+        }
+        function verifySettingsPassword() {
+            const password = document.getElementById('input-settings-password').value;
+            if (password !== SETTINGS_PASSWORD) {
+                showModal('Gagal', 'Password pengaturan salah!');
+                return;
+            }
+            document.getElementById('settings-password-gate').classList.add('hidden');
+            document.getElementById('settings-content').classList.remove('hidden');
+        }
+        function saveSettings(event) {
+            event.preventDefault();
+            const url = document.getElementById('input-script-url').value.trim();
+            if (!url) return;
+            SCRIPT_URL = url.replace(/\/$/, '');
+            localStorage.setItem('perpus_script_url', SCRIPT_URL);
+            showModal('Berhasil', 'Link Apps Script berhasil disimpan di perangkat ini.');
+        }
+        function savePasswords() {
+            const adminBaru = document.getElementById('input-new-admin-password').value;
+            const settingsBaru = document.getElementById('input-new-settings-password').value;
+
+            if (!adminBaru && !settingsBaru) {
+                showModal('Info', 'Isi minimal salah satu password yang ingin diubah.');
+                return;
+            }
+            if (adminBaru) {
+                ADMIN_PASSWORD = adminBaru;
+                localStorage.setItem('perpus_admin_password', ADMIN_PASSWORD);
+            }
+            if (settingsBaru) {
+                SETTINGS_PASSWORD = settingsBaru;
+                localStorage.setItem('perpus_settings_password', SETTINGS_PASSWORD);
+            }
+            document.getElementById('input-new-admin-password').value = '';
+            document.getElementById('input-new-settings-password').value = '';
+            document.getElementById('input-settings-password').value = '';
+            closeSettingsModal();
+            showModal('Berhasil', 'Password berhasil diperbarui.');
+        }
+
+        function openFormDokumentasiModal() {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            document.getElementById('input-dokumentasi-judul').value = '';
+            document.getElementById('input-dokumentasi-link').value = '';
+            document.getElementById('input-dokumentasi-foto').value = '';
+            document.getElementById('input-dokumentasi-jenis').value = 'link';
+            toggleDokumentasiInput();
+            document.getElementById('form-dokumentasi-modal').classList.remove('hidden');
+        }
+        function closeFormDokumentasiModal() { document.getElementById('form-dokumentasi-modal').classList.add('hidden'); }
+        function toggleDokumentasiInput() {
+            const jenis = document.getElementById('input-dokumentasi-jenis').value;
+            document.getElementById('dokumentasi-link-wrap').classList.toggle('hidden', jenis !== 'link');
+            document.getElementById('dokumentasi-foto-wrap').classList.toggle('hidden', jenis !== 'foto');
+            document.getElementById('input-dokumentasi-link').required = jenis === 'link';
+            document.getElementById('input-dokumentasi-foto').required = jenis === 'foto';
+        }
+
+        async function saveDokumentasi(event) {
+            event.preventDefault();
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            const judul = document.getElementById('input-dokumentasi-judul').value.trim();
+            const jenis = document.getElementById('input-dokumentasi-jenis').value;
+            const waktu = new Date().toLocaleString();
+            const btn = document.getElementById('btn-simpan-dokumentasi');
+            btn.disabled = true;
+            btn.innerText = jenis === 'foto' ? 'Mengunggah...' : 'Menyimpan...';
+            try {
+                let url = '';
+                if (jenis === 'link') {
+                    url = document.getElementById('input-dokumentasi-link').value.trim();
+                } else {
+                    const file = document.getElementById('input-dokumentasi-foto').files[0];
+                    if (!file) throw new Error('Silakan pilih foto.');
+                    const base64 = await fileToBase64(file);
+                    const response = await fetch(`${SCRIPT_URL}?action=uploadDokumentasi`, {
+                        method: 'POST',
+                        body: JSON.stringify({ fileName: file.name, mimeType: file.type || 'image/jpeg', base64 })
+                    });
+                    const result = await response.json();
+                    if (!result.success || !result.url) throw new Error(result.message || 'Upload foto gagal.');
+                    url = result.url;
+                }
+                const data = { col1: waktu, col2: judul, col3: jenis, col4: url };
+                appData.dokumentasi.unshift(data);
+                localStorage.setItem('perpus_cache_dokumentasi', JSON.stringify(appData.dokumentasi));
+                queueOrSendRequest('add', 'Dokumentasi', [waktu, judul, jenis, url]);
+                closeFormDokumentasiModal();
+                render();
+                showModal('Berhasil', jenis === 'foto' ? 'Foto berhasil diunggah dan dicatat.' : 'Link berhasil disimpan.');
+            } catch (err) {
+                console.error(err);
+                showModal('Gagal', err.message || 'Dokumentasi gagal disimpan.');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = '💾 Simpan';
+            }
+        }
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(String(reader.result).split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+        function hapusDokumentasi(index) {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            if (!confirm('Hapus dokumentasi ini?')) return;
+            appData.dokumentasi.splice(index, 1);
+            localStorage.setItem('perpus_cache_dokumentasi', JSON.stringify(appData.dokumentasi));
+            queueOrSendRequest('delete', 'Dokumentasi', {}, index + 2);
+            render();
+            showModal('Berhasil', 'Dokumentasi berhasil dihapus.');
         }
 
         function showPage(id) {
