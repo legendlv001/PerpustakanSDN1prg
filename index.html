@@ -222,53 +222,6 @@
         </div>
     </div>
 
-    <!-- Modal Pengaturan -->
-    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white p-6 rounded-2xl w-full max-w-lg text-left shadow-2xl">
-            <h3 class="text-xl mb-2 text-emerald-800 text-center">⚙️ Pengaturan</h3>
-
-            <div id="settings-password-gate">
-                <p class="text-sm text-gray-600 mb-4 text-center">Masukkan password pengaturan untuk membuka menu.</p>
-                <input type="password" id="input-settings-password" placeholder="Password Pengaturan" class="w-full px-3 py-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <div class="flex gap-2">
-                    <button type="button" onclick="closeSettingsModal()" class="w-1/2 bg-gray-300 text-gray-700 py-2 rounded-lg">Batal</button>
-                    <button type="button" onclick="verifySettingsPassword()" class="w-1/2 bg-emerald-600 text-white py-2 rounded-lg">🔓 Buka</button>
-                </div>
-            </div>
-
-            <div id="settings-content" class="hidden">
-            <p class="text-xs text-gray-500 mb-4 text-center">Kelola koneksi dan password aplikasi.</p>
-            <form onsubmit="saveSettings(event)">
-                <label class="block text-sm text-gray-700 mb-1">Link Google Apps Script Web App</label>
-                <input type="url" id="input-script-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3 py-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
-                <div class="flex gap-2">
-                    <button type="button" onclick="closeSettingsModal()" class="w-1/2 bg-gray-300 text-gray-700 py-2 rounded-lg">Batal</button>
-                    <button type="submit" class="w-1/2 bg-emerald-600 text-white py-2 rounded-lg">💾 Simpan Link</button>
-                </div>
-            </form>
-
-            <div class="border-t mt-5 pt-4">
-                <h4 class="font-semibold text-emerald-800 mb-3">🔐 Password Saat Ini</h4>
-                <div class="bg-gray-50 border rounded-lg p-3 mb-4 text-sm space-y-2">
-                    <div class="flex justify-between gap-3"><span class="text-gray-600">Password Admin Lama</span><span id="display-old-admin-password" class="font-semibold break-all"></span></div>
-                    <div class="flex justify-between gap-3"><span class="text-gray-600">Password Pengaturan Lama</span><span id="display-old-settings-password" class="font-semibold break-all"></span></div>
-                </div>
-
-                <h4 class="font-semibold text-emerald-800 mb-3">✏️ Ubah Password</h4>
-                <div class="mb-3">
-                    <label class="block text-sm text-gray-700 mb-1">Password Admin Baru</label>
-                    <input type="password" id="input-new-admin-password" class="w-full px-3 py-2 border rounded-lg" placeholder="Password admin baru">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm text-gray-700 mb-1">Password Pengaturan Baru</label>
-                    <input type="password" id="input-new-settings-password" class="w-full px-3 py-2 border rounded-lg" placeholder="Password pengaturan baru">
-                </div>
-                <button type="button" onclick="savePasswords()" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg">🔑 Simpan Password</button>
-            </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Modal Tambah Dokumentasi -->
     <div id="form-dokumentasi-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 rounded-2xl w-full max-w-lg text-left shadow-2xl max-h-[90vh] overflow-y-auto">
@@ -315,7 +268,7 @@
                     <button onclick="showPage('absen')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">📋 Absen</button>
                     <button onclick="showPage('transaksi')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">📖 Pinjam</button>
                     <button onclick="showPage('dokumentasi')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">🗂️ Dokumentasi</button>
-                    <button onclick="openSettingsModal()" id="btn-settings" class="hidden hover:bg-emerald-700 px-3 py-1 rounded transition">⚙️ Pengaturan</button>
+                    <button onclick="showPage('settings')" id="btn-settings" class="hidden hover:bg-emerald-700 px-3 py-1 rounded transition">⚙️ Pengaturan</button>
                     <button onclick="manualSync()" id="btn-sync" class="hidden bg-emerald-700 hover:bg-emerald-800 px-3 py-1 rounded transition text-sm">🔄 Sinkron (<span id="offline-queue-count">0</span>)</button>
                     <div id="auth-nav-container">
                         <button onclick="openLoginModal()" id="btn-login-admin" class="bg-amber-500 hover:bg-amber-600 px-3 py-1 rounded transition text-sm font-semibold">🔐 Login Admin</button>
@@ -394,6 +347,56 @@
                 </div>
                 <div id="table-transaksi-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data transaksi...</div>
             </div>
+    <!-- Halaman Pengaturan -->
+            <div id="page-settings" class="page-content">
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+                    <h2 class="text-2xl text-emerald-800">⚙️ Pengaturan</h2>
+                </div>
+                <div class="bg-white p-6 rounded-2xl w-full max-w-2xl mx-auto text-left shadow-sm">
+<h3 class="text-xl mb-2 text-emerald-800 text-center">⚙️ Pengaturan</h3>
+
+            <div id="settings-password-gate">
+                <p class="text-sm text-gray-600 mb-4 text-center">Masukkan password pengaturan untuk membuka menu.</p>
+                <input type="password" id="input-settings-password" placeholder="Password Pengaturan" class="w-full px-3 py-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <div class="flex gap-2">
+                    <button type="button" onclick="showPage('dashboard')" class="w-1/2 bg-gray-300 text-gray-700 py-2 rounded-lg">Kembali</button>
+                    <button type="button" onclick="verifySettingsPassword()" class="w-1/2 bg-emerald-600 text-white py-2 rounded-lg">🔓 Buka</button>
+                </div>
+            </div>
+
+            <div id="settings-content" class="hidden">
+            <p class="text-xs text-gray-500 mb-4 text-center">Kelola koneksi dan password aplikasi.</p>
+            <form onsubmit="saveSettings(event)">
+                <label class="block text-sm text-gray-700 mb-1">Link Google Apps Script Web App</label>
+                <input type="url" id="input-script-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3 py-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                <div class="flex gap-2">
+                    <button type="button" onclick="showPage('dashboard')" class="w-1/2 bg-gray-300 text-gray-700 py-2 rounded-lg">Kembali</button>
+                    <button type="submit" class="w-1/2 bg-emerald-600 text-white py-2 rounded-lg">💾 Simpan Link</button>
+                </div>
+            </form>
+
+            <div class="border-t mt-5 pt-4">
+                <h4 class="font-semibold text-emerald-800 mb-3">🔐 Password Saat Ini</h4>
+                <div class="bg-gray-50 border rounded-lg p-3 mb-4 text-sm space-y-2">
+                    <div class="flex justify-between gap-3"><span class="text-gray-600">Password Admin Lama</span><span id="display-old-admin-password" class="font-semibold break-all"></span></div>
+                    <div class="flex justify-between gap-3"><span class="text-gray-600">Password Pengaturan Lama</span><span id="display-old-settings-password" class="font-semibold break-all"></span></div>
+                </div>
+
+                <h4 class="font-semibold text-emerald-800 mb-3">✏️ Ubah Password</h4>
+                <div class="mb-3">
+                    <label class="block text-sm text-gray-700 mb-1">Password Admin Baru</label>
+                    <input type="password" id="input-new-admin-password" class="w-full px-3 py-2 border rounded-lg" placeholder="Password admin baru">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-700 mb-1">Password Pengaturan Baru</label>
+                    <input type="password" id="input-new-settings-password" class="w-full px-3 py-2 border rounded-lg" placeholder="Password pengaturan baru">
+                </div>
+                <button type="button" onclick="savePasswords()" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg">🔑 Simpan Password</button>
+            </div>
+            </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -754,11 +757,12 @@
             const remembered = localStorage.getItem('perpus_admin_remember') === 'true';
             document.getElementById('remember-admin-checkbox').checked = remembered;
             if (remembered) {
-                document.getElementById('input-password').value =
+                document.getElementById('admin-password-input').value =
                     localStorage.getItem('perpus_admin_remembered_password') || '';
             }
+            document.getElementById('login-error-msg').classList.add('hidden');
             document.getElementById('login-modal').classList.remove('hidden');
-            document.getElementById('admin-password-input').value = '';
+            if (!remembered) document.getElementById('admin-password-input').value = '';
         }
 
         function closeLoginModal() { document.getElementById('login-modal').classList.add('hidden'); }
@@ -768,13 +772,13 @@
             const passwordInput = document.getElementById('admin-password-input').value;
             const rememberChecked = document.getElementById('remember-admin-checkbox').checked;
 
-            if (passwordInput === '123') {
+            if (passwordInput === ADMIN_PASSWORD) {
                 isAdminLoggedIn = true;
                 localStorage.setItem('perpus_admin_logged', 'true');
                 
                 if (rememberChecked) {
                     localStorage.setItem('perpus_admin_remember', 'true');
-                    localStorage.setItem('perpus_admin_remembered_password', password);
+                    localStorage.setItem('perpus_admin_remembered_password', passwordInput);
                 } else {
                     localStorage.removeItem('perpus_admin_remember');
                     localStorage.removeItem('perpus_admin_remembered_password');
@@ -792,6 +796,8 @@
             isAdminLoggedIn = false;
             localStorage.removeItem('perpus_admin_logged');
             localStorage.removeItem('perpus_admin_remember');
+            localStorage.removeItem('perpus_admin_remembered_password');
+            showPage('dashboard');
             updateAdminUI();
             render(); 
         }
@@ -834,6 +840,7 @@
 
         function openSettingsModal() {
             if (!isAdminLoggedIn) { return; }
+            showPage('settings');
             document.getElementById('input-script-url').value = SCRIPT_URL;
             document.getElementById('input-settings-password').value = '';
             document.getElementById('input-new-admin-password').value = '';
@@ -842,11 +849,10 @@
             document.getElementById('display-old-settings-password').innerText = SETTINGS_PASSWORD;
             document.getElementById('settings-password-gate').classList.remove('hidden');
             document.getElementById('settings-content').classList.add('hidden');
-            document.getElementById('settings-modal').classList.remove('hidden');
             setTimeout(() => document.getElementById('input-settings-password').focus(), 100);
         }
         function closeSettingsModal() {
-            document.getElementById('settings-modal').classList.add('hidden');
+            showPage('dashboard');
         }
         function verifySettingsPassword() {
             const password = document.getElementById('input-settings-password').value;
@@ -965,8 +971,12 @@
         }
 
         function showPage(id) {
+            if (id === 'settings' && !isAdminLoggedIn) {
+                return;
+            }
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active-page'));
-            document.getElementById('page-' + id).classList.add('active-page');
+            const page = document.getElementById('page-' + id);
+            if (page) page.classList.add('active-page');
         }
 
         function openPrintCardModal(namaEncoded, nisEncoded, kelasEncoded) {
