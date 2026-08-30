@@ -23,6 +23,7 @@
             80% { transform: rotate(-4deg); }
             100% { transform: rotate(0deg); }
         }
+        .student-select-btn{transition:.15s}.student-select-btn.selected{background:#ede9fe;border-color:#7c3aed;color:#5b21b6;font-weight:600}
         .animate-wave {
             display: inline-block;
             animation: wave 2s infinite;
@@ -68,7 +69,17 @@
             <div id="reader" class="w-full overflow-hidden rounded-xl border mb-4 bg-black min-h-[250px] flex items-center justify-center relative">
                 <span class="text-gray-400 text-xs">Memuat kamera...</span>
             </div>
-            <button onclick="closeScannerModal()" class="bg-rose-600 text-white w-full py-2 rounded-lg hover:bg-rose-700 transition">Tutup Kamera</button>
+            <div id="absen-scan-batch" class="hidden text-left mb-3">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-sm font-semibold text-gray-700">Siswa Terpindai (<span id="scan-absen-count">0</span>)</span>
+                    <button type="button" onclick="clearScanAbsenBatch()" class="text-xs text-rose-600">Hapus semua</button>
+                </div>
+                <div id="scan-absen-list" class="border rounded-lg p-2 max-h-28 overflow-y-auto bg-gray-50 text-xs">Belum ada siswa.</div>
+            </div>
+            <div class="flex gap-2">
+                <button type="button" id="btn-selesai-scan-absen" onclick="selesaiScanAbsen()" class="hidden bg-emerald-600 text-white w-1/2 py-2 rounded-lg hover:bg-emerald-700 transition">✅ Selesai</button>
+                <button type="button" onclick="closeScannerModal()" class="bg-rose-600 text-white w-full py-2 rounded-lg hover:bg-rose-700 transition" id="btn-tutup-scanner">Tutup Kamera</button>
+            </div>
         </div>
     </div>
 
@@ -102,9 +113,16 @@
             <h3 class="text-xl mb-4 text-emerald-800 text-center">📋 Tambah Absen Kunjungan</h3>
             <form onsubmit="saveAbsenManual(event)">
                 <div class="mb-3">
-                    <label class="block text-sm text-gray-700 mb-1">Kode Siswa</label>
-                    <input type="text" id="input-nis-absen" placeholder="Masukkan Kode Siswa" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Pilih Kelas</label>
+                    <select id="absen-kelas-manual" onchange="renderAbsenManualSiswa()" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm" required><option value="">-- Pilih Kelas --</option></select>
                 </div>
+                <div class="mb-3">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Pilih Siswa</label>
+                    <div id="absen-manual-siswa" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded-lg p-2 bg-gray-50">
+                        <p class="col-span-2 text-center text-xs text-gray-400 py-3">Pilih kelas terlebih dahulu.</p>
+                    </div>
+                </div>
+                <input type="hidden" id="input-nis-absen">
                 <div class="mb-4">
                     <label class="block text-sm text-gray-700 mb-1">Kegiatan / Aktivitas</label>
                     <input type="text" id="input-kegiatan-absen" value="Membaca / Berhitung" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 font-medium" readonly>
@@ -148,12 +166,12 @@
                     </div>
 
                     <div id="tugas-manual-section" class="border p-3 rounded-xl bg-purple-50/50 mb-3 hidden">
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Masukkan Daftar Kode (Pisahkan dengan koma, spasi, atau baris baru)</label>
-                        <textarea id="input-nis-batch" rows="3" placeholder="Contoh: 101, 102, 105" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm font-mono"></textarea>
-                        <button type="button" onclick="tambahNisBatchManual()" class="mt-2 bg-purple-700 hover:bg-purple-800 text-white text-xs px-3 py-1.5 rounded transition">➕ Tambahkan ke Daftar</button>
-                    </div>
+  <label class="block text-xs font-semibold text-gray-700 mb-1">Pilih Kelas</label>
+  <select id="tugas-kelas-manual" onchange="renderTugasManualSiswa()" class="w-full px-3 py-2 border rounded-lg text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500"><option value="">-- Pilih Kelas --</option></select>
+  <div id="tugas-manual-siswa" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto"></div>
+</div>
 
-                    <div class="mt-3">
+<div class="mt-3">
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Daftar Siswa Terpilih (<span id="count-selected-siswa">0</span>)</label>
                         <div id="selected-siswa-container" class="border rounded-xl p-2 max-h-36 overflow-y-auto bg-gray-50 text-sm space-y-1">
                             <p class="text-gray-400 text-xs italic text-center py-2">Belum ada siswa yang dipilih.</p>
@@ -268,7 +286,7 @@
                     <button onclick="showPage('absen')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">📋 Absen</button>
                     <button onclick="showPage('transaksi')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">📖 Pinjam</button>
                     <button onclick="showPage('dokumentasi')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">🗂️ Dokumentasi</button>
-                    <button onclick="showPage('settings')" id="btn-settings" class="hidden hover:bg-emerald-700 px-3 py-1 rounded transition">⚙️ Pengaturan</button>
+                    <button onclick="openSettingsModal()" id="btn-settings" class="hidden hover:bg-emerald-700 px-3 py-1 rounded transition">⚙️ Pengaturan</button>
                     <button onclick="manualSync()" id="btn-sync" class="hidden bg-emerald-700 hover:bg-emerald-800 px-3 py-1 rounded transition text-sm">🔄 Sinkron (<span id="offline-queue-count">0</span>)</button>
                     <div id="auth-nav-container">
                         <button onclick="openLoginModal()" id="btn-login-admin" class="bg-amber-500 hover:bg-amber-600 px-3 py-1 rounded transition text-sm font-semibold">🔐 Login Admin</button>
@@ -347,55 +365,24 @@
                 </div>
                 <div id="table-transaksi-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data transaksi...</div>
             </div>
-    <!-- Halaman Pengaturan -->
-            <div id="page-settings" class="page-content">
-                <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
-                    <h2 class="text-2xl text-emerald-800">⚙️ Pengaturan</h2>
-                </div>
-                <div class="bg-white p-6 rounded-2xl w-full max-w-2xl mx-auto text-left shadow-sm">
-<h3 class="text-xl mb-2 text-emerald-800 text-center">⚙️ Pengaturan</h3>
-
-            <div id="settings-password-gate">
-                <p class="text-sm text-gray-600 mb-4 text-center">Masukkan password pengaturan untuk membuka menu.</p>
-                <input type="password" id="input-settings-password" placeholder="Password Pengaturan" class="w-full px-3 py-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <div class="flex gap-2">
-                    <button type="button" onclick="showPage('dashboard')" class="w-1/2 bg-gray-300 text-gray-700 py-2 rounded-lg">Kembali</button>
-                    <button type="button" onclick="verifySettingsPassword()" class="w-1/2 bg-emerald-600 text-white py-2 rounded-lg">🔓 Buka</button>
-                </div>
-            </div>
-
-            <div id="settings-content" class="hidden">
-            <p class="text-xs text-gray-500 mb-4 text-center">Kelola koneksi dan password aplikasi.</p>
-            <form onsubmit="saveSettings(event)">
-                <label class="block text-sm text-gray-700 mb-1">Link Google Apps Script Web App</label>
-                <input type="url" id="input-script-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3 py-2 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
-                <div class="flex gap-2">
-                    <button type="button" onclick="showPage('dashboard')" class="w-1/2 bg-gray-300 text-gray-700 py-2 rounded-lg">Kembali</button>
-                    <button type="submit" class="w-1/2 bg-emerald-600 text-white py-2 rounded-lg">💾 Simpan Link</button>
-                </div>
-            </form>
-
-            <div class="border-t mt-5 pt-4">
-                <h4 class="font-semibold text-emerald-800 mb-3">🔐 Password Saat Ini</h4>
-                <div class="bg-gray-50 border rounded-lg p-3 mb-4 text-sm space-y-2">
-                    <div class="flex justify-between gap-3"><span class="text-gray-600">Password Admin Lama</span><span id="display-old-admin-password" class="font-semibold break-all"></span></div>
-                    <div class="flex justify-between gap-3"><span class="text-gray-600">Password Pengaturan Lama</span><span id="display-old-settings-password" class="font-semibold break-all"></span></div>
-                </div>
-
-                <h4 class="font-semibold text-emerald-800 mb-3">✏️ Ubah Password</h4>
-                <div class="mb-3">
-                    <label class="block text-sm text-gray-700 mb-1">Password Admin Baru</label>
-                    <input type="password" id="input-new-admin-password" class="w-full px-3 py-2 border rounded-lg" placeholder="Password admin baru">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm text-gray-700 mb-1">Password Pengaturan Baru</label>
-                    <input type="password" id="input-new-settings-password" class="w-full px-3 py-2 border rounded-lg" placeholder="Password pengaturan baru">
-                </div>
-                <button type="button" onclick="savePasswords()" class="w-full bg-amber-500 hover:bg-amber-600 text-white py-2 rounded-lg">🔑 Simpan Password</button>
-            </div>
-            </div>
-                </div>
-            </div>
+    <!-- Modal Pengaturan -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5">
+        <div id="settings-password-gate">
+          <h3 class="text-lg font-bold text-emerald-800 text-center mb-2">⚙️ Pengaturan</h3>
+          <p class="text-xs text-gray-500 text-center mb-4">Masukkan password pengaturan</p>
+          <input type="password" id="input-settings-password" placeholder="Password" class="w-full px-3 py-2.5 border rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <p id="settings-password-error" class="text-rose-600 text-xs mb-3 hidden text-center">Password salah!</p>
+          <div class="flex gap-2"><button type="button" onclick="closeSettingsModal()" class="w-1/2 bg-gray-200 text-gray-700 py-2 rounded-lg">Batal</button><button type="button" onclick="verifySettingsPassword()" class="w-1/2 bg-emerald-600 text-white py-2 rounded-lg">Buka</button></div>
+        </div>
+        <div id="settings-content" class="hidden">
+          <h3 class="text-lg font-bold text-emerald-800 text-center mb-4">⚙️ Pengaturan</h3>
+          <form onsubmit="saveSettings(event)"><label class="block text-xs text-gray-700 mb-1">Link Google Apps Script</label><input type="url" id="input-script-url" class="w-full px-3 py-2 border rounded-lg mb-3 text-sm" required><button type="submit" class="w-full bg-emerald-600 text-white py-2 rounded-lg mb-3">💾 Simpan Link</button></form>
+          <div class="border-t pt-3"><p class="text-xs font-semibold text-gray-700 mb-2">Ubah Password</p><input type="password" id="input-new-admin-password" class="w-full px-3 py-2 border rounded-lg mb-2 text-sm" placeholder="Password admin baru"><input type="password" id="input-new-settings-password" class="w-full px-3 py-2 border rounded-lg mb-3 text-sm" placeholder="Password pengaturan baru"><button type="button" onclick="savePasswords()" class="w-full bg-amber-500 text-white py-2 rounded-lg">🔑 Simpan Password</button></div>
+          <button type="button" onclick="closeSettingsModal()" class="w-full mt-3 bg-gray-200 text-gray-700 py-2 rounded-lg">Tutup</button>
+        </div>
+      </div>
+    </div>
 
         </main>
     </div>
@@ -426,6 +413,9 @@
         let activeScannerTarget = '';
         let batchSelectedMurid = []; 
         let html5TugasQrCode = null;
+        let scanAbsenSelectedMurid = [];
+        let manualAbsenSelectedMurid = [];
+        let scannerAbsenProcessing = false;
 
         window.addEventListener('DOMContentLoaded', () => {
             const rememberStatus = localStorage.getItem('perpus_admin_remember') === 'true';
@@ -839,38 +829,23 @@
         function escapeAttribute(value) { return escapeHtml(value); }
 
         function openSettingsModal() {
-            if (!isAdminLoggedIn) { return; }
-            showPage('settings');
+            if (!isAdminLoggedIn) return;
             document.getElementById('input-script-url').value = SCRIPT_URL;
             document.getElementById('input-settings-password').value = '';
             document.getElementById('input-new-admin-password').value = '';
             document.getElementById('input-new-settings-password').value = '';
-            document.getElementById('display-old-admin-password').innerText = ADMIN_PASSWORD;
-            document.getElementById('display-old-settings-password').innerText = SETTINGS_PASSWORD;
+            document.getElementById('settings-password-error').classList.add('hidden');
             document.getElementById('settings-password-gate').classList.remove('hidden');
             document.getElementById('settings-content').classList.add('hidden');
-            setTimeout(() => document.getElementById('input-settings-password').focus(), 100);
+            document.getElementById('settings-modal').classList.remove('hidden');
+            setTimeout(()=>document.getElementById('input-settings-password').focus(),100);
         }
-        function closeSettingsModal() {
-            showPage('dashboard');
+        function closeSettingsModal(){ document.getElementById('settings-modal').classList.add('hidden'); }
+        function verifySettingsPassword(){
+            if(document.getElementById('input-settings-password').value!==SETTINGS_PASSWORD){document.getElementById('settings-password-error').classList.remove('hidden');return;}
+            document.getElementById('settings-password-error').classList.add('hidden'); document.getElementById('settings-password-gate').classList.add('hidden'); document.getElementById('settings-content').classList.remove('hidden');
         }
-        function verifySettingsPassword() {
-            const password = document.getElementById('input-settings-password').value;
-            if (password !== SETTINGS_PASSWORD) {
-                showModal('Gagal', 'Password pengaturan salah!');
-                return;
-            }
-            document.getElementById('settings-password-gate').classList.add('hidden');
-            document.getElementById('settings-content').classList.remove('hidden');
-        }
-        function saveSettings(event) {
-            event.preventDefault();
-            const url = document.getElementById('input-script-url').value.trim();
-            if (!url) return;
-            SCRIPT_URL = url.replace(/\/$/, '');
-            localStorage.setItem('perpus_script_url', SCRIPT_URL);
-            showModal('Berhasil', 'Link Apps Script berhasil disimpan di perangkat ini.');
-        }
+        function saveSettings(event){event.preventDefault();const url=document.getElementById('input-script-url').value.trim();if(!url)return;SCRIPT_URL=url.replace(/\/$/,'');localStorage.setItem('perpus_script_url',SCRIPT_URL);closeSettingsModal();showModal('Berhasil','Link Apps Script berhasil disimpan.');}
         function savePasswords() {
             const adminBaru = document.getElementById('input-new-admin-password').value;
             const settingsBaru = document.getElementById('input-new-settings-password').value;
@@ -1021,66 +996,64 @@
 
         function openScannerModal(target) {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
-            activeScannerTarget = target;
-            
-            const titleEl = document.getElementById('scanner-title');
-            const subTitleEl = document.getElementById('scanner-subtitle');
-
-            titleEl.innerText = "📷 Scan Barcode / Kode Siswa";
-            subTitleEl.innerText = "Arahkan kamera ke QR Code / Barcode Kode Siswa.";
-
+            activeScannerTarget=target; scannerAbsenProcessing=false;
+            const batchBox=document.getElementById('absen-scan-batch');
+            const doneBtn=document.getElementById('btn-selesai-scan-absen');
+            const closeBtn=document.getElementById('btn-tutup-scanner');
+            if(target==='absen'){
+                scanAbsenSelectedMurid=[]; renderScanAbsenBatch();
+                batchBox.classList.remove('hidden'); doneBtn.classList.remove('hidden'); closeBtn.classList.remove('w-full'); closeBtn.classList.add('w-1/2');
+                document.getElementById('scanner-title').innerText='📷 Scan Absen';
+                document.getElementById('scanner-subtitle').innerText='Scan siswa satu per satu. Semua hasil akan disimpan saat Selesai.';
+            } else {
+                batchBox.classList.add('hidden'); doneBtn.classList.add('hidden'); closeBtn.classList.remove('w-1/2'); closeBtn.classList.add('w-full');
+                document.getElementById('scanner-title').innerText='📷 Scan Barcode / Kode Siswa';
+                document.getElementById('scanner-subtitle').innerText='Arahkan kamera ke QR Code / Barcode Kode Siswa.';
+            }
             document.getElementById('scanner-modal').classList.remove('hidden');
-            
-            setTimeout(() => {
-                if (!html5QrCode) {
-                    html5QrCode = new Html5Qrcode("reader");
+            setTimeout(()=>{
+                if(!html5QrCode) html5QrCode=new Html5Qrcode('reader');
+                if(!html5QrCode.isScanning){
+                    html5QrCode.start({facingMode:'environment'},{fps:10,qrbox:{width:220,height:220}},text=>{
+                        const nis=text.trim();
+                        if(activeScannerTarget==='absen') tambahkanScanAbsen(nis); else stopActiveScannerAndProcess(nis);
+                    },()=>{}).catch(err=>{console.error(err);showModal('Akses Kamera','Gagal membuka kamera. Pastikan izin kamera diberikan di browser.');});
                 }
-                
-                const config = { fps: 10, qrbox: { width: 220, height: 220 } };
-                html5QrCode.start(
-                    { facingMode: "environment" }, 
-                    config, 
-                    (text) => {
-                        const scannedVal = text.trim();
-                        stopActiveScannerAndProcess(scannedVal);
-                    },
-                    (errorMessage) => {}
-                ).catch(err => {
-                    console.error("Gagal memulai kamera:", err);
-                    showModal("Akses Kamera", "Gagal membuka kamera. Pastikan izin kamera telah diberikan di browser.");
-                });
-            }, 300);
+            },300);
+        }
+
+        function tambahkanScanAbsen(nis){
+            if(scannerAbsenProcessing||!nis)return;
+            const m=appData.murid.find(m=>(m.col4||m.col2||'').toString().trim()===nis.toString().trim());
+            if(!m){showModal('Perhatian','Kode Siswa '+nis+' tidak terdaftar dalam Data Murid!');return;}
+            const kode=(m.col4||m.col2||'').toString().trim();
+            if(!scanAbsenSelectedMurid.some(x=>(x.col4||x.col2||'').toString().trim()===kode)){scanAbsenSelectedMurid.push(m);renderScanAbsenBatch();}
+        }
+
+        function renderScanAbsenBatch(){
+            const box=document.getElementById('scan-absen-list'); const count=document.getElementById('scan-absen-count');
+            count.innerText=scanAbsenSelectedMurid.length;
+            if(!scanAbsenSelectedMurid.length){box.innerHTML='Belum ada siswa.';return;}
+            box.innerHTML=scanAbsenSelectedMurid.map((m,i)=>`<div class="flex justify-between py-1 border-b last:border-0"><span>${escapeHtml(m.col3||m.col1||'')}</span><button type="button" class="text-rose-600" onclick="hapusScanAbsen(${i})">✕</button></div>`).join('');
+        }
+        function hapusScanAbsen(i){scanAbsenSelectedMurid.splice(i,1);renderScanAbsenBatch();}
+        function clearScanAbsenBatch(){scanAbsenSelectedMurid=[];renderScanAbsenBatch();}
+        function selesaiScanAbsen(){
+            if(!scanAbsenSelectedMurid.length){showModal('Peringatan','Belum ada siswa yang discan.');return;}
+            scannerAbsenProcessing=true;
+            const simpan=[...scanAbsenSelectedMurid];
+            const waktuStr=new Date().toLocaleString();
+            const finish=()=>{scanAbsenSelectedMurid=[];renderScanAbsenBatch();closeScannerModal();render();showModal('Berhasil',`Absensi berhasil dicatat untuk ${simpan.length} siswa.`);scannerAbsenProcessing=false;};
+            const saveNext=(i)=>{if(i>=simpan.length){localStorage.setItem('perpus_cache_absen',JSON.stringify(appData.absensi));finish();return;}const m=simpan[i];const nama=m.col3||m.col1||'';const nis=m.col4||m.col2||'';const kelas=m.col5||m.col3||'';appData.absensi.unshift({col1:nama,col2:nis,col3:waktuStr,col4:'Membaca / Berhitung',col5:kelas});queueOrSendRequest('add','absen',[nama,nis,waktuStr,'Membaca / Berhitung',kelas]);saveNext(i+1);};
+            if(html5QrCode&&html5QrCode.isScanning) html5QrCode.stop().then(()=>saveNext(0)).catch(()=>saveNext(0)); else saveNext(0);
         }
 
         function stopActiveScannerAndProcess(nis) {
             if (html5QrCode && html5QrCode.isScanning) {
-                html5QrCode.stop().then(() => {
-                    closeScannerModal();
-                    if (activeScannerTarget === 'absen') {
-                        prosesAbsenByNIS(nis, "Membaca / Berhitung");
-                    } else if (activeScannerTarget === 'transaksi') {
-                        prosesTransaksiByNIS(nis);
-                    }
-                }).catch(e => {
-                    console.error("Gagal menghentikan scanner:", e);
-                    closeScannerModal();
-                });
-            } else {
-                closeScannerModal();
-                if (activeScannerTarget === 'absen') {
-                    prosesAbsenByNIS(nis, "Membaca / Berhitung");
-                } else if (activeScannerTarget === 'transaksi') {
-                    prosesTransaksiByNIS(nis);
-                }
-            }
+                html5QrCode.stop().then(()=>{closeScannerModal(); if(activeScannerTarget==='transaksi') prosesTransaksiByNIS(nis);}).catch(()=>{closeScannerModal(); if(activeScannerTarget==='transaksi') prosesTransaksiByNIS(nis);});
+            } else { closeScannerModal(); if(activeScannerTarget==='transaksi') prosesTransaksiByNIS(nis); }
         }
-
-        function closeScannerModal() { 
-            if (html5QrCode && html5QrCode.isScanning) {
-                html5QrCode.stop().catch(e => console.log(e));
-            }
-            document.getElementById('scanner-modal').classList.add('hidden'); 
-        }
+        function closeScannerModal(){if(html5QrCode&&html5QrCode.isScanning)html5QrCode.stop().catch(()=>{});document.getElementById('scanner-modal').classList.add('hidden');}
 
         function openFormMuridModal(isEdit = false) {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
@@ -1096,30 +1069,72 @@
 
         function closeFormMuridModal() { document.getElementById('form-murid-modal').classList.add('hidden'); }
 
+        function getUniqueKelas() {
+            const kelas = [...new Set(appData.murid.map(m => (m.col5 || m.col3 || '').toString().trim()).filter(Boolean))];
+            return kelas.sort((a,b)=>a.localeCompare(b, undefined, {numeric:true, sensitivity:'base'}));
+        }
+
+        function populateAbsenKelas() {
+            const select = document.getElementById('absen-kelas-manual');
+            if (!select) return;
+            select.innerHTML = '<option value="">-- Pilih Kelas --</option>' + getUniqueKelas().map(k => `<option value="${escapeAttribute(k)}">Kelas ${escapeHtml(k)}</option>`).join('');
+            renderAbsenManualSiswa();
+        }
+
+        function renderAbsenManualSiswa() {
+            const kelas = document.getElementById('absen-kelas-manual')?.value || '';
+            const box = document.getElementById('absen-manual-siswa');
+            if (!box) return;
+            if (!kelas) { box.innerHTML = '<p class="col-span-2 text-center text-xs text-gray-400 py-3">Pilih kelas terlebih dahulu.</p>'; return; }
+            const siswa = appData.murid.filter(m => (m.col5 || m.col3 || '').toString().trim() === kelas);
+            box.innerHTML = siswa.map(m => {
+                const kode=(m.col4||m.col2||'').toString().trim();
+                const nama=m.col3||m.col1||'';
+                const sel=manualAbsenSelectedMurid.some(x => (x.col4||x.col2||'').toString().trim()===kode);
+                return `<button type="button" onclick="toggleAbsenManualSiswa('${encodeURIComponent(kode)}')" class="border rounded-lg p-2 text-left text-xs bg-white ${sel?'ring-2 ring-emerald-500 bg-emerald-50':''}"><span class="block font-semibold">${escapeHtml(nama)}</span><span class="text-gray-500">${escapeHtml(kode)}</span></button>`;
+            }).join('');
+            document.getElementById('input-nis-absen').value = manualAbsenSelectedMurid.map(m=>m.col4||m.col2||'').join(',');
+        }
+
+        function toggleAbsenManualSiswa(k) {
+            const kode=decodeURIComponent(k);
+            const i=manualAbsenSelectedMurid.findIndex(m=>(m.col4||m.col2||'').toString().trim()===kode);
+            if(i>=0) manualAbsenSelectedMurid.splice(i,1);
+            else { const m=appData.murid.find(m=>(m.col4||m.col2||'').toString().trim()===kode); if(m) manualAbsenSelectedMurid.push(m); }
+            renderAbsenManualSiswa();
+        }
+
         function openFormAbsenModal() {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
-            document.getElementById('input-nis-absen').value = "";
-            document.getElementById('input-kegiatan-absen').value = "Membaca / Berhitung";
+            manualAbsenSelectedMurid=[];
+            document.getElementById('input-kegiatan-absen').value = 'Membaca / Berhitung';
+            document.getElementById('absen-kelas-manual').value='';
+            populateAbsenKelas();
             document.getElementById('form-absen-modal').classList.remove('hidden');
         }
 
-        function closeFormAbsenModal() {
-            document.getElementById('form-absen-modal').classList.add('hidden');
-        }
+        function closeFormAbsenModal() { document.getElementById('form-absen-modal').classList.add('hidden'); }
 
         function saveAbsenManual(event) {
             event.preventDefault();
-            const nis = document.getElementById('input-nis-absen').value.trim();
-            closeFormAbsenModal();
-            prosesAbsenByNIS(nis, "Membaca / Berhitung");
+            if (manualAbsenSelectedMurid.length===0) { showModal('Peringatan','Pilih minimal satu siswa.'); return; }
+            const waktuStr=new Date().toLocaleString();
+            manualAbsenSelectedMurid.forEach(m=>{
+                const nama=m.col3||m.col1||''; const nis=m.col4||m.col2||''; const kelas=m.col5||m.col3||'';
+                appData.absensi.unshift({col1:nama,col2:nis,col3:waktuStr,col4:'Membaca / Berhitung',col5:kelas});
+                queueOrSendRequest('add','absen',[nama,nis,waktuStr,'Membaca / Berhitung',kelas]);
+            });
+            localStorage.setItem('perpus_cache_absen',JSON.stringify(appData.absensi));
+            closeFormAbsenModal(); render();
+            showModal('Berhasil',`Absensi berhasil dicatat untuk ${manualAbsenSelectedMurid.length} siswa.`);
         }
 
         function openFormTugasModal() {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             document.getElementById('input-deskripsi-tugas').value = "";
-            document.getElementById('input-nis-batch').value = "";
             batchSelectedMurid = [];
             renderBatchMuridList();
+            populateTugasKelas();
             toggleTugasMethod('scan');
             document.querySelector('input[name="metode_tugas"][value="scan"]').checked = true;
             document.getElementById('form-tugas-modal').classList.remove('hidden');
@@ -1142,6 +1157,10 @@
                 stopTugasScanner();
             }
         }
+
+        function populateTugasKelas(){const select=document.getElementById('tugas-kelas-manual');if(!select)return;const kelas=[...new Set(appData.murid.map(m=>(m.col5||m.col3||'').toString().trim()).filter(Boolean))];kelas.sort((a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'}));select.innerHTML='<option value="">-- Pilih Kelas --</option>'+kelas.map(k=>`<option value="${escapeAttribute(k)}">Kelas ${escapeHtml(k)}</option>`).join('');renderTugasManualSiswa();}
+        function renderTugasManualSiswa(){const kelas=document.getElementById('tugas-kelas-manual')?.value||'';const box=document.getElementById('tugas-manual-siswa');if(!box)return;if(!kelas){box.innerHTML='<p class="col-span-2 text-center text-xs text-gray-400 py-3">Pilih kelas terlebih dahulu.</p>';return;}const siswa=appData.murid.filter(m=>(m.col5||m.col3||'').toString().trim()===kelas);box.innerHTML=siswa.map(m=>{const kode=(m.col4||m.col2||'').toString().trim();const nama=m.col3||m.col1||'';const sel=batchSelectedMurid.some(x=>(x.col4||x.col2||'').toString().trim()===kode);return `<button type="button" onclick="toggleTugasManualSiswa('${encodeURIComponent(kode)}')" class="student-select-btn ${sel?'selected':''} border bg-white rounded-lg p-2 text-left text-xs"><span class="block font-medium">${escapeHtml(nama)}</span></button>`;}).join('');}
+        function toggleTugasManualSiswa(k){const kode=decodeURIComponent(k);const i=batchSelectedMurid.findIndex(m=>(m.col4||m.col2||'').toString().trim()===kode);if(i>=0)batchSelectedMurid.splice(i,1);else{const m=appData.murid.find(m=>(m.col4||m.col2||'').toString().trim()===kode);if(m)batchSelectedMurid.push(m);}renderTugasManualSiswa();renderBatchMuridList();}
 
         function startTugasScanner() {
             const container = document.getElementById('tugas-reader-container');
@@ -1188,25 +1207,7 @@
             }
         }
 
-        function tambahNisBatchManual() {
-            const raw = document.getElementById('input-nis-batch').value;
-            if (!raw.trim()) return;
-            let listNis = raw.split(/[\s,]+/);
-            let addedCount = 0;
-            listNis.forEach(nis => {
-                let cleanNis = nis.trim();
-                if (cleanNis) {
-                    let muridDitemukan = appData.murid.find(m => (m.col4 || m.col2).toString().trim() === cleanNis.toString().trim());
-                    if (muridDitemukan && !batchSelectedMurid.some(m => (m.col4 || m.col2).toString().trim() === cleanNis.toString().trim())) {
-                        batchSelectedMurid.push(muridDitemukan);
-                        addedCount++;
-                    }
-                }
-            });
-            document.getElementById('input-nis-batch').value = "";
-            renderBatchMuridList();
-            showModal("Informasi", `${addedCount} siswa berhasil ditambahkan ke daftar tugas.`);
-        }
+        function tambahNisBatchManual() { renderTugasManualSiswa(); }
 
         function removeBatchMurid(index) {
             batchSelectedMurid.splice(index, 1);
