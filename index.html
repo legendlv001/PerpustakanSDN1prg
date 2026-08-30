@@ -192,8 +192,14 @@
             <h3 class="text-xl mb-4 text-emerald-800 text-center">📖 Tambah Peminjaman Buku</h3>
             <form onsubmit="saveTransaksiManual(event)">
                 <div class="mb-3">
-                    <label class="block text-sm text-gray-700 mb-1">Kode Siswa</label>
-                    <input type="text" id="input-nis-transaksi" placeholder="Masukkan Kode Siswa" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" required>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Pilih Kelas</label>
+                    <select id="transaksi-kelas-manual" onchange="renderTransaksiManualSiswa()" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm" required><option value="">-- Pilih Kelas --</option></select>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Pilih Siswa</label>
+                    <div id="transaksi-manual-siswa" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded-lg p-2 bg-gray-50">
+                        <p class="col-span-2 text-center text-xs text-gray-400 py-3">Pilih kelas terlebih dahulu.</p>
+                    </div>
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm text-gray-700 mb-1">Judul Buku</label>
@@ -903,13 +909,16 @@
                 } else {
                     const file = document.getElementById('input-dokumentasi-foto').files[0];
                     if (!file) throw new Error('Silakan pilih foto.');
-                    const base64 = await fileToBase64(file);
+                    const uploadData = await prepareImageForUpload(file);
                     const response = await fetch(`${SCRIPT_URL}?action=uploadDokumentasi`, {
                         method: 'POST',
-                        body: JSON.stringify({ fileName: file.name, mimeType: file.type || 'image/jpeg', base64 })
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(uploadData)
                     });
-                    const result = await response.json();
-                    if (!result.success || !result.url) throw new Error(result.message || 'Upload foto gagal.');
+                    const raw = await response.text();
+                    let result;
+                    try { result = JSON.parse(raw); } catch (e) { throw new Error('Apps Script tidak mengembalikan JSON. Pastikan deployment Code.gs sudah diperbarui sebagai Web App dan aksesnya dapat digunakan semua orang.'); }
+                    if (!response.ok || !result.success || !result.url) throw new Error(result.message || 'Upload foto gagal.');
                     url = result.url;
                 }
                 const data = { col1: waktu, col2: judul, col3: jenis, col4: url };
@@ -927,6 +936,30 @@
                 btn.innerText = '💾 Simpan';
             }
         }
+        function prepareImageForUpload(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const max = 1600;
+                        const scale = Math.min(1, max / Math.max(img.width, img.height));
+                        const canvas = document.createElement('canvas');
+                        canvas.width = Math.max(1, Math.round(img.width * scale));
+                        canvas.height = Math.max(1, Math.round(img.height * scale));
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+                        resolve({ fileName: file.name.replace(/\.[^.]+$/, '') + '.jpg', mimeType: 'image/jpeg', base64: dataUrl.split(',')[1] });
+                    };
+                    img.onerror = () => reject(new Error('Foto tidak dapat diproses oleh browser.'));
+                    img.src = reader.result;
+                };
+                reader.onerror = () => reject(new Error('Gagal membaca file foto.'));
+                reader.readAsDataURL(file);
+            });
+        }
+
         function fileToBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -1077,7 +1110,7 @@
         function populateAbsenKelas() {
             const select = document.getElementById('absen-kelas-manual');
             if (!select) return;
-            select.innerHTML = '<option value="">-- Pilih Kelas --</option>' + getUniqueKelas().map(k => `<option value="${escapeAttribute(k)}">Kelas ${escapeHtml(k)}</option>`).join('');
+            select.innerHTML = '<option value="">-- Pilih Kelas --</option>' + getUniqueKelas().map(k => `<option value="${escapeAttribute(k)}">${escapeHtml(k)}</option>`).join('');
             renderAbsenManualSiswa();
         }
 
@@ -1158,7 +1191,7 @@
             }
         }
 
-        function populateTugasKelas(){const select=document.getElementById('tugas-kelas-manual');if(!select)return;const kelas=[...new Set(appData.murid.map(m=>(m.col5||m.col3||'').toString().trim()).filter(Boolean))];kelas.sort((a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'}));select.innerHTML='<option value="">-- Pilih Kelas --</option>'+kelas.map(k=>`<option value="${escapeAttribute(k)}">Kelas ${escapeHtml(k)}</option>`).join('');renderTugasManualSiswa();}
+        function populateTugasKelas(){const select=document.getElementById('tugas-kelas-manual');if(!select)return;const kelas=[...new Set(appData.murid.map(m=>(m.col5||m.col3||'').toString().trim()).filter(Boolean))];kelas.sort((a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'}));select.innerHTML='<option value="">-- Pilih Kelas --</option>'+kelas.map(k=>`<option value="${escapeAttribute(k)}">${escapeHtml(k)}</option>`).join('');renderTugasManualSiswa();}
         function renderTugasManualSiswa(){const kelas=document.getElementById('tugas-kelas-manual')?.value||'';const box=document.getElementById('tugas-manual-siswa');if(!box)return;if(!kelas){box.innerHTML='<p class="col-span-2 text-center text-xs text-gray-400 py-3">Pilih kelas terlebih dahulu.</p>';return;}const siswa=appData.murid.filter(m=>(m.col5||m.col3||'').toString().trim()===kelas);box.innerHTML=siswa.map(m=>{const kode=(m.col4||m.col2||'').toString().trim();const nama=m.col3||m.col1||'';const sel=batchSelectedMurid.some(x=>(x.col4||x.col2||'').toString().trim()===kode);return `<button type="button" onclick="toggleTugasManualSiswa('${encodeURIComponent(kode)}')" class="student-select-btn ${sel?'selected':''} border bg-white rounded-lg p-2 text-left text-xs"><span class="block font-medium">${escapeHtml(nama)}</span></button>`;}).join('');}
         function toggleTugasManualSiswa(k){const kode=decodeURIComponent(k);const i=batchSelectedMurid.findIndex(m=>(m.col4||m.col2||'').toString().trim()===kode);if(i>=0)batchSelectedMurid.splice(i,1);else{const m=appData.murid.find(m=>(m.col4||m.col2||'').toString().trim()===kode);if(m)batchSelectedMurid.push(m);}renderTugasManualSiswa();renderBatchMuridList();}
 
@@ -1269,23 +1302,66 @@
             showModal("Berhasil", `Tugas "${deskripsi}" berhasil dicatat untuk ${batchSelectedMurid.length} siswa sekaligus!`);
         }
 
+        let manualTransaksiSelectedMurid = [];
+
+        function populateTransaksiKelas() {
+            const select = document.getElementById('transaksi-kelas-manual');
+            if (!select) return;
+            const kelas = getUniqueKelas();
+            select.innerHTML = '<option value="">-- Pilih Kelas --</option>' + kelas.map(k => `<option value="${escapeAttribute(k)}">${escapeHtml(k)}</option>`).join('');
+            renderTransaksiManualSiswa();
+        }
+
+        function renderTransaksiManualSiswa() {
+            const kelas = document.getElementById('transaksi-kelas-manual')?.value || '';
+            const box = document.getElementById('transaksi-manual-siswa');
+            if (!box) return;
+            if (!kelas) { box.innerHTML = '<p class="col-span-2 text-center text-xs text-gray-400 py-3">Pilih kelas terlebih dahulu.</p>'; return; }
+            const siswa = appData.murid.filter(m => (m.col5 || m.col3 || '').toString().trim() === kelas);
+            box.innerHTML = siswa.map(m => {
+                const kode = (m.col4 || m.col2 || '').toString().trim();
+                const nama = m.col3 || m.col1 || '';
+                const sel = manualTransaksiSelectedMurid.some(x => (x.col4 || x.col2 || '').toString().trim() === kode);
+                return `<button type="button" onclick="toggleTransaksiManualSiswa('${encodeURIComponent(kode)}')" class="border rounded-lg p-2 text-left text-xs bg-white ${sel ? 'ring-2 ring-emerald-500 bg-emerald-50 font-semibold' : ''}"><span class="block">${escapeHtml(nama)}</span></button>`;
+            }).join('');
+        }
+
+        function toggleTransaksiManualSiswa(k) {
+            const kode = decodeURIComponent(k);
+            const i = manualTransaksiSelectedMurid.findIndex(m => (m.col4 || m.col2 || '').toString().trim() === kode);
+            if (i >= 0) manualTransaksiSelectedMurid.splice(i, 1);
+            else { const m = appData.murid.find(m => (m.col4 || m.col2 || '').toString().trim() === kode); if (m) manualTransaksiSelectedMurid.push(m); }
+            renderTransaksiManualSiswa();
+        }
+
         function openFormTransaksiModal() {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
-            document.getElementById('input-nis-transaksi').value = "";
-            document.getElementById('input-buku-transaksi').value = "";
+            manualTransaksiSelectedMurid = [];
+            document.getElementById('input-buku-transaksi').value = '';
+            populateTransaksiKelas();
+            document.getElementById('transaksi-kelas-manual').value = '';
+            renderTransaksiManualSiswa();
             document.getElementById('form-transaksi-modal').classList.remove('hidden');
         }
 
-        function closeFormTransaksiModal() {
-            document.getElementById('form-transaksi-modal').classList.add('hidden');
-        }
+        function closeFormTransaksiModal() { document.getElementById('form-transaksi-modal').classList.add('hidden'); }
 
         function saveTransaksiManual(event) {
             event.preventDefault();
-            const nis = document.getElementById('input-nis-transaksi').value.trim();
             const buku = document.getElementById('input-buku-transaksi').value.trim();
-            closeFormTransaksiModal();
-            prosesTransaksiByBukuDanNIS(nis, buku);
+            if (!buku) { showModal('Peringatan', 'Judul buku wajib diisi.'); return; }
+            if (!manualTransaksiSelectedMurid.length) { showModal('Peringatan', 'Pilih minimal satu siswa.'); return; }
+            const tglStr = new Date().toLocaleDateString();
+            manualTransaksiSelectedMurid.forEach(m => {
+                const nama = m.col3 || m.col1 || '';
+                const nis = m.col4 || m.col2 || '';
+                const kelas = m.col5 || m.col3 || '';
+                appData.transaksi.unshift({ col1:nama, col2:buku, col3:tglStr, col4:nis, col5:'Belum Dikembalikan', col6:kelas });
+                queueOrSendRequest('add','pinjam',[nama,buku,tglStr,nis,'Belum Dikembalikan',kelas]);
+            });
+            localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
+            closeFormTransaksiModal(); render();
+            showModal('Berhasil', `Peminjaman dicatat untuk ${manualTransaksiSelectedMurid.length} siswa.`);
         }
 
         function prosesAbsenByNIS(nisInput, kegiatanInput) {
