@@ -4,10 +4,150 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PERPUS SDN 1 PARIGI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.tailwindcss.com">
+        function openImageLightbox(src) {
+            if (!src) return;
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            img.src = src;
+            box.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageLightbox() {
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            box.classList.add('hidden');
+            img.src = '';
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('click', function(event) {
+            const img = event.target.closest('img');
+            if (!img) return;
+            const src = img.currentSrc || img.src || '';
+            if (!src || img.id === 'image-lightbox-img') return;
+            if (img.closest('#image-lightbox')) return;
+            // Hanya foto dari area dokumentasi agar gambar UI lain tidak ikut fullscreen.
+            if (img.closest('[id*="dokumentasi"], .dokumentasi, .documentation')) {
+                event.preventDefault();
+                openImageLightbox(src);
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') closeImageLightbox();
+        });
+
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
+        function openImageLightbox(src) {
+            if (!src) return;
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            img.src = src;
+            box.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageLightbox() {
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            box.classList.add('hidden');
+            img.src = '';
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('click', function(event) {
+            const img = event.target.closest('img');
+            if (!img) return;
+            const src = img.currentSrc || img.src || '';
+            if (!src || img.id === 'image-lightbox-img') return;
+            if (img.closest('#image-lightbox')) return;
+            // Hanya foto dari area dokumentasi agar gambar UI lain tidak ikut fullscreen.
+            if (img.closest('[id*="dokumentasi"], .dokumentasi, .documentation')) {
+                event.preventDefault();
+                openImageLightbox(src);
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') closeImageLightbox();
+        });
+
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js">
+        function openImageLightbox(src) {
+            if (!src) return;
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            img.src = src;
+            box.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageLightbox() {
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            box.classList.add('hidden');
+            img.src = '';
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('click', function(event) {
+            const img = event.target.closest('img');
+            if (!img) return;
+            const src = img.currentSrc || img.src || '';
+            if (!src || img.id === 'image-lightbox-img') return;
+            if (img.closest('#image-lightbox')) return;
+            // Hanya foto dari area dokumentasi agar gambar UI lain tidak ikut fullscreen.
+            if (img.closest('[id*="dokumentasi"], .dokumentasi, .documentation')) {
+                event.preventDefault();
+                openImageLightbox(src);
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') closeImageLightbox();
+        });
+
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+        function openImageLightbox(src) {
+            if (!src) return;
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            img.src = src;
+            box.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageLightbox() {
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            box.classList.add('hidden');
+            img.src = '';
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('click', function(event) {
+            const img = event.target.closest('img');
+            if (!img) return;
+            const src = img.currentSrc || img.src || '';
+            if (!src || img.id === 'image-lightbox-img') return;
+            if (img.closest('#image-lightbox')) return;
+            // Hanya foto dari area dokumentasi agar gambar UI lain tidak ikut fullscreen.
+            if (img.closest('[id*="dokumentasi"], .dokumentasi, .documentation')) {
+                event.preventDefault();
+                openImageLightbox(src);
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') closeImageLightbox();
+        });
+
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f0fdf4; }
@@ -28,6 +168,24 @@
             display: inline-block;
             animation: wave 2s infinite;
             transform-origin: 70% 70%;
+        }
+    
+        /* Fullscreen image viewer */
+        .image-lightbox {
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,.92);
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px; cursor: zoom-out;
+        }
+        .image-lightbox.hidden { display: none; }
+        .image-lightbox img {
+            max-width: 96vw; max-height: 92vh;
+            object-fit: contain; border-radius: 8px;
+        }
+        .image-lightbox-close {
+            position: absolute; top: 16px; right: 20px;
+            color: #fff; font-size: 32px; line-height: 1;
+            background: transparent; border: 0; cursor: pointer;
         }
     </style>
 </head>
@@ -1537,6 +1695,46 @@
                 showModal("Berhasil", "Data berhasil dihapus!");
             }
         }
+    
+        function openImageLightbox(src) {
+            if (!src) return;
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            img.src = src;
+            box.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageLightbox() {
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            box.classList.add('hidden');
+            img.src = '';
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('click', function(event) {
+            const img = event.target.closest('img');
+            if (!img) return;
+            const src = img.currentSrc || img.src || '';
+            if (!src || img.id === 'image-lightbox-img') return;
+            if (img.closest('#image-lightbox')) return;
+            // Hanya foto dari area dokumentasi agar gambar UI lain tidak ikut fullscreen.
+            if (img.closest('[id*="dokumentasi"], .dokumentasi, .documentation')) {
+                event.preventDefault();
+                openImageLightbox(src);
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') closeImageLightbox();
+        });
+
     </script>
+
+    <div id="image-lightbox" class="image-lightbox hidden" onclick="closeImageLightbox()">
+        <button class="image-lightbox-close" type="button" aria-label="Tutup" onclick="event.stopPropagation(); closeImageLightbox()">×</button>
+        <img id="image-lightbox-img" src="" alt="Foto dokumentasi" onclick="event.stopPropagation()">
+    </div>
 </body>
 </html>
