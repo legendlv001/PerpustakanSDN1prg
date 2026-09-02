@@ -909,7 +909,7 @@
                 } else {
                     const file = document.getElementById('input-dokumentasi-foto').files[0];
                     if (!file) throw new Error('Silakan pilih foto.');
-                    const uploadData = await prepareImageForUpload(file);
+                    const uploadData = await prepareImageForUpload(file, judul);
                     const response = await fetch(`${SCRIPT_URL}?action=uploadDokumentasi`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -924,7 +924,11 @@
                 const data = { col1: waktu, col2: judul, col3: jenis, col4: url };
                 appData.dokumentasi.unshift(data);
                 localStorage.setItem('perpus_cache_dokumentasi', JSON.stringify(appData.dokumentasi));
-                queueOrSendRequest('add', 'Dokumentasi', [waktu, judul, jenis, url]);
+                // Untuk FOTO, Apps Script uploadDokumentasi sudah menyimpan 1 baris.
+                // Jadi jangan kirim action 'add' lagi agar tidak duplikat.
+                if (jenis === 'link') {
+                    queueOrSendRequest('add', 'Dokumentasi', [waktu, judul, jenis, url]);
+                }
                 closeFormDokumentasiModal();
                 render();
                 showModal('Berhasil', jenis === 'foto' ? 'Foto berhasil diunggah dan dicatat.' : 'Link berhasil disimpan.');
@@ -936,7 +940,7 @@
                 btn.innerText = '💾 Simpan';
             }
         }
-        function prepareImageForUpload(file) {
+        function prepareImageForUpload(file, judul) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = () => {
@@ -950,7 +954,7 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                         const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
-                        resolve({ fileName: file.name.replace(/\.[^.]+$/, '') + '.jpg', mimeType: 'image/jpeg', base64: dataUrl.split(',')[1] });
+                        resolve({ title: judul, jenis: 'foto', fileName: file.name.replace(/\.[^.]+$/, '') + '.jpg', mimeType: 'image/jpeg', base64: dataUrl.split(',')[1] });
                     };
                     img.onerror = () => reject(new Error('Foto tidak dapat diproses oleh browser.'));
                     img.src = reader.result;
