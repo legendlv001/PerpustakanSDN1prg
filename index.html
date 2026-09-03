@@ -1,37 +1,8 @@
-<!DOCTYPE html>
-<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Perpustakaan</title></head>
-<body><h2>📚 Aplikasi Perpustakaan</h2><div id="status">Memuat...</div><pre id="output"></pre>
-<script>
-const SPREADSHEET_ID="1RFxZ6uY1CrDSxKd6GeMLSOD7QwZBd66jqZsvxfnkbXk";
-let SCRIPT_URL="",DRIVE_FOLDER_URL="";
-let appData={murid:[],absensi:[],transaksi:[],dokumentasi:[]};
-
-function parseCSV(t){let r=t.trim().split(/\r?\n/).map(x=>x.replace(/^"|"$/g,"").split('","'));return r.slice(1).filter(x=>x.some(y=>y.trim())).map(x=>({col1:x[0]||"",col2:x[1]||"",col3:x[2]||"",col4:x[3]||"",col5:x[4]||""}));}
-async function fetchSheetCSV(n){let u=`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(n)}`,r=await fetch(u);if(!r.ok)throw Error("Gagal membaca sheet "+n);return parseCSV(await r.text());}
-
-async function loadPengaturan(){
- const d=await fetchSheetCSV("Pengaturan");
- if(d.length<2)throw Error("Sheet Pengaturan minimal 2 baris.");
- SCRIPT_URL=String(d[0].col2||"").trim().replace(/\/$/,"");
- DRIVE_FOLDER_URL=String(d[1].col2||"").trim();
- if(!SCRIPT_URL)throw Error("Pengaturan!B1 kosong.");
- if(!DRIVE_FOLDER_URL)throw Error("Pengaturan!B2 kosong.");
-}
-async function loadAllData(){
- if(!SCRIPT_URL)await loadPengaturan();
- appData.murid=await fetchSheetCSV("murid");
- appData.absensi=await fetchSheetCSV("absen");
- appData.transaksi=await fetchSheetCSV("pinjam");
- appData.dokumentasi=await fetchSheetCSV("Dokumentasi");
- document.getElementById("output").textContent=JSON.stringify(appData,null,2);
-}
-async function uploadDokumentasi(file,title){
- if(!SCRIPT_URL)await loadPengaturan();
- const base64=await new Promise((ok,no)=>{let r=new FileReader();r.onload=()=>ok(String(r.result).split(",")[1]);r.onerror=no;r.readAsDataURL(file);});
- const res=await fetch(`${SCRIPT_URL}?action=uploadDokumentasi`,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({title:title||file.name,fileName:file.name,mimeType:file.type||"image/jpeg",base64})});
- const result=await res.json();
- if(!result.success)throw Error(result.message||"Upload gagal");
- return result.url;
-}
-window.addEventListener("DOMContentLoaded",async()=>{try{document.getElementById("status").textContent="Mengambil Pengaturan B1 dan B2...";await loadPengaturan();await loadAllData();document.getElementById("status").textContent="Siap. Semua HP memakai konfigurasi Spreadsheet yang sama.";}catch(e){document.getElementById("status").textContent="Gagal: "+e.message;}});
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Perpustakaan</title><style>body{font-family:Arial;margin:0;padding:20px}#loading{position:fixed;inset:0;background:white;display:flex;z-index:99;align-items:center;justify-content:center;flex-direction:column}#loading img{width:160px;max-width:60vw}.hidden{display:none}</style></head><body><div id="loading"><img src="https://i.pinimg.com/originals/71/3a/32/713a3272124cc57ba9e9fb7f59e9ab3b.gif"><b id="loadingText">Memuat...</b></div><h2>📚 Aplikasi Perpustakaan</h2><p id="status"></p><script>
+const SPREADSHEET_ID="1RFxZ6uY1CrDSxKd6GeMLSOD7QwZBd66jqZsvxfnkbXk";let SCRIPT_URL="",DRIVE_FOLDER_URL="",appData={murid:[],absensi:[],transaksi:[],dokumentasi:[]};
+const load=(t)=>{document.getElementById("loadingText").textContent=t;document.getElementById("loading").style.display="flex"};const hide=()=>document.getElementById("loading").style.display="none";
+async function loadPengaturan(){load("Mengambil Pengaturan B1 dan B2...");let u=`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=Pengaturan&range=B1:B2`;let r=await fetch(u);if(!r.ok)throw Error("Tidak dapat membaca Pengaturan.");let t=await r.text(),j=JSON.parse(t.replace(/^[\s\S]*?setResponse\(/,"").replace(/\);?\s*$/,"")),rows=j.table?.rows||[],v=i=>String(rows[i]?.c?.[0]?.v??"").trim();SCRIPT_URL=v(0).replace(/\/$/,"");DRIVE_FOLDER_URL=v(1);if(!SCRIPT_URL)throw Error("Pengaturan!B1 kosong.");if(!DRIVE_FOLDER_URL)throw Error("Pengaturan!B2 kosong.")}
+async function getSheet(n){let u=`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(n)}`,r=await fetch(u);if(!r.ok)throw Error("Gagal membaca "+n);return await r.text();}
+async function loadAllData(){load("Memuat data Spreadsheet...");let x=await Promise.all(["murid","absen","pinjam","Dokumentasi"].map(getSheet));appData={murid:x[0],absensi:x[1],transaksi:x[2],dokumentasi:x[3]};}
+window.addEventListener("DOMContentLoaded",async()=>{try{await loadPengaturan();await loadAllData();document.getElementById("status").textContent="Aplikasi siap. Konfigurasi diambil dari Pengaturan!B1 dan B2."}catch(e){document.getElementById("status").textContent="Gagal: "+e.message;alert("Gagal: "+e.message)}finally{hide()}});
 </script></body></html>
