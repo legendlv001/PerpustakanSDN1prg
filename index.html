@@ -566,36 +566,8 @@
 
     <script>
         const SPREADSHEET_ID = "1RFxZ6uY1CrDSxKd6GeMLSOD7QwZBd66jqZsvxfnkbXk";
-        let SCRIPT_URL = "";
-        let DRIVE_FOLDER_URL = "";
-
-        function setSpreadsheetLoading(text) {
-            const t = document.getElementById('spreadsheet-loading-text');
-            if (t) t.innerText = text || 'Memuat data...';
-        }
-        function hideSpreadsheetLoading() {
-            const el = document.getElementById('spreadsheet-loading');
-            if (el) el.style.display = 'none';
-        }
-
-        async function loadPengaturan() {
-            setSpreadsheetLoading('Mengambil pengaturan aplikasi...');
-            const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=Pengaturan&range=B1:B2`;
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Tidak dapat membaca sheet Pengaturan.');
-            const text = await response.text();
-            const jsonText = text
-                .replace(/^[\\s\\S]*?google\\.visualization\\.Query\\.setResponse\\(/, '')
-                .replace(/\\);?\\s*$/, '');
-            const result = JSON.parse(jsonText);
-            const rows = result.table?.rows || [];
-            const getValue = (i) => String(rows[i]?.c?.[0]?.v ?? rows[i]?.c?.[0]?.f ?? '').trim();
-            SCRIPT_URL = getValue(0).replace(/\\/$/, '');
-            DRIVE_FOLDER_URL = getValue(1);
-            if (!SCRIPT_URL) throw new Error('Link Apps Script kosong di Pengaturan!B1.');
-            if (!DRIVE_FOLDER_URL) throw new Error('Link Folder Drive kosong di Pengaturan!B2.');
-            return true;
-        }
+        const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6wvTMY2c9rZkKnu_Z5PdjaSDlUpyOgnAGl94awsD1cNoky9uEY8DZ8NEOhwOmCQ/exec";
+        let SCRIPT_URL = localStorage.getItem('perpus_script_url') || DEFAULT_SCRIPT_URL;
         let ADMIN_PASSWORD = localStorage.getItem('perpus_admin_password') || '123';
         let SETTINGS_PASSWORD = localStorage.getItem('perpus_settings_password') || '456';
         
@@ -626,17 +598,7 @@
             updateAdminUI();
             updateConnectionStatus();
             render();
-            (async () => {
-            try {
-                await loadPengaturan();
-                await loadAllData();
-            } catch (err) {
-                console.error(err);
-                showModal('Gagal Memuat', err.message || 'Gagal memuat konfigurasi aplikasi.');
-            } finally {
-                hideSpreadsheetLoading();
-            }
-        })();
+            loadAllData();
 
             window.addEventListener('online', () => {
                 updateConnectionStatus();
@@ -882,8 +844,6 @@
 
         async function loadAllData() {
             if (navigator.onLine) {
-                if (!SCRIPT_URL) await loadPengaturan();
-                setSpreadsheetLoading('Memuat data perpustakaan...');
                 appData.murid = await fetchSheetCSV('murid');
                 appData.absensi = await fetchSheetCSV('absen');
                 appData.transaksi = await fetchSheetCSV('pinjam');
@@ -1809,10 +1769,47 @@
         <img id="image-lightbox-img" src="" alt="Foto dokumentasi" onclick="event.stopPropagation()">
     </div>
 
-<!-- LOADING SPREADSHEET -->
-<div id="spreadsheet-loading" style="position:fixed;inset:0;background:#fff;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-  <img src="https://i.pinimg.com/originals/71/3a/32/713a3272124cc57ba9e9fb7f59e9ab3b.gif" style="width:160px;max-width:60vw;" alt="Memuat">
-  <div id="spreadsheet-loading-text" style="margin-top:10px;font-weight:600;">Memuat aplikasi...</div>
-</div>
+<div id="spreadsheet-loading" style="position:fixed;inset:0;background:#fff;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center">
+<img src="https://i.pinimg.com/originals/71/3a/32/713a3272124cc57ba9e9fb7f59e9ab3b.gif" style="width:150px;max-width:60vw" alt="Loading">
+<div id="spreadsheet-loading-text" style="margin-top:10px;font-family:Arial,sans-serif;font-weight:bold">Memuat data...</div></div>
+
+<script>
+(function(){
+  const loader=document.getElementById('spreadsheet-loading');
+  const text=document.getElementById('spreadsheet-loading-text');
+  function msg(x){if(text)text.textContent=x}
+  async function readSettings(){
+    msg('Mengambil Pengaturan...');
+    const id=(typeof SPREADSHEET_ID!=='undefined' && SPREADSHEET_ID) ? SPREADSHEET_ID : '';
+    if(!id) throw new Error('SPREADSHEET_ID tidak ditemukan.');
+    const u='https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&sheet=Pengaturan&range=B1:B2';
+    const r=await fetch(u);
+    if(!r.ok) throw new Error('Gagal membaca sheet Pengaturan.');
+    const raw=await r.text();
+    const clean=raw.replace(/^[\s\S]*?setResponse\(/,'').replace(/\);?\s*$/,'');
+    const j=JSON.parse(clean), rows=(j.table&&j.table.rows)||[];
+    const val=i=>String((rows[i]&&rows[i].c&&rows[i].c[0]&&(rows[i].c[0].v??rows[i].c[0].f))||'').trim();
+    const app=val(0).replace(/\/$/,''), drive=val(1);
+    if(!app) throw new Error('Pengaturan!B1 kosong.');
+    if(!drive) throw new Error('Pengaturan!B2 kosong.');
+    window.SCRIPT_URL=app;
+    window.DRIVE_FOLDER_URL=drive;
+    // support top-level let bindings where possible
+    try { SCRIPT_URL=app; } catch(e) {}
+    msg('Memuat aplikasi...');
+  }
+  window.addEventListener('load', async function(){
+    try{
+      await readSettings();
+      // Existing app may already be loaded. Briefly keep loader while UI renders.
+      setTimeout(()=>{if(loader)loader.style.display='none'},400);
+    }catch(e){
+      console.error(e);
+      msg('Gagal: '+e.message);
+      setTimeout(()=>{if(loader)loader.style.display='none'},2500);
+    }
+  });
+})();
+</script>
 </body>
 </html>
