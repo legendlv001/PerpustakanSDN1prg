@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PERPUS SDN 1 PARIGI</title>
     <script src="https://cdn.tailwindcss.com">
+        function resetPenyimpananLokal() {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
+            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
+            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [] };
+            offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
+            showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
+        }
+
         function openImageLightbox(src) {
             if (!src) return;
             const box = document.getElementById('image-lightbox');
@@ -41,6 +50,15 @@
 
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
+        function resetPenyimpananLokal() {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
+            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
+            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [] };
+            offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
+            showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
+        }
+
         function openImageLightbox(src) {
             if (!src) return;
             const box = document.getElementById('image-lightbox');
@@ -77,6 +95,15 @@
 
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js">
+        function resetPenyimpananLokal() {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
+            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
+            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [] };
+            offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
+            showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
+        }
+
         function openImageLightbox(src) {
             if (!src) return;
             const box = document.getElementById('image-lightbox');
@@ -113,6 +140,15 @@
 
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+        function resetPenyimpananLokal() {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
+            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
+            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [] };
+            offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
+            showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
+        }
+
         function openImageLightbox(src) {
             if (!src) return;
             const box = document.getElementById('image-lightbox');
@@ -549,6 +585,11 @@
               <span>Ingat password admin di perangkat ini</span>
             </label>
             <p class="text-xs font-semibold text-gray-700 mb-2">Ubah Password</p><input type="password" id="input-new-admin-password" class="w-full px-3 py-2 border rounded-lg mb-2 text-sm" placeholder="Password admin baru"><input type="password" id="input-new-settings-password" class="w-full px-3 py-2 border rounded-lg mb-3 text-sm" placeholder="Password pengaturan baru"><button type="button" onclick="savePasswords()" class="w-full bg-amber-500 text-white py-2 rounded-lg">🔑 Simpan Password</button></div>
+          <div class="mt-4 border-t pt-3">
+            <p class="text-xs font-semibold text-gray-700 mb-2">Penyimpanan Perangkat</p>
+            <p class="text-xs text-gray-500 mb-2">Hapus cache dan antrean offline. Data Spreadsheet tidak dihapus.</p>
+            <button type="button" onclick="resetPenyimpananLokal()" class="w-full bg-rose-600 hover:bg-rose-700 text-white py-2 rounded-lg">🗑️ Reset Penyimpanan Lokal</button>
+          </div>
           <button type="button" onclick="closeSettingsModal()" class="w-full mt-3 bg-gray-200 text-gray-700 py-2 rounded-lg">Tutup</button>
         </div>
       </div>
@@ -565,8 +606,8 @@
 
     <script>
         const SPREADSHEET_ID = "1RFxZ6uY1CrDSxKd6GeMLSOD7QwZBd66jqZsvxfnkbXk";
-        const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6wvTMY2c9rZkKnu_Z5PdjaSDlUpyOgnAGl94awsD1cNoky9uEY8DZ8NEOhwOmCQ/exec";
-        const SCRIPT_URL = DEFAULT_SCRIPT_URL;
+        let SCRIPT_URL = "";
+        let DRIVE_FOLDER_URL = "";
         try { localStorage.removeItem('perpus_script_url'); } catch(e) {}
         let ADMIN_PASSWORD = localStorage.getItem('perpus_admin_password') || '123';
         let SETTINGS_PASSWORD = localStorage.getItem('perpus_settings_password') || '456';
@@ -588,12 +629,33 @@
         let manualAbsenSelectedMurid = [];
         let scannerAbsenProcessing = false;
 
-        window.addEventListener('DOMContentLoaded', () => {
+        async function loadPengaturanDariSheet() {
+            const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=Pengaturan&range=B1:B2`;
+            const response = await fetch(url, { cache: 'no-store' });
+            if (!response.ok) throw new Error('Gagal membaca Sheet Pengaturan.');
+            const raw = await response.text();
+            const clean = raw.replace(/^[\s\S]*?setResponse\(/, '').replace(/\);?\s*$/, '');
+            const data = JSON.parse(clean);
+            const rows = (data.table && data.table.rows) || [];
+            const getVal = i => String((rows[i] && rows[i].c && rows[i].c[0] && (rows[i].c[0].v ?? rows[i].c[0].f)) || '').trim();
+            SCRIPT_URL = getVal(0).replace(/\/$/, '');
+            DRIVE_FOLDER_URL = getVal(1);
+            if (!SCRIPT_URL) throw new Error('Pengaturan!B1 kosong. Isi link Web App Apps Script.');
+            if (!DRIVE_FOLDER_URL) throw new Error('Pengaturan!B2 kosong. Isi link Folder Google Drive.');
+        }
 
+        window.addEventListener('DOMContentLoaded', async () => {
             updateAdminUI();
             updateConnectionStatus();
             render();
-            loadAllData();
+            try {
+                await loadPengaturanDariSheet();
+                await processOfflineQueue();
+                await loadAllData();
+            } catch (e) {
+                console.error(e);
+                showModal('Gagal Memuat Pengaturan', e.message || String(e));
+            }
 
             window.addEventListener('online', () => {
                 updateConnectionStatus();
@@ -1149,7 +1211,7 @@
                 // Untuk FOTO, Apps Script uploadDokumentasi sudah menyimpan 1 baris.
                 // Jadi jangan kirim action 'add' lagi agar tidak duplikat.
                 if (jenis === 'link') {
-                    queueOrSendRequest('add', 'Dokumentasi', [waktu, judul, jenis, url]);
+                    await queueOrSendRequest('add', 'Dokumentasi', [waktu, judul, jenis, url]);
                 }
                 closeFormDokumentasiModal();
                 render();
@@ -1194,12 +1256,12 @@
                 reader.readAsDataURL(file);
             });
         }
-        function hapusDokumentasi(index) {
+        async function hapusDokumentasi(index) {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             if (!confirm('Hapus dokumentasi ini?')) return;
             appData.dokumentasi.splice(index, 1);
             localStorage.setItem('perpus_cache_dokumentasi', JSON.stringify(appData.dokumentasi));
-            queueOrSendRequest('delete', 'Dokumentasi', {}, index + 2);
+            try { await queueOrSendRequest('delete', 'Dokumentasi', {}, index + 2); } catch(e) { showModal('Gagal Menghapus', e.message || String(e)); return; }
             render();
             showModal('Berhasil', 'Dokumentasi berhasil dihapus.');
         }
@@ -1656,26 +1718,21 @@
             }
         }
 
-        function saveMurid(event) {
+        async function saveMurid(event) {
             event.preventDefault();
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
             const index = parseInt(document.getElementById('murid-index').value);
-            const nama = document.getElementById('input-nama-murid').value;
-            const nis = document.getElementById('input-nis-murid').value;
-            const kelas = document.getElementById('input-kelas-murid').value;
-            
-            let payload = ["", "", nama, nis, kelas];
-            if (index >= 0) {
-                appData.murid[index] = { col3: nama, col4: nis, col5: kelas };
-                queueOrSendRequest('edit', 'murid', payload, index + 2);
-            } else {
-                appData.murid.push({ col3: nama, col4: nis, col5: kelas });
-                queueOrSendRequest('add', 'murid', payload);
-            }
-
-            localStorage.setItem('perpus_cache_murid', JSON.stringify(appData.murid));
-            closeFormMuridModal();
-            render();
-            showModal("Berhasil", "Data murid berhasil disimpan secara offline/online!");
+            const nama = document.getElementById('input-nama-murid').value.trim();
+            const nis = document.getElementById('input-nis-murid').value.trim();
+            const kelas = document.getElementById('input-kelas-murid').value.trim();
+            const payload = ["", "", nama, nis, kelas];
+            try {
+                if (index >= 0) await queueOrSendRequest('edit', 'murid', payload, index + 2);
+                else await queueOrSendRequest('add', 'murid', payload);
+                await loadAllData();
+                closeFormMuridModal();
+                showModal('Berhasil', 'Data murid berhasil tersimpan ke Spreadsheet.');
+            } catch (e) { showModal('Gagal Menyimpan', e.message || String(e)); }
         }
 
         function editMurid(index) {
@@ -1689,7 +1746,7 @@
             openFormMuridModal(true);
         }
 
-        function editAbsen(index) {
+        async function editAbsen(index) {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             const a = appData.absensi[index];
             const namaBaru = prompt("Edit Nama Siswa:", a.col1);
@@ -1716,11 +1773,11 @@
             localStorage.setItem('perpus_cache_absen', JSON.stringify(appData.absensi));
             render();
 
-            queueOrSendRequest('edit', 'absen', [namaBaru, nisBaru, waktuBaru, kegiatanBaru, kelasBaru], index + 2);
+            try { await queueOrSendRequest('edit', 'absen', [namaBaru, nisBaru, waktuBaru, kegiatanBaru, kelasBaru], index + 2); } catch(e) { showModal('Gagal Menyimpan', e.message || String(e)); return; }
             showModal("Berhasil", "Data absen berhasil diperbarui!");
         }
 
-        function editTransaksi(index) {
+        async function editTransaksi(index) {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             const t = appData.transaksi[index];
             const namaBaru = prompt("Edit Nama Siswa:", t.col1);
@@ -1746,22 +1803,22 @@
             localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
             render();
 
-            queueOrSendRequest('edit', 'pinjam', [namaBaru, bukuBaru, tglBaru, nisBaru, statusBaru, kelasBaru], index + 2);
+            try { await queueOrSendRequest('edit', 'pinjam', [namaBaru, bukuBaru, tglBaru, nisBaru, statusBaru, kelasBaru], index + 2); } catch(e) { showModal('Gagal Menyimpan', e.message || String(e)); return; }
             showModal("Berhasil", "Data peminjaman berhasil diperbarui!");
         }
 
-        function ubahStatusKembali(index) {
+        async function ubahStatusKembali(index) {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             const t = appData.transaksi[index];
             t.col5 = "Sudah Dikembalikan";
             localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
             render();
 
-            queueOrSendRequest('edit', 'pinjam', [t.col1, t.col2, t.col3, t.col4 || '', "Sudah Dikembalikan", t.col6 || ''], index + 2);
+            try { await queueOrSendRequest('edit', 'pinjam', [t.col1, t.col2, t.col3, t.col4 || '', "Sudah Dikembalikan", t.col6 || ''], index + 2); } catch(e) { showModal('Gagal Menyimpan', e.message || String(e)); return; }
             showModal("Berhasil", "Buku berhasil dikembalikan!");
         }
 
-        function hapusData(sheetName, index) {
+        async function hapusData(sheetName, index) {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
                 if (sheetName === 'murid') appData.murid.splice(index, 1);
@@ -1773,11 +1830,20 @@
                 localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
                 render();
 
-                queueOrSendRequest('delete', sheetName, {}, index + 2);
+                try { await queueOrSendRequest('delete', sheetName, {}, index + 2); } catch(e) { showModal('Gagal Menghapus', e.message || String(e)); return; }
                 showModal("Berhasil", "Data berhasil dihapus!");
             }
         }
     
+        function resetPenyimpananLokal() {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
+            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
+            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [] };
+            offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
+            showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
+        }
+
         function openImageLightbox(src) {
             if (!src) return;
             const box = document.getElementById('image-lightbox');
