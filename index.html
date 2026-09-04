@@ -535,20 +535,19 @@
         <div id="settings-password-gate">
           <h3 class="text-lg font-bold text-emerald-800 text-center mb-2">⚙️ Pengaturan</h3>
           <p class="text-xs text-gray-500 text-center mb-4">Masukkan password pengaturan</p>
-          <input type="password" id="input-settings-password" placeholder="Password" class="w-full px-3 py-2.5 border rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <input type="password" id="input-settings-password" placeholder="Password" class="w-full px-3 py-2.5 border rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <label class="flex items-center gap-2 text-sm text-gray-700 mb-3 cursor-pointer"><input type="checkbox" id="remember-settings-checkbox" class="w-4 h-4"><span>Ingat password</span></label>
           <p id="settings-password-error" class="text-rose-600 text-xs mb-3 hidden text-center">Password salah!</p>
           <div class="flex gap-2"><button type="button" onclick="closeSettingsModal()" class="w-1/2 bg-gray-200 text-gray-700 py-2 rounded-lg">Batal</button><button type="button" onclick="verifySettingsPassword()" class="w-1/2 bg-emerald-600 text-white py-2 rounded-lg">Buka</button></div>
         </div>
         <div id="settings-content" class="hidden">
           <h3 class="text-lg font-bold text-emerald-800 text-center mb-4">⚙️ Pengaturan</h3>
-          <form onsubmit="saveSettings(event)"><label class="block text-xs text-gray-700 mb-1">Link Google Apps Script</label><input type="url" id="input-script-url" class="w-full px-3 py-2 border rounded-lg mb-3 text-sm" required><button type="submit" class="w-full bg-emerald-600 text-white py-2 rounded-lg mb-3">💾 Simpan Link</button></form>
           <div class="border-t pt-3">
             <p class="text-xs font-semibold text-gray-700 mb-2">Keamanan Login</p>
             <label class="flex items-center gap-2 text-sm text-gray-700 mb-3 cursor-pointer">
               <input type="checkbox" id="settings-remember-admin" class="w-4 h-4">
               <span>Ingat password admin di perangkat ini</span>
             </label>
-            <button type="button" onclick="saveRememberPasswordSetting()" class="w-full bg-blue-600 text-white py-2 rounded-lg mb-3">💾 Simpan Pengaturan Ingat Password</button>
             <p class="text-xs font-semibold text-gray-700 mb-2">Ubah Password</p><input type="password" id="input-new-admin-password" class="w-full px-3 py-2 border rounded-lg mb-2 text-sm" placeholder="Password admin baru"><input type="password" id="input-new-settings-password" class="w-full px-3 py-2 border rounded-lg mb-3 text-sm" placeholder="Password pengaturan baru"><button type="button" onclick="savePasswords()" class="w-full bg-amber-500 text-white py-2 rounded-lg">🔑 Simpan Password</button></div>
           <button type="button" onclick="closeSettingsModal()" class="w-full mt-3 bg-gray-200 text-gray-700 py-2 rounded-lg">Tutup</button>
         </div>
@@ -567,7 +566,8 @@
     <script>
         const SPREADSHEET_ID = "1RFxZ6uY1CrDSxKd6GeMLSOD7QwZBd66jqZsvxfnkbXk";
         const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6wvTMY2c9rZkKnu_Z5PdjaSDlUpyOgnAGl94awsD1cNoky9uEY8DZ8NEOhwOmCQ/exec";
-        let SCRIPT_URL = localStorage.getItem('perpus_script_url') || DEFAULT_SCRIPT_URL;
+        const SCRIPT_URL = DEFAULT_SCRIPT_URL;
+        try { localStorage.removeItem('perpus_script_url'); } catch(e) {}
         let ADMIN_PASSWORD = localStorage.getItem('perpus_admin_password') || '123';
         let SETTINGS_PASSWORD = localStorage.getItem('perpus_settings_password') || '456';
         
@@ -589,11 +589,6 @@
         let scannerAbsenProcessing = false;
 
         window.addEventListener('DOMContentLoaded', () => {
-            const rememberStatus = localStorage.getItem('perpus_admin_remember') === 'true';
-            if (rememberStatus) {
-                isAdminLoggedIn = true;
-                localStorage.setItem('perpus_admin_logged', 'true');
-            }
 
             updateAdminUI();
             updateConnectionStatus();
@@ -1004,25 +999,60 @@
         function escapeAttribute(value) { return escapeHtml(value); }
 
         function openSettingsModal() {
-            if (!isAdminLoggedIn) return;
-            document.getElementById('input-script-url').value = SCRIPT_URL;
-            document.getElementById('input-settings-password').value = '';
-            document.getElementById('settings-remember-admin').checked =
-                localStorage.getItem('perpus_admin_remember') === 'true';
-            document.getElementById('input-new-admin-password').value = '';
-            document.getElementById('input-new-settings-password').value = '';
-            document.getElementById('settings-password-error').classList.add('hidden');
-            document.getElementById('settings-password-gate').classList.remove('hidden');
-            document.getElementById('settings-content').classList.add('hidden');
-            document.getElementById('settings-modal').classList.remove('hidden');
-            setTimeout(()=>document.getElementById('input-settings-password').focus(),100);
+            if (!isAdminLoggedIn) {
+                openLoginModal();
+                return;
+            }
+
+            const modal = document.getElementById('settings-modal');
+            if (!modal) {
+                showModal('Error', 'Panel Pengaturan tidak ditemukan.');
+                return;
+            }
+
+            const rememberSettings = localStorage.getItem('perpus_settings_remember') === 'true';
+            const settingsPasswordInput = document.getElementById('input-settings-password');
+            const rememberSettingsCheckbox = document.getElementById('remember-settings-checkbox');
+            const rememberAdminCheckbox = document.getElementById('settings-remember-admin');
+            const newAdminInput = document.getElementById('input-new-admin-password');
+            const newSettingsInput = document.getElementById('input-new-settings-password');
+            const passwordError = document.getElementById('settings-password-error');
+            const gate = document.getElementById('settings-password-gate');
+            const content = document.getElementById('settings-content');
+
+            if (settingsPasswordInput) {
+                settingsPasswordInput.value = rememberSettings
+                    ? (localStorage.getItem('perpus_settings_remembered_password') || '')
+                    : '';
+            }
+            if (rememberSettingsCheckbox) rememberSettingsCheckbox.checked = rememberSettings;
+            if (rememberAdminCheckbox) {
+                rememberAdminCheckbox.checked =
+                    localStorage.getItem('perpus_admin_remember') === 'true';
+            }
+            if (newAdminInput) newAdminInput.value = '';
+            if (newSettingsInput) newSettingsInput.value = '';
+            if (passwordError) passwordError.classList.add('hidden');
+            if (gate) gate.classList.remove('hidden');
+            if (content) content.classList.add('hidden');
+
+            modal.classList.remove('hidden');
+            setTimeout(() => settingsPasswordInput?.focus(), 100);
         }
         function closeSettingsModal(){ document.getElementById('settings-modal').classList.add('hidden'); }
         function verifySettingsPassword(){
-            if(document.getElementById('input-settings-password').value!==SETTINGS_PASSWORD){document.getElementById('settings-password-error').classList.remove('hidden');return;}
+            const password = document.getElementById('input-settings-password').value;
+            const remember = document.getElementById('remember-settings-checkbox').checked;
+            if(password !== SETTINGS_PASSWORD){document.getElementById('settings-password-error').classList.remove('hidden');return;}
+            if (remember) {
+                localStorage.setItem('perpus_settings_remember', 'true');
+                localStorage.setItem('perpus_settings_remembered_password', password);
+            } else {
+                localStorage.removeItem('perpus_settings_remember');
+                localStorage.removeItem('perpus_settings_remembered_password');
+            }
             document.getElementById('settings-password-error').classList.add('hidden'); document.getElementById('settings-password-gate').classList.add('hidden'); document.getElementById('settings-content').classList.remove('hidden');
         }
-        function saveSettings(event){event.preventDefault();const url=document.getElementById('input-script-url').value.trim();if(!url)return;SCRIPT_URL=url.replace(/\/$/,'');localStorage.setItem('perpus_script_url',SCRIPT_URL);closeSettingsModal();showModal('Berhasil','Link Apps Script berhasil disimpan.');}
         function saveRememberPasswordSetting() {
             const enabled = document.getElementById('settings-remember-admin').checked;
 
@@ -1057,6 +1087,9 @@
             if (settingsBaru) {
                 SETTINGS_PASSWORD = settingsBaru;
                 localStorage.setItem('perpus_settings_password', SETTINGS_PASSWORD);
+                if (localStorage.getItem('perpus_settings_remember') === 'true') {
+                    localStorage.setItem('perpus_settings_remembered_password', SETTINGS_PASSWORD);
+                }
             }
             document.getElementById('input-new-admin-password').value = '';
             document.getElementById('input-new-settings-password').value = '';
@@ -1778,30 +1811,11 @@
   const loader=document.getElementById('spreadsheet-loading');
   const text=document.getElementById('spreadsheet-loading-text');
   function msg(x){if(text)text.textContent=x}
-  async function readSettings(){
-    msg('Mengambil Pengaturan...');
-    const id=(typeof SPREADSHEET_ID!=='undefined' && SPREADSHEET_ID) ? SPREADSHEET_ID : '';
-    if(!id) throw new Error('SPREADSHEET_ID tidak ditemukan.');
-    const u='https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&sheet=Pengaturan&range=B1:B2';
-    const r=await fetch(u);
-    if(!r.ok) throw new Error('Gagal membaca sheet Pengaturan.');
-    const raw=await r.text();
-    const clean=raw.replace(/^[\s\S]*?setResponse\(/,'').replace(/\);?\s*$/,'');
-    const j=JSON.parse(clean), rows=(j.table&&j.table.rows)||[];
-    const val=i=>String((rows[i]&&rows[i].c&&rows[i].c[0]&&(rows[i].c[0].v??rows[i].c[0].f))||'').trim();
-    const app=val(0).replace(/\/$/,''), drive=val(1);
-    if(!app) throw new Error('Pengaturan!B1 kosong.');
-    if(!drive) throw new Error('Pengaturan!B2 kosong.');
-    window.SCRIPT_URL=app;
-    window.DRIVE_FOLDER_URL=drive;
-    // support top-level let bindings where possible
-    try { SCRIPT_URL=app; } catch(e) {}
-    msg('Memuat aplikasi...');
-  }
   window.addEventListener('load', async function(){
     try{
-      await readSettings();
-      // Existing app may already be loaded. Briefly keep loader while UI renders.
+      msg('Memuat aplikasi...');
+      // URL Apps Script sudah ditetapkan di dalam kode aplikasi.
+      // Sheet Pengaturan hanya dipakai untuk Folder Drive pada sisi Code.gs.
       setTimeout(()=>{if(loader)loader.style.display='none'},400);
     }catch(e){
       console.error(e);
