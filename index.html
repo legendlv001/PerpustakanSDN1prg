@@ -859,49 +859,48 @@
             showModal("Berhasil", "Semua data offline berhasil disinkronkan!");
         }
 
-        async function processOfflineQueue() {
-            if (offlineQueue.length === 0) return;
-            let remainingQueue = [];
-            for (let item of offlineQueue) {
-                try {
-                    let url = `${SCRIPT_URL}?action=${item.action}&sheetName=${item.sheetName}`;
-                    if (item.row) url += `&row=${item.row}`;
-                    
-                    await fetch(url, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        body: JSON.stringify(item.payload)
-                    });
-                } catch (e) {
-                    console.error("Gagal sinkron item:", e);
-                    remainingQueue.push(item);
-                }
-            }
-            offlineQueue = remainingQueue;
-            localStorage.setItem('perpus_offline_queue', JSON.stringify(offlineQueue));
-            updateConnectionStatus();
+        async function sendCrudRequest(action, sheetName, payload, row = null) {
+            if (!navigator.onLine) throw new Error('Tidak ada koneksi internet.');
+            let url = `${SCRIPT_URL}?action=${encodeURIComponent(action)}&sheetName=${encodeURIComponent(sheetName)}`;
+            if (row !== null && row !== undefined) url += `&row=${encodeURIComponent(row)}`;
+            if (action !== 'delete') url += `&payload=${encodeURIComponent(JSON.stringify(payload))}`;
+            const response = await fetch(url, { method: 'GET', cache: 'no-store' });
+            if (!response.ok) throw new Error(`Server HTTP ${response.status}`);
+            const text = await response.text();
+            let result;
+            try { result = JSON.parse(text); } catch (e) { throw new Error('Server tidak mengembalikan JSON yang valid.'); }
+            if (!result.success) throw new Error(result.message || 'Data gagal disimpan ke Spreadsheet.');
+            return result;
         }
 
-        function queueOrSendRequest(action, sheetName, payload, row = null) {
-            if (navigator.onLine) {
-                let url = `${SCRIPT_URL}?action=${action}&sheetName=${sheetName}`;
-                if (row) url += `&row=${row}`;
+        async function processOfflineQueue() {
+            if (!offlineQueue.length || !navigator.onLine) return;
+            const pending = [...offlineQueue];
+            const remaining = [];
+            for (const item of pending) {
+                try { await sendCrudRequest(item.action, item.sheetName, item.payload, item.row); }
+                catch (e) { console.error('Gagal sinkron item:', e); remaining.push(item); }
+            }
+            offlineQueue = remaining;
+            localStorage.setItem('perpus_offline_queue', JSON.stringify(offlineQueue));
+            updateConnectionStatus();
+            if (pending.length && remaining.length === 0) await loadAllData();
+        }
 
-                fetch(url, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify(payload)
-                }).then(() => {
-                    setTimeout(() => loadAllData(), 1500);
-                }).catch(() => {
-                    offlineQueue.push({ action, sheetName, payload, row });
-                    localStorage.setItem('perpus_offline_queue', JSON.stringify(offlineQueue));
-                    updateConnectionStatus();
-                });
-            } else {
-                offlineQueue.push({ action, sheetName, payload, row });
+        async function queueOrSendRequest(action, sheetName, payload, row = null) {
+            const item = { action, sheetName, payload, row };
+            if (!navigator.onLine) {
+                offlineQueue.push(item);
                 localStorage.setItem('perpus_offline_queue', JSON.stringify(offlineQueue));
                 updateConnectionStatus();
+                return { success: false, queued: true, message: 'Offline. Data masuk antrean.' };
+            }
+            try { return await sendCrudRequest(action, sheetName, payload, row); }
+            catch (e) {
+                offlineQueue.push(item);
+                localStorage.setItem('perpus_offline_queue', JSON.stringify(offlineQueue));
+                updateConnectionStatus();
+                throw e;
             }
         }
 
@@ -1298,14 +1297,23 @@
         }
         function hapusScanAbsen(i){scanAbsenSelectedMurid.splice(i,1);renderScanAbsenBatch();}
         function clearScanAbsenBatch(){scanAbsenSelectedMurid=[];renderScanAbsenBatch();}
-        function selesaiScanAbsen(){
+        async function selesaiScanAbsen(){
             if(!scanAbsenSelectedMurid.length){showModal('Peringatan','Belum ada siswa yang discan.');return;}
             scannerAbsenProcessing=true;
             const simpan=[...scanAbsenSelectedMurid];
-            const waktuStr=new Date().toLocaleString();
-            const finish=()=>{scanAbsenSelectedMurid=[];renderScanAbsenBatch();closeScannerModal();render();showModal('Berhasil',`Absensi berhasil dicatat untuk ${simpan.length} siswa.`);scannerAbsenProcessing=false;};
-            const saveNext=(i)=>{if(i>=simpan.length){localStorage.setItem('perpus_cache_absen',JSON.stringify(appData.absensi));finish();return;}const m=simpan[i];const nama=m.col3||m.col1||'';const nis=m.col4||m.col2||'';const kelas=m.col5||m.col3||'';appData.absensi.unshift({col1:nama,col2:nis,col3:waktuStr,col4:'Membaca / Berhitung',col5:kelas});queueOrSendRequest('add','absen',[nama,nis,waktuStr,'Membaca / Berhitung',kelas]);saveNext(i+1);};
-            if(html5QrCode&&html5QrCode.isScanning) html5QrCode.stop().then(()=>saveNext(0)).catch(()=>saveNext(0)); else saveNext(0);
+            try {
+                if(html5QrCode&&html5QrCode.isScanning){ try{await html5QrCode.stop();}catch(e){} }
+                const waktuStr=new Date().toLocaleString();
+                for(const m of simpan){
+                    const nama=m.col3||m.col1||''; const nis=m.col4||m.col2||''; const kelas=m.col5||m.col3||'';
+                    await queueOrSendRequest('add','absen',[nama,nis,waktuStr,'Membaca / Berhitung',kelas]);
+                    appData.absensi.unshift({col1:nama,col2:nis,col3:waktuStr,col4:'Membaca / Berhitung',col5:kelas});
+                }
+                localStorage.setItem('perpus_cache_absen',JSON.stringify(appData.absensi));
+                scanAbsenSelectedMurid=[]; renderScanAbsenBatch(); closeScannerModal(); render(); await loadAllData();
+                showModal('Berhasil',`Absensi berhasil tersimpan ke Spreadsheet untuk ${simpan.length} siswa.`);
+            } catch(e) { showModal('Gagal Menyimpan','Sebagian/seluruh absen belum tersimpan. Data yang gagal tetap masuk antrean.\n\n'+(e.message||e)); }
+            finally { scannerAbsenProcessing=false; }
         }
 
         function stopActiveScannerAndProcess(nis) {
@@ -1375,18 +1383,21 @@
 
         function closeFormAbsenModal() { document.getElementById('form-absen-modal').classList.add('hidden'); }
 
-        function saveAbsenManual(event) {
+        async function saveAbsenManual(event) {
             event.preventDefault();
             if (manualAbsenSelectedMurid.length===0) { showModal('Peringatan','Pilih minimal satu siswa.'); return; }
             const waktuStr=new Date().toLocaleString();
-            manualAbsenSelectedMurid.forEach(m=>{
-                const nama=m.col3||m.col1||''; const nis=m.col4||m.col2||''; const kelas=m.col5||m.col3||'';
-                appData.absensi.unshift({col1:nama,col2:nis,col3:waktuStr,col4:'Membaca / Berhitung',col5:kelas});
-                queueOrSendRequest('add','absen',[nama,nis,waktuStr,'Membaca / Berhitung',kelas]);
-            });
-            localStorage.setItem('perpus_cache_absen',JSON.stringify(appData.absensi));
-            closeFormAbsenModal(); render();
-            showModal('Berhasil',`Absensi berhasil dicatat untuk ${manualAbsenSelectedMurid.length} siswa.`);
+            const selected = [...manualAbsenSelectedMurid];
+            try {
+                for (const m of selected) {
+                    const nama=m.col3||m.col1||''; const nis=m.col4||m.col2||''; const kelas=m.col5||m.col3||'';
+                    await queueOrSendRequest('add','absen',[nama,nis,waktuStr,'Membaca / Berhitung',kelas]);
+                    appData.absensi.unshift({col1:nama,col2:nis,col3:waktuStr,col4:'Membaca / Berhitung',col5:kelas});
+                }
+                localStorage.setItem('perpus_cache_absen',JSON.stringify(appData.absensi));
+                closeFormAbsenModal(); render(); await loadAllData();
+                showModal('Berhasil','Absensi berhasil tersimpan ke Spreadsheet.');
+            } catch (e) { showModal('Gagal Menyimpan','Absensi belum tersimpan ke Spreadsheet. Data tetap dipertahankan di antrean.\n\n'+(e.message||e)); }
         }
 
         function openFormTugasModal() {
@@ -1497,7 +1508,7 @@
             container.innerHTML = html;
         }
 
-        function saveTugasBatch(event) {
+        async function saveTugasBatch(event) {
             event.preventDefault();
             const deskripsi = document.getElementById('input-deskripsi-tugas').value.trim();
             if (!deskripsi) {
@@ -1515,18 +1526,19 @@
             const waktuStr = new Date().toLocaleString();
             const taskLabel = deskripsi;
 
-            batchSelectedMurid.forEach(m => {
-                let namaM = m.col3 || m.col1 || '';
-                let kodeM = m.col4 || m.col2 || '';
-                let kelasM = m.col5 || m.col3 || '';
-
-                appData.absensi.unshift({ col1: namaM, col2: kodeM, col3: waktuStr, col4: taskLabel, col5: kelasM });
-                queueOrSendRequest('add', 'absen', [namaM, kodeM, waktuStr, taskLabel, kelasM]);
-            });
-
-            localStorage.setItem('perpus_cache_absen', JSON.stringify(appData.absensi));
-            render();
-            showModal("Berhasil", `Tugas "${deskripsi}" berhasil dicatat untuk ${batchSelectedMurid.length} siswa sekaligus!`);
+            const selected = [...batchSelectedMurid];
+            try {
+                for (const m of selected) {
+                    let namaM = m.col3 || m.col1 || '';
+                    let kodeM = m.col4 || m.col2 || '';
+                    let kelasM = m.col5 || m.col3 || '';
+                    await queueOrSendRequest('add', 'absen', [namaM, kodeM, waktuStr, taskLabel, kelasM]);
+                    appData.absensi.unshift({ col1: namaM, col2: kodeM, col3: waktuStr, col4: taskLabel, col5: kelasM });
+                }
+                localStorage.setItem('perpus_cache_absen', JSON.stringify(appData.absensi));
+                render(); await loadAllData();
+                showModal("Berhasil", `Tugas "${deskripsi}" berhasil tersimpan ke Spreadsheet untuk ${selected.length} siswa.`);
+            } catch(e) { showModal("Gagal Menyimpan", "Tugas belum tersimpan ke Spreadsheet. Data tetap ada di antrean.\n\n"+(e.message||e)); }
         }
 
         let manualTransaksiSelectedMurid = [];
@@ -1573,25 +1585,28 @@
 
         function closeFormTransaksiModal() { document.getElementById('form-transaksi-modal').classList.add('hidden'); }
 
-        function saveTransaksiManual(event) {
+        async function saveTransaksiManual(event) {
             event.preventDefault();
             const buku = document.getElementById('input-buku-transaksi').value.trim();
             if (!buku) { showModal('Peringatan', 'Judul buku wajib diisi.'); return; }
             if (!manualTransaksiSelectedMurid.length) { showModal('Peringatan', 'Pilih minimal satu siswa.'); return; }
             const tglStr = new Date().toLocaleDateString();
-            manualTransaksiSelectedMurid.forEach(m => {
-                const nama = m.col3 || m.col1 || '';
-                const nis = m.col4 || m.col2 || '';
-                const kelas = m.col5 || m.col3 || '';
-                appData.transaksi.unshift({ col1:nama, col2:buku, col3:tglStr, col4:nis, col5:'Belum Dikembalikan', col6:kelas });
-                queueOrSendRequest('add','pinjam',[nama,buku,tglStr,nis,'Belum Dikembalikan',kelas]);
-            });
-            localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
-            closeFormTransaksiModal(); render();
-            showModal('Berhasil', `Peminjaman dicatat untuk ${manualTransaksiSelectedMurid.length} siswa.`);
+            const selected = [...manualTransaksiSelectedMurid];
+            try {
+                for (const m of selected) {
+                    const nama = m.col3 || m.col1 || '';
+                    const nis = m.col4 || m.col2 || '';
+                    const kelas = m.col5 || m.col3 || '';
+                    await queueOrSendRequest('add','pinjam',[nama,buku,tglStr,nis,'Belum Dikembalikan',kelas]);
+                    appData.transaksi.unshift({ col1:nama, col2:buku, col3:tglStr, col4:nis, col5:'Belum Dikembalikan', col6:kelas });
+                }
+                localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
+                closeFormTransaksiModal(); render(); await loadAllData();
+                showModal('Berhasil','Peminjaman berhasil tersimpan ke Spreadsheet.');
+            } catch (e) { showModal('Gagal Menyimpan','Peminjaman belum tersimpan ke Spreadsheet. Data tetap dipertahankan di antrean.\n\n'+(e.message||e)); }
         }
 
-        function prosesAbsenByNIS(nisInput, kegiatanInput) {
+        async function prosesAbsenByNIS(nisInput, kegiatanInput) {
             if (!nisInput) return;
             const muridDitemukan = appData.murid.find(m => (m.col4 || m.col2).toString().trim() === nisInput.toString().trim());
 
@@ -1604,15 +1619,16 @@
             const kelasMurid = muridDitemukan.col5 || muridDitemukan.col3 || '';
             const waktuStr = new Date().toLocaleString();
             
-            appData.absensi.unshift({ col1: namaMurid, col2: nisInput, col3: waktuStr, col4: kegiatanInput, col5: kelasMurid });
-            localStorage.setItem('perpus_cache_absen', JSON.stringify(appData.absensi));
-            render();
-
-            queueOrSendRequest('add', 'absen', [namaMurid, nisInput, waktuStr, kegiatanInput, kelasMurid]);
-            showModal("Berhasil", "Dicatat untuk: " + namaMurid + " (Kelas " + kelasMurid + ") — Kegiatan: " + kegiatanInput);
+            try {
+                await queueOrSendRequest('add', 'absen', [namaMurid, nisInput, waktuStr, kegiatanInput, kelasMurid]);
+                appData.absensi.unshift({ col1: namaMurid, col2: nisInput, col3: waktuStr, col4: kegiatanInput, col5: kelasMurid });
+                localStorage.setItem('perpus_cache_absen', JSON.stringify(appData.absensi));
+                render(); await loadAllData();
+                showModal("Berhasil", "Absen tersimpan ke Spreadsheet: " + namaMurid);
+            } catch(e) { showModal("Gagal Menyimpan", "Absen belum masuk Spreadsheet.\n\n"+(e.message||e)); }
         }
 
-        function prosesTransaksiByBukuDanNIS(nisInput, bukuInput) {
+        async function prosesTransaksiByBukuDanNIS(nisInput, bukuInput) {
             if (!nisInput || !bukuInput) return;
             const muridDitemukan = appData.murid.find(m => (m.col4 || m.col2).toString().trim() === nisInput.toString().trim());
             if (!muridDitemukan) {
@@ -1624,12 +1640,13 @@
             const kelas = muridDitemukan.col5 || muridDitemukan.col3 || '';
             const tglStr = new Date().toLocaleDateString();
             
-            appData.transaksi.unshift({ col1: nama, col2: bukuInput, col3: tglStr, col4: nisInput, col5: "Belum Dikembalikan", col6: kelas });
-            localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
-            render();
-
-            queueOrSendRequest('add', 'pinjam', [nama, bukuInput, tglStr, nisInput, "Belum Dikembalikan", kelas]);
-            showModal("Berhasil", "Data peminjaman tersimpan untuk " + nama + " (Kelas " + kelas + ")!");
+            try {
+                await queueOrSendRequest('add', 'pinjam', [nama, bukuInput, tglStr, nisInput, "Belum Dikembalikan", kelas]);
+                appData.transaksi.unshift({ col1: nama, col2: bukuInput, col3: tglStr, col4: nisInput, col5: "Belum Dikembalikan", col6: kelas });
+                localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
+                render(); await loadAllData();
+                showModal("Berhasil", "Peminjaman tersimpan ke Spreadsheet untuk " + nama + ".");
+            } catch(e) { showModal("Gagal Menyimpan", "Peminjaman belum masuk Spreadsheet.\n\n"+(e.message||e)); }
         }
 
         function prosesTransaksiByNIS(nisInput) {
@@ -1809,20 +1826,7 @@
 <script>
 (function(){
   const loader=document.getElementById('spreadsheet-loading');
-  const text=document.getElementById('spreadsheet-loading-text');
-  function msg(x){if(text)text.textContent=x}
-  window.addEventListener('load', async function(){
-    try{
-      msg('Memuat aplikasi...');
-      // URL Apps Script sudah ditetapkan di dalam kode aplikasi.
-      // Sheet Pengaturan hanya dipakai untuk Folder Drive pada sisi Code.gs.
-      setTimeout(()=>{if(loader)loader.style.display='none'},400);
-    }catch(e){
-      console.error(e);
-      msg('Gagal: '+e.message);
-      setTimeout(()=>{if(loader)loader.style.display='none'},2500);
-    }
-  });
+  window.addEventListener('load',function(){ setTimeout(()=>{if(loader)loader.style.display='none';},500); });
 })();
 </script>
 </body>
