@@ -324,7 +324,7 @@
                 </div>
                 <div class="flex space-x-2">
                     <button type="button" onclick="closeFormAbsenModal()" class="bg-gray-300 text-gray-700 w-1/2 py-2 rounded-lg hover:bg-gray-400 transition">Batal</button>
-                    <button type="submit" class="bg-emerald-600 text-white w-1/2 py-2 rounded-lg hover:bg-emerald-700 transition">Simpan</button>
+                    <button id="btn-simpan-absen" type="submit" class="bg-emerald-600 text-white w-1/2 py-2 rounded-lg hover:bg-emerald-700 transition">Simpan</button>
                 </div>
             </form>
         </div>
@@ -401,7 +401,7 @@
                 </div>
                 <div class="flex space-x-2">
                     <button type="button" onclick="closeFormTransaksiModal()" class="bg-gray-300 text-gray-700 w-1/2 py-2 rounded-lg hover:bg-gray-400 transition">Batal</button>
-                    <button type="submit" class="bg-emerald-600 text-white w-1/2 py-2 rounded-lg hover:bg-emerald-700 transition">Simpan</button>
+                    <button id="btn-simpan-transaksi" type="submit" class="bg-emerald-600 text-white w-1/2 py-2 rounded-lg hover:bg-emerald-700 transition">Simpan</button>
                 </div>
             </form>
         </div>
@@ -1447,7 +1447,12 @@
 
         async function saveAbsenManual(event) {
             event.preventDefault();
+            if (savingAbsen) return;
             if (manualAbsenSelectedMurid.length===0) { showModal('Peringatan','Pilih minimal satu siswa.'); return; }
+            const btn = document.getElementById('btn-simpan-absen');
+            savingAbsen = true;
+            if (btn) { btn.disabled = true; btn.innerText = '⏳ Menyimpan...'; }
+            showSavingLoading('Menyimpan absen ke Spreadsheet...');
             const waktuStr=new Date().toLocaleString();
             const selected = [...manualAbsenSelectedMurid];
             try {
@@ -1458,8 +1463,15 @@
                 }
                 localStorage.setItem('perpus_cache_absen',JSON.stringify(appData.absensi));
                 closeFormAbsenModal(); render(); await loadAllData();
+                hideSavingLoading();
                 showModal('Berhasil','Absensi berhasil tersimpan ke Spreadsheet.');
-            } catch (e) { showModal('Gagal Menyimpan','Absensi belum tersimpan ke Spreadsheet. Data tetap dipertahankan di antrean.\n\n'+(e.message||e)); }
+            } catch (e) {
+                hideSavingLoading();
+                showModal('Gagal Menyimpan','Absensi belum tersimpan ke Spreadsheet.\n\n'+(e.message||e));
+            } finally {
+                savingAbsen = false;
+                if (btn) { btn.disabled = false; btn.innerText = 'Simpan'; }
+            }
         }
 
         function openFormTugasModal() {
@@ -1649,9 +1661,14 @@
 
         async function saveTransaksiManual(event) {
             event.preventDefault();
+            if (savingPinjam) return;
             const buku = document.getElementById('input-buku-transaksi').value.trim();
             if (!buku) { showModal('Peringatan', 'Judul buku wajib diisi.'); return; }
             if (!manualTransaksiSelectedMurid.length) { showModal('Peringatan', 'Pilih minimal satu siswa.'); return; }
+            const btn = document.getElementById('btn-simpan-transaksi');
+            savingPinjam = true;
+            if (btn) { btn.disabled = true; btn.innerText = '⏳ Menyimpan...'; }
+            showSavingLoading('Menyimpan peminjaman ke Spreadsheet...');
             const tglStr = new Date().toLocaleDateString();
             const selected = [...manualTransaksiSelectedMurid];
             try {
@@ -1664,51 +1681,53 @@
                 }
                 localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
                 closeFormTransaksiModal(); render(); await loadAllData();
+                hideSavingLoading();
                 showModal('Berhasil','Peminjaman berhasil tersimpan ke Spreadsheet.');
-            } catch (e) { showModal('Gagal Menyimpan','Peminjaman belum tersimpan ke Spreadsheet. Data tetap dipertahankan di antrean.\n\n'+(e.message||e)); }
+            } catch (e) {
+                hideSavingLoading();
+                showModal('Gagal Menyimpan','Peminjaman belum tersimpan ke Spreadsheet. Data tetap dipertahankan di antrean.\n\n'+(e.message||e));
+            } finally {
+                savingPinjam = false;
+                if (btn) { btn.disabled = false; btn.innerText = 'Simpan'; }
+            }
         }
 
         async function prosesAbsenByNIS(nisInput, kegiatanInput) {
-            if (!nisInput) return;
+            if (!nisInput || savingAbsen) return;
             const muridDitemukan = appData.murid.find(m => (m.col4 || m.col2).toString().trim() === nisInput.toString().trim());
-
-            if (!muridDitemukan) {
-                showModal("Gagal", "Kode Siswa " + nisInput + " tidak terdaftar dalam Data Murid!");
-                return;
-            }
-
+            if (!muridDitemukan) { showModal("Gagal", "Kode Siswa " + nisInput + " tidak terdaftar dalam Data Murid!"); return; }
+            savingAbsen = true;
+            showSavingLoading('Menyimpan absen ke Spreadsheet...');
             const namaMurid = muridDitemukan.col3 || muridDitemukan.col1 || '';
             const kelasMurid = muridDitemukan.col5 || muridDitemukan.col3 || '';
             const waktuStr = new Date().toLocaleString();
-            
             try {
                 await queueOrSendRequest('add', 'absen', [namaMurid, nisInput, waktuStr, kegiatanInput, kelasMurid]);
                 appData.absensi.unshift({ col1: namaMurid, col2: nisInput, col3: waktuStr, col4: kegiatanInput, col5: kelasMurid });
                 localStorage.setItem('perpus_cache_absen', JSON.stringify(appData.absensi));
-                render(); await loadAllData();
+                render(); await loadAllData(); hideSavingLoading();
                 showModal("Berhasil", "Absen tersimpan ke Spreadsheet: " + namaMurid);
-            } catch(e) { showModal("Gagal Menyimpan", "Absen belum masuk Spreadsheet.\n\n"+(e.message||e)); }
+            } catch(e) { hideSavingLoading(); showModal("Gagal Menyimpan", "Absen belum masuk Spreadsheet.\n\n"+(e.message||e)); }
+            finally { savingAbsen = false; }
         }
 
         async function prosesTransaksiByBukuDanNIS(nisInput, bukuInput) {
-            if (!nisInput || !bukuInput) return;
+            if (!nisInput || !bukuInput || savingPinjam) return;
             const muridDitemukan = appData.murid.find(m => (m.col4 || m.col2).toString().trim() === nisInput.toString().trim());
-            if (!muridDitemukan) {
-                showModal("Gagal", "Kode Siswa " + nisInput + " tidak terdaftar dalam Data Murid!");
-                return;
-            }
-
+            if (!muridDitemukan) { showModal("Gagal", "Kode Siswa " + nisInput + " tidak terdaftar dalam Data Murid!"); return; }
+            savingPinjam = true;
+            showSavingLoading('Menyimpan peminjaman ke Spreadsheet...');
             const nama = muridDitemukan.col3 || muridDitemukan.col1 || '';
             const kelas = muridDitemukan.col5 || muridDitemukan.col3 || '';
             const tglStr = new Date().toLocaleDateString();
-            
             try {
                 await queueOrSendRequest('add', 'pinjam', [nama, bukuInput, tglStr, nisInput, "Belum Dikembalikan", kelas]);
                 appData.transaksi.unshift({ col1: nama, col2: bukuInput, col3: tglStr, col4: nisInput, col5: "Belum Dikembalikan", col6: kelas });
                 localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
-                render(); await loadAllData();
+                render(); await loadAllData(); hideSavingLoading();
                 showModal("Berhasil", "Peminjaman tersimpan ke Spreadsheet untuk " + nama + ".");
-            } catch(e) { showModal("Gagal Menyimpan", "Peminjaman belum masuk Spreadsheet.\n\n"+(e.message||e)); }
+            } catch(e) { hideSavingLoading(); showModal("Gagal Menyimpan", "Peminjaman belum masuk Spreadsheet.\n\n"+(e.message||e)); }
+            finally { savingPinjam = false; }
         }
 
         function prosesTransaksiByNIS(nisInput) {
@@ -1835,13 +1854,38 @@
             }
         }
     
+        let savingAbsen = false;
+        let savingPinjam = false;
+
+        function showSavingLoading(text) {
+            const loader = document.getElementById('spreadsheet-loading');
+            const label = document.getElementById('spreadsheet-loading-text');
+            if (label) label.innerText = text || 'Menyimpan data...';
+            if (loader) {
+                loader.style.display = 'flex';
+                loader.style.zIndex = '2147483647';
+            }
+        }
+
+        function hideSavingLoading() {
+            const loader = document.getElementById('spreadsheet-loading');
+            if (loader) loader.style.display = 'none';
+        }
+
         function resetPenyimpananLokal() {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
-            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
-            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [] };
-            offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
-            showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
+            try {
+                ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
+                appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [] };
+                offlineQueue = [];
+                closeSettingsModal();
+                showSavingLoading('Memuat ulang aplikasi...');
+                setTimeout(() => window.location.reload(), 300);
+            } catch (err) {
+                hideSavingLoading();
+                showModal('Gagal', 'Penyimpanan lokal tidak dapat di-reset: ' + (err.message || err));
+            }
         }
 
         function openImageLightbox(src) {
