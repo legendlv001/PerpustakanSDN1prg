@@ -4,10 +4,186 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PERPUS SDN 1 PARIGI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.tailwindcss.com">
+        function resetPenyimpananLokal() {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
+            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
+            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [] };
+            offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
+            showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
+        }
+
+        function openImageLightbox(src) {
+            if (!src) return;
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            img.src = src;
+            box.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageLightbox() {
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            box.classList.add('hidden');
+            img.src = '';
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('click', function(event) {
+            const img = event.target.closest('img');
+            if (!img) return;
+            const src = img.currentSrc || img.src || '';
+            if (!src || img.id === 'image-lightbox-img') return;
+            if (img.closest('#image-lightbox')) return;
+            // Hanya foto dari area dokumentasi agar gambar UI lain tidak ikut fullscreen.
+            if (img.closest('[id*="dokumentasi"], .dokumentasi, .documentation')) {
+                event.preventDefault();
+                openImageLightbox(src);
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') closeImageLightbox();
+        });
+
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
+        function resetPenyimpananLokal() {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
+            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
+            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [] };
+            offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
+            showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
+        }
+
+        function openImageLightbox(src) {
+            if (!src) return;
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            img.src = src;
+            box.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageLightbox() {
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            box.classList.add('hidden');
+            img.src = '';
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('click', function(event) {
+            const img = event.target.closest('img');
+            if (!img) return;
+            const src = img.currentSrc || img.src || '';
+            if (!src || img.id === 'image-lightbox-img') return;
+            if (img.closest('#image-lightbox')) return;
+            // Hanya foto dari area dokumentasi agar gambar UI lain tidak ikut fullscreen.
+            if (img.closest('[id*="dokumentasi"], .dokumentasi, .documentation')) {
+                event.preventDefault();
+                openImageLightbox(src);
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') closeImageLightbox();
+        });
+
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js">
+        function resetPenyimpananLokal() {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
+            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
+            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [] };
+            offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
+            showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
+        }
+
+        function openImageLightbox(src) {
+            if (!src) return;
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            img.src = src;
+            box.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageLightbox() {
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            box.classList.add('hidden');
+            img.src = '';
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('click', function(event) {
+            const img = event.target.closest('img');
+            if (!img) return;
+            const src = img.currentSrc || img.src || '';
+            if (!src || img.id === 'image-lightbox-img') return;
+            if (img.closest('#image-lightbox')) return;
+            // Hanya foto dari area dokumentasi agar gambar UI lain tidak ikut fullscreen.
+            if (img.closest('[id*="dokumentasi"], .dokumentasi, .documentation')) {
+                event.preventDefault();
+                openImageLightbox(src);
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') closeImageLightbox();
+        });
+
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+        function resetPenyimpananLokal() {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
+            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
+            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [] };
+            offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
+            showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
+        }
+
+        function openImageLightbox(src) {
+            if (!src) return;
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            img.src = src;
+            box.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageLightbox() {
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            box.classList.add('hidden');
+            img.src = '';
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('click', function(event) {
+            const img = event.target.closest('img');
+            if (!img) return;
+            const src = img.currentSrc || img.src || '';
+            if (!src || img.id === 'image-lightbox-img') return;
+            if (img.closest('#image-lightbox')) return;
+            // Hanya foto dari area dokumentasi agar gambar UI lain tidak ikut fullscreen.
+            if (img.closest('[id*="dokumentasi"], .dokumentasi, .documentation')) {
+                event.preventDefault();
+                openImageLightbox(src);
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') closeImageLightbox();
+        });
+
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f0fdf4; }
@@ -50,11 +226,6 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between">
-
-    <div id="image-lightbox" class="image-lightbox hidden" onclick="closeImageLightbox()">
-        <button class="image-lightbox-close" onclick="closeImageLightbox()">&times;</button>
-        <img id="image-lightbox-img" src="" alt="Pratinjau Foto">
-    </div>
 
     <div id="custom-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 rounded-2xl w-full max-w-sm text-center shadow-2xl">
@@ -189,12 +360,12 @@
                     </div>
 
                     <div id="tugas-manual-section" class="border p-3 rounded-xl bg-purple-50/50 mb-3 hidden">
-                        <label class="block text-xs font-semibold text-gray-700 mb-1">Pilih Kelas</label>
-                        <select id="tugas-kelas-manual" onchange="renderTugasManualSiswa()" class="w-full px-3 py-2 border rounded-lg text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500"><option value="">-- Pilih Kelas --</option></select>
-                        <div id="tugas-manual-siswa" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto"></div>
-                    </div>
+  <label class="block text-xs font-semibold text-gray-700 mb-1">Pilih Kelas</label>
+  <select id="tugas-kelas-manual" onchange="renderTugasManualSiswa()" class="w-full px-3 py-2 border rounded-lg text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500"><option value="">-- Pilih Kelas --</option></select>
+  <div id="tugas-manual-siswa" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto"></div>
+</div>
 
-                    <div class="mt-3">
+<div class="mt-3">
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Daftar Siswa Terpilih (<span id="count-selected-siswa">0</span>)</label>
                         <div id="selected-siswa-container" class="border rounded-xl p-2 max-h-36 overflow-y-auto bg-gray-50 text-sm space-y-1">
                             <p class="text-gray-400 text-xs italic text-center py-2">Belum ada siswa yang dipilih.</p>
@@ -394,36 +565,35 @@
                 </div>
                 <div id="table-transaksi-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data transaksi...</div>
             </div>
-
-            <!-- Modal Pengaturan -->
-            <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-              <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5">
-                <div id="settings-password-gate">
-                  <h3 class="text-lg font-bold text-emerald-800 text-center mb-2">⚙️ Pengaturan</h3>
-                  <p class="text-xs text-gray-500 text-center mb-4">Masukkan password pengaturan</p>
-                  <input type="password" id="input-settings-password" placeholder="Password" class="w-full px-3 py-2.5 border rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                  <label class="flex items-center gap-2 text-sm text-gray-700 mb-3 cursor-pointer"><input type="checkbox" id="remember-settings-checkbox" class="w-4 h-4"><span>Ingat password</span></label>
-                  <p id="settings-password-error" class="text-rose-600 text-xs mb-3 hidden text-center">Password salah!</p>
-                  <div class="flex gap-2"><button type="button" onclick="closeSettingsModal()" class="w-1/2 bg-gray-200 text-gray-700 py-2 rounded-lg">Batal</button><button type="button" onclick="verifySettingsPassword()" class="w-1/2 bg-emerald-600 text-white py-2 rounded-lg">Buka</button></div>
-                </div>
-                <div id="settings-content" class="hidden">
-                  <h3 class="text-lg font-bold text-emerald-800 text-center mb-4">⚙️ Pengaturan</h3>
-                  <div class="border-t pt-3">
-                    <p class="text-xs font-semibold text-gray-700 mb-2">Keamanan Login</p>
-                    <label class="flex items-center gap-2 text-sm text-gray-700 mb-3 cursor-pointer">
-                      <input type="checkbox" id="settings-remember-admin" class="w-4 h-4">
-                      <span>Ingat password admin di perangkat ini</span>
-                    </label>
-                    <p class="text-xs font-semibold text-gray-700 mb-2">Ubah Password</p><input type="password" id="input-new-admin-password" class="w-full px-3 py-2 border rounded-lg mb-2 text-sm" placeholder="Password admin baru"><input type="password" id="input-new-settings-password" class="w-full px-3 py-2 border rounded-lg mb-3 text-sm" placeholder="Password pengaturan baru"><button type="button" onclick="savePasswords()" class="w-full bg-amber-500 text-white py-2 rounded-lg">🔑 Simpan Password</button></div>
-                  <div class="mt-4 border-t pt-3">
-                    <p class="text-xs font-semibold text-gray-700 mb-2">Penyimpanan Perangkat</p>
-                    <p class="text-xs text-gray-500 mb-2">Hapus cache dan antrean offline. Data Spreadsheet tidak dihapus.</p>
-                    <button type="button" onclick="resetPenyimpananLokal()" class="w-full bg-rose-600 hover:bg-rose-700 text-white py-2 rounded-lg">🗑️ Reset Penyimpanan Lokal</button>
-                  </div>
-                  <button type="button" onclick="closeSettingsModal()" class="w-full mt-3 bg-gray-200 text-gray-700 py-2 rounded-lg">Tutup</button>
-                </div>
-              </div>
-            </div>
+    <!-- Modal Pengaturan -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5">
+        <div id="settings-password-gate">
+          <h3 class="text-lg font-bold text-emerald-800 text-center mb-2">⚙️ Pengaturan</h3>
+          <p class="text-xs text-gray-500 text-center mb-4">Masukkan password pengaturan</p>
+          <input type="password" id="input-settings-password" placeholder="Password" class="w-full px-3 py-2.5 border rounded-lg mb-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <label class="flex items-center gap-2 text-sm text-gray-700 mb-3 cursor-pointer"><input type="checkbox" id="remember-settings-checkbox" class="w-4 h-4"><span>Ingat password</span></label>
+          <p id="settings-password-error" class="text-rose-600 text-xs mb-3 hidden text-center">Password salah!</p>
+          <div class="flex gap-2"><button type="button" onclick="closeSettingsModal()" class="w-1/2 bg-gray-200 text-gray-700 py-2 rounded-lg">Batal</button><button type="button" onclick="verifySettingsPassword()" class="w-1/2 bg-emerald-600 text-white py-2 rounded-lg">Buka</button></div>
+        </div>
+        <div id="settings-content" class="hidden">
+          <h3 class="text-lg font-bold text-emerald-800 text-center mb-4">⚙️ Pengaturan</h3>
+          <div class="border-t pt-3">
+            <p class="text-xs font-semibold text-gray-700 mb-2">Keamanan Login</p>
+            <label class="flex items-center gap-2 text-sm text-gray-700 mb-3 cursor-pointer">
+              <input type="checkbox" id="settings-remember-admin" class="w-4 h-4">
+              <span>Ingat password admin di perangkat ini</span>
+            </label>
+            <p class="text-xs font-semibold text-gray-700 mb-2">Ubah Password</p><input type="password" id="input-new-admin-password" class="w-full px-3 py-2 border rounded-lg mb-2 text-sm" placeholder="Password admin baru"><input type="password" id="input-new-settings-password" class="w-full px-3 py-2 border rounded-lg mb-3 text-sm" placeholder="Password pengaturan baru"><button type="button" onclick="savePasswords()" class="w-full bg-amber-500 text-white py-2 rounded-lg">🔑 Simpan Password</button></div>
+          <div class="mt-4 border-t pt-3">
+            <p class="text-xs font-semibold text-gray-700 mb-2">Penyimpanan Perangkat</p>
+            <p class="text-xs text-gray-500 mb-2">Hapus cache dan antrean offline. Data Spreadsheet tidak dihapus.</p>
+            <button type="button" onclick="resetPenyimpananLokal()" class="w-full bg-rose-600 hover:bg-rose-700 text-white py-2 rounded-lg">🗑️ Reset Penyimpanan Lokal</button>
+          </div>
+          <button type="button" onclick="closeSettingsModal()" class="w-full mt-3 bg-gray-200 text-gray-700 py-2 rounded-lg">Tutup</button>
+        </div>
+      </div>
+    </div>
 
         </main>
     </div>
@@ -458,50 +628,6 @@
         let scanAbsenSelectedMurid = [];
         let manualAbsenSelectedMurid = [];
         let scannerAbsenProcessing = false;
-        let savingAbsen = false;
-        let savingPinjam = false;
-
-        function resetPenyimpananLokal() {
-            if (!isAdminLoggedIn) { openLoginModal(); return; }
-            if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
-            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
-            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [] };
-            offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
-            showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
-        }
-
-        function openImageLightbox(src) {
-            if (!src) return;
-            const box = document.getElementById('image-lightbox');
-            const img = document.getElementById('image-lightbox-img');
-            img.src = src;
-            box.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeImageLightbox() {
-            const box = document.getElementById('image-lightbox');
-            const img = document.getElementById('image-lightbox-img');
-            if (box) box.classList.add('hidden');
-            if (img) img.src = '';
-            document.body.style.overflow = '';
-        }
-
-        document.addEventListener('click', function(event) {
-            const img = event.target.closest('img');
-            if (!img) return;
-            const src = img.currentSrc || img.src || '';
-            if (!src || img.id === 'image-lightbox-img') return;
-            if (img.closest('#image-lightbox')) return;
-            if (img.closest('[id*="dokumentasi"], .dokumentasi, .documentation')) {
-                event.preventDefault();
-                openImageLightbox(src);
-            }
-        });
-
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') closeImageLightbox();
-        });
 
         async function loadPengaturanDariSheet() {
             const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=Pengaturan&range=B1:B2`;
@@ -544,65 +670,48 @@
         function updateConnectionStatus() {
             const badge = document.getElementById('connection-badge');
             const queueCountSpan = document.getElementById('offline-queue-count');
-            if (queueCountSpan) queueCountSpan.innerText = offlineQueue.length;
+            queueCountSpan.innerText = offlineQueue.length;
             
-            if (badge) {
-                if (navigator.onLine) {
-                    badge.classList.add('hidden');
-                    if (offlineQueue.length > 0) {
-                        processOfflineQueue();
-                    }
-                } else {
-                    badge.classList.remove('hidden');
+            if (navigator.onLine) {
+                badge.classList.add('hidden');
+                if (offlineQueue.length > 0) {
+                    processOfflineQueue();
                 }
+            } else {
+                badge.classList.remove('hidden');
             }
         }
 
         async function fetchSheetCSV(sheetName) {
+            const cacheKey = `perpus_cache_${sheetName}`;
             try {
-                const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+                const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
                 const response = await fetch(url, { cache: 'no-store' });
-                if (!response.ok) throw new Error('Network response not ok');
-                const csvText = await response.text();
-                const parsed = parseCSV(csvText);
-                localStorage.setItem(`perpus_cache_${sheetName}`, JSON.stringify(parsed));
-                return parsed;
+                if (!response.ok) throw new Error(`Gagal membaca sheet ${sheetName}.`);
+                const raw = await response.text();
+                const jsonText = raw.replace(/^[\s\S]*?setResponse\(/, '').replace(/\);?\s*$/, '');
+                const json = JSON.parse(jsonText);
+                const rows = (json.table && json.table.rows) || [];
+                const result = rows
+                    .filter(r => r && r.c && r.c.some(c => c && c.v !== null && c.v !== undefined && String(c.v).trim() !== ''))
+                    .map(r => {
+                        const c = r.c || [];
+                        return {
+                            col1: c[0] && c[0].v != null ? String(c[0].v) : '',
+                            col2: c[1] && c[1].v != null ? String(c[1].v) : '',
+                            col3: c[2] && c[2].v != null ? String(c[2].v) : '',
+                            col4: c[3] && c[3].v != null ? String(c[3].v) : '',
+                            col5: c[4] && c[4].v != null ? String(c[4].v) : '',
+                            col6: c[5] && c[5].v != null ? String(c[5].v) : ''
+                        };
+                    });
+                localStorage.setItem(cacheKey, JSON.stringify(result));
+                return result;
             } catch (err) {
                 console.warn(`Menggunakan data cache offline untuk tab ${sheetName}:`, err);
-                const cached = localStorage.getItem(`perpus_cache_${sheetName}`);
+                const cached = localStorage.getItem(cacheKey);
                 return cached ? JSON.parse(cached) : [];
             }
-        }
-
-        function parseCSV(text) {
-            let lines = text.split('\n');
-            let result = [];
-            for (let i = 1; i < lines.length; i++) {
-                let line = lines[i].trim();
-                if (!line) continue;
-                let row = [];
-                let inQuotes = false;
-                let entry = '';
-                for (let char of line) {
-                    if (char === '"') inQuotes = !inQuotes;
-                    else if (char === ',' && !inQuotes) {
-                        row.push(entry.trim().replace(/^"|"$/g, ''));
-                        entry = '';
-                    } else entry += char;
-                }
-                row.push(entry.trim().replace(/^"|"$/g, ''));
-                if (row[0] && row[0] !== '') {
-                    result.push({ 
-                        col1: row[0] || '', 
-                        col2: row[1] || '', 
-                        col3: row[2] || '', 
-                        col4: row[3] || '', 
-                        col5: row[4] || '',
-                        col6: row[5] || ''
-                    });
-                }
-            }
-            return result;
         }
 
         function render() {
@@ -759,11 +868,11 @@
                     dokumentasiContainer.innerHTML = dokumentasiTerurut.map(({ d, index }) => {
                         const waktu = d.col1 || '';
                         const judul = escapeHtml(d.col2 || 'Dokumentasi');
-                        const jenis = (d.col3 || '').toLowerCase();
-                        const url = d.col4 || '';
-                        const media = (jenis === 'foto')
-                            ? `<img src="${escapeAttribute(url)}" alt="${escapeAttribute(judul)}" class="w-full h-48 object-cover rounded-lg border cursor-pointer">`
-                            : `<a href="${escapeAttribute(url)}" target="_blank" rel="noopener noreferrer" class="block bg-blue-50 border border-blue-200 text-blue-700 p-4 rounded-lg break-all hover:bg-blue-100">🔗 ${judul}<br><span class="text-xs text-blue-500 underline">${escapeHtml(url)}</span></a>`;
+                        const jenis = String(d.col3 || '').trim().toLowerCase();
+                        const url = String(d.col4 || '').trim();
+                        const media = jenis === 'foto'
+                            ? `<img src="${escapeAttribute(url)}" alt="${escapeAttribute(judul)}" class="w-full h-48 object-cover rounded-lg border">`
+                            : `<a href="${escapeAttribute(url)}" target="_blank" rel="noopener noreferrer" class="block bg-blue-50 border border-blue-200 text-blue-700 p-4 rounded-lg break-all hover:bg-blue-100">🔗 ${judul}<br><span class="text-xs">${escapeHtml(url)}</span></a>`;
                         const hapus = isAdminLoggedIn ? `<button onclick="hapusDokumentasi(${index})" class="mt-3 bg-rose-600 text-white px-3 py-1 rounded text-xs">Hapus</button>` : '';
                         return `<div class="bg-white p-4 rounded-xl shadow-sm">${media}<div class="mt-3 font-semibold text-gray-800">${judul}</div><div class="text-xs text-gray-400 mt-1">${escapeHtml(waktu)}</div>${hapus}</div>`;
                     }).join('');
@@ -891,6 +1000,8 @@
 
         function logoutAdmin() {
             isAdminLoggedIn = false;
+            // Logout hanya mengakhiri sesi. Password yang dipilih untuk diingat
+            // tetap tersimpan sampai pengguna menonaktifkan fitur Ingat Password.
             localStorage.removeItem('perpus_admin_logged');
             showPage('dashboard');
             updateAdminUI();
@@ -926,6 +1037,7 @@
                 document.getElementById('btn-settings')?.classList.add('hidden');
             }
         }
+
 
         function escapeHtml(value) {
             return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -986,6 +1098,21 @@
                 localStorage.removeItem('perpus_settings_remembered_password');
             }
             document.getElementById('settings-password-error').classList.add('hidden'); document.getElementById('settings-password-gate').classList.add('hidden'); document.getElementById('settings-content').classList.remove('hidden');
+        }
+        function saveRememberPasswordSetting() {
+            const enabled = document.getElementById('settings-remember-admin').checked;
+
+            if (enabled) {
+                // Gunakan password admin aktif sebagai password yang diingat.
+                localStorage.setItem('perpus_admin_remember', 'true');
+                localStorage.setItem('perpus_admin_remembered_password', ADMIN_PASSWORD);
+                showModal('Berhasil', 'Password admin akan diingat di perangkat ini.');
+            } else {
+                localStorage.removeItem('perpus_admin_remember');
+                localStorage.removeItem('perpus_admin_remembered_password');
+                document.getElementById('admin-password-input').value = '';
+                showModal('Berhasil', 'Fitur ingat password telah dinonaktifkan.');
+            }
         }
 
         function savePasswords() {
@@ -1059,16 +1186,20 @@
                     });
                     const raw = await response.text();
                     let result;
-                    try { result = JSON.parse(raw); } catch (e) { throw new Error('Apps Script tidak mengembalikan JSON. Pastikan deployment Web App sudah diperbarui.'); }
+                    try { result = JSON.parse(raw); } catch (e) { throw new Error('Apps Script tidak mengembalikan JSON. Pastikan deployment Code.gs sudah diperbarui sebagai Web App dan aksesnya dapat digunakan semua orang.'); }
                     if (!response.ok || !result.success || !result.url) throw new Error(result.message || 'Upload foto gagal.');
                     url = result.url;
                 }
                 const data = { col1: waktu, col2: judul, col3: jenis, col4: url };
                 appData.dokumentasi.unshift(data);
                 localStorage.setItem('perpus_cache_dokumentasi', JSON.stringify(appData.dokumentasi));
-                
+                // Untuk FOTO, Apps Script uploadDokumentasi sudah menyimpan 1 baris.
+                // Jadi jangan kirim action 'add' lagi agar tidak duplikat.
                 if (jenis === 'link') {
-                    await queueOrSendRequest('add', 'Dokumentasi', [waktu, judul, jenis, url]);
+                    if (!url) throw new Error('Link dokumentasi masih kosong.');
+                    try { new URL(url); } catch (e) { throw new Error('Format link tidak valid. Gunakan link lengkap, misalnya https://...'); }
+                    await queueOrSendRequest('add', 'Dokumentasi', [waktu, judul, 'link', url]);
+                    await loadAllData();
                 }
                 closeFormDokumentasiModal();
                 render();
@@ -1081,7 +1212,6 @@
                 btn.innerText = '💾 Simpan';
             }
         }
-
         function prepareImageForUpload(file, judul) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -1106,6 +1236,14 @@
             });
         }
 
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(String(reader.result).split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
         async function hapusDokumentasi(index) {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             if (!confirm('Hapus dokumentasi ini?')) return;
@@ -1302,6 +1440,7 @@
             const btn = document.getElementById('btn-simpan-absen');
             savingAbsen = true;
             if (btn) { btn.disabled = true; btn.innerText = '⏳ Menyimpan...'; }
+            showSavingLoading('Menyimpan absen ke Spreadsheet...');
             const waktuStr=new Date().toLocaleString();
             const selected = [...manualAbsenSelectedMurid];
             try {
@@ -1312,8 +1451,10 @@
                 }
                 localStorage.setItem('perpus_cache_absen',JSON.stringify(appData.absensi));
                 closeFormAbsenModal(); render(); await loadAllData();
+                hideSavingLoading();
                 showModal('Berhasil','Absensi berhasil tersimpan ke Spreadsheet.');
             } catch (e) {
+                hideSavingLoading();
                 showModal('Gagal Menyimpan','Absensi belum tersimpan ke Spreadsheet.\n\n'+(e.message||e));
             } finally {
                 savingAbsen = false;
@@ -1398,6 +1539,8 @@
                 renderBatchMuridList();
             }
         }
+
+        function tambahNisBatchManual() { renderTugasManualSiswa(); }
 
         function removeBatchMurid(index) {
             batchSelectedMurid.splice(index, 1);
@@ -1513,6 +1656,7 @@
             const btn = document.getElementById('btn-simpan-transaksi');
             savingPinjam = true;
             if (btn) { btn.disabled = true; btn.innerText = '⏳ Menyimpan...'; }
+            showSavingLoading('Menyimpan peminjaman ke Spreadsheet...');
             const tglStr = new Date().toLocaleDateString();
             const selected = [...manualTransaksiSelectedMurid];
             try {
@@ -1525,8 +1669,10 @@
                 }
                 localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
                 closeFormTransaksiModal(); render(); await loadAllData();
+                hideSavingLoading();
                 showModal('Berhasil','Peminjaman berhasil tersimpan ke Spreadsheet.');
             } catch (e) {
+                hideSavingLoading();
                 showModal('Gagal Menyimpan','Peminjaman belum tersimpan ke Spreadsheet. Data tetap dipertahankan di antrean.\n\n'+(e.message||e));
             } finally {
                 savingPinjam = false;
@@ -1534,30 +1680,70 @@
             }
         }
 
+        async function prosesAbsenByNIS(nisInput, kegiatanInput) {
+            if (!nisInput || savingAbsen) return;
+            const muridDitemukan = appData.murid.find(m => (m.col4 || m.col2).toString().trim() === nisInput.toString().trim());
+            if (!muridDitemukan) { showModal("Gagal", "Kode Siswa " + nisInput + " tidak terdaftar dalam Data Murid!"); return; }
+            savingAbsen = true;
+            showSavingLoading('Menyimpan absen ke Spreadsheet...');
+            const namaMurid = muridDitemukan.col3 || muridDitemukan.col1 || '';
+            const kelasMurid = muridDitemukan.col5 || muridDitemukan.col3 || '';
+            const waktuStr = new Date().toLocaleString();
+            try {
+                await queueOrSendRequest('add', 'absen', [namaMurid, nisInput, waktuStr, kegiatanInput, kelasMurid]);
+                appData.absensi.unshift({ col1: namaMurid, col2: nisInput, col3: waktuStr, col4: kegiatanInput, col5: kelasMurid });
+                localStorage.setItem('perpus_cache_absen', JSON.stringify(appData.absensi));
+                render(); await loadAllData(); hideSavingLoading();
+                showModal("Berhasil", "Absen tersimpan ke Spreadsheet: " + namaMurid);
+            } catch(e) { hideSavingLoading(); showModal("Gagal Menyimpan", "Absen belum masuk Spreadsheet.\n\n"+(e.message||e)); }
+            finally { savingAbsen = false; }
+        }
+
+        async function prosesTransaksiByBukuDanNIS(nisInput, bukuInput) {
+            if (!nisInput || !bukuInput || savingPinjam) return;
+            const muridDitemukan = appData.murid.find(m => (m.col4 || m.col2).toString().trim() === nisInput.toString().trim());
+            if (!muridDitemukan) { showModal("Gagal", "Kode Siswa " + nisInput + " tidak terdaftar dalam Data Murid!"); return; }
+            savingPinjam = true;
+            showSavingLoading('Menyimpan peminjaman ke Spreadsheet...');
+            const nama = muridDitemukan.col3 || muridDitemukan.col1 || '';
+            const kelas = muridDitemukan.col5 || muridDitemukan.col3 || '';
+            const tglStr = new Date().toLocaleDateString();
+            try {
+                await queueOrSendRequest('add', 'pinjam', [nama, bukuInput, tglStr, nisInput, "Belum Dikembalikan", kelas]);
+                appData.transaksi.unshift({ col1: nama, col2: bukuInput, col3: tglStr, col4: nisInput, col5: "Belum Dikembalikan", col6: kelas });
+                localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
+                render(); await loadAllData(); hideSavingLoading();
+                showModal("Berhasil", "Peminjaman tersimpan ke Spreadsheet untuk " + nama + ".");
+            } catch(e) { hideSavingLoading(); showModal("Gagal Menyimpan", "Peminjaman belum masuk Spreadsheet.\n\n"+(e.message||e)); }
+            finally { savingPinjam = false; }
+        }
+
+        function prosesTransaksiByNIS(nisInput) {
+            const bukuInput = prompt("Masukkan Judul Buku yang Dipinjam:", "Buku Cerita");
+            if (bukuInput) {
+                prosesTransaksiByBukuDanNIS(nisInput, bukuInput);
+            }
+        }
+
         async function saveMurid(event) {
             event.preventDefault();
-            const idx = parseInt(document.getElementById('murid-index').value);
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            const index = parseInt(document.getElementById('murid-index').value);
             const nama = document.getElementById('input-nama-murid').value.trim();
             const nis = document.getElementById('input-nis-murid').value.trim();
             const kelas = document.getElementById('input-kelas-murid').value.trim();
-
-            if (idx >= 0) {
-                appData.murid[idx] = { col1: nama, col2: nis, col3: kelas, col4: nis, col5: kelas };
-                localStorage.setItem('perpus_cache_murid', JSON.stringify(appData.murid));
-                try { await queueOrSendRequest('edit', 'murid', [nama, nis, kelas, nis, kelas], idx + 2); }
-                catch(e) { showModal('Gagal Edit', e.message || String(e)); }
-            } else {
-                appData.murid.unshift({ col1: nama, col2: nis, col3: kelas, col4: nis, col5: kelas });
-                localStorage.setItem('perpus_cache_murid', JSON.stringify(appData.murid));
-                try { await queueOrSendRequest('add', 'murid', [nama, nis, kelas, nis, kelas]); }
-                catch(e) { showModal('Gagal Tambah', e.message || String(e)); }
-            }
-            closeFormMuridModal();
-            render();
-            await loadAllData();
+            const payload = ["", "", nama, nis, kelas];
+            try {
+                if (index >= 0) await queueOrSendRequest('edit', 'murid', payload, index + 2);
+                else await queueOrSendRequest('add', 'murid', payload);
+                await loadAllData();
+                closeFormMuridModal();
+                showModal('Berhasil', 'Data murid berhasil tersimpan ke Spreadsheet.');
+            } catch (e) { showModal('Gagal Menyimpan', e.message || String(e)); }
         }
 
         function editMurid(index) {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
             const m = appData.murid[index];
             document.getElementById('murid-index').value = index;
             document.getElementById('input-nama-murid').value = m.col3 || m.col1 || '';
@@ -1567,31 +1753,179 @@
             openFormMuridModal(true);
         }
 
-        async function hapusData(sheet, index) {
+        async function editAbsen(index) {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
-            if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) return;
-            if (sheet === 'murid') appData.murid.splice(index, 1);
-            else if (sheet === 'absen') appData.absensi.splice(index, 1);
-            else if (sheet === 'pinjam') appData.transaksi.splice(index, 1);
+            const a = appData.absensi[index];
+            const namaBaru = prompt("Edit Nama Siswa:", a.col1);
+            if (namaBaru === null) return;
+            const nisBaru = prompt("Edit Kode Siswa:", a.col2);
+            if (nisBaru === null) return;
+            const waktuBaru = prompt("Edit Waktu:", a.col3);
+            if (waktuBaru === null) return;
+            const kegiatanBaru = prompt("Edit Kegiatan / Tugas:", a.col4 || 'Membaca / Berhitung');
+            if (kegiatanBaru === null) return;
+            
+            let defaultKelas = a.col5 || '';
+            if (!defaultKelas && a.col4 && (a.col4.includes('/') || a.col4.includes('Kelas'))) {
+                defaultKelas = '';
+            }
+            if (!defaultKelas) {
+                let foundM = appData.murid.find(m => (m.col4 || m.col2).toString().trim() === nisBaru.toString().trim());
+                if (foundM) defaultKelas = foundM.col5 || foundM.col3;
+            }
+            const kelasBaru = prompt("Edit Kelas:", defaultKelas);
+            if (kelasBaru === null) return;
 
-            localStorage.setItem(`perpus_cache_${sheet}`, JSON.stringify(appData[sheet === 'murid' ? 'murid' : (sheet === 'absen' ? 'absensi' : 'transaksi')]));
-            try { await queueOrSendRequest('delete', sheet, {}, index + 2); }
-            catch(e) { showModal('Gagal Hapus', e.message || String(e)); }
+            appData.absensi[index] = { col1: namaBaru, col2: nisBaru, col3: waktuBaru, col4: kegiatanBaru, col5: kelasBaru };
+            localStorage.setItem('perpus_cache_absen', JSON.stringify(appData.absensi));
             render();
-            await loadAllData();
+
+            try { await queueOrSendRequest('edit', 'absen', [namaBaru, nisBaru, waktuBaru, kegiatanBaru, kelasBaru], index + 2); } catch(e) { showModal('Gagal Menyimpan', e.message || String(e)); return; }
+            showModal("Berhasil", "Data absen berhasil diperbarui!");
+        }
+
+        async function editTransaksi(index) {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            const t = appData.transaksi[index];
+            const namaBaru = prompt("Edit Nama Siswa:", t.col1);
+            if (namaBaru === null) return;
+            const bukuBaru = prompt("Edit Buku:", t.col2);
+            if (bukuBaru === null) return;
+            const tglBaru = prompt("Edit Tanggal:", t.col3);
+            if (tglBaru === null) return;
+            const nisBaru = prompt("Edit Kode Siswa:", t.col4 || '');
+            if (nisBaru === null) return;
+            const statusBaru = prompt("Edit Status (Belum Dikembalikan / Sudah Dikembalikan):", t.col5 || 'Belum Dikembalikan');
+            if (statusBaru === null) return;
+
+            let defaultKelas = t.col6 || '';
+            if (!defaultKelas) {
+                let foundM = appData.murid.find(m => (m.col4 || m.col2).toString().trim() === nisBaru.toString().trim());
+                if (foundM) defaultKelas = foundM.col5 || foundM.col3;
+            }
+            const kelasBaru = prompt("Edit Kelas:", defaultKelas);
+            if (kelasBaru === null) return;
+
+            appData.transaksi[index] = { col1: namaBaru, col2: bukuBaru, col3: tglBaru, col4: nisBaru, col5: statusBaru, col6: kelasBaru };
+            localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
+            render();
+
+            try { await queueOrSendRequest('edit', 'pinjam', [namaBaru, bukuBaru, tglBaru, nisBaru, statusBaru, kelasBaru], index + 2); } catch(e) { showModal('Gagal Menyimpan', e.message || String(e)); return; }
+            showModal("Berhasil", "Data peminjaman berhasil diperbarui!");
         }
 
         async function ubahStatusKembali(index) {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
-            const item = appData.transaksi[index];
-            item.col5 = 'Sudah Dikembalikan';
+            const t = appData.transaksi[index];
+            t.col5 = "Sudah Dikembalikan";
             localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
-            try {
-                await queueOrSendRequest('edit', 'pinjam', [item.col1, item.col2, item.col3, item.col4, 'Sudah Dikembalikan', item.col6], index + 2);
-            } catch(e) { showModal('Gagal Mengubah Status', e.message || String(e)); }
             render();
-            await loadAllData();
+
+            try { await queueOrSendRequest('edit', 'pinjam', [t.col1, t.col2, t.col3, t.col4 || '', "Sudah Dikembalikan", t.col6 || ''], index + 2); } catch(e) { showModal('Gagal Menyimpan', e.message || String(e)); return; }
+            showModal("Berhasil", "Buku berhasil dikembalikan!");
         }
+
+        async function hapusData(sheetName, index) {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+                if (sheetName === 'murid') appData.murid.splice(index, 1);
+                else if (sheetName === 'absen') appData.absensi.splice(index, 1);
+                else if (sheetName === 'pinjam') appData.transaksi.splice(index, 1);
+
+                localStorage.setItem('perpus_cache_murid', JSON.stringify(appData.murid));
+                localStorage.setItem('perpus_cache_absen', JSON.stringify(appData.absensi));
+                localStorage.setItem('perpus_cache_pinjam', JSON.stringify(appData.transaksi));
+                render();
+
+                try { await queueOrSendRequest('delete', sheetName, {}, index + 2); } catch(e) { showModal('Gagal Menghapus', e.message || String(e)); return; }
+                showModal("Berhasil", "Data berhasil dihapus!");
+            }
+        }
+    
+        let savingAbsen = false;
+        let savingPinjam = false;
+
+        function showSavingLoading(text) {
+            const loader = document.getElementById('spreadsheet-loading');
+            const label = document.getElementById('spreadsheet-loading-text');
+            if (label) label.innerText = text || 'Menyimpan data...';
+            if (loader) {
+                loader.style.display = 'flex';
+                loader.style.zIndex = '2147483647';
+            }
+        }
+
+        function hideSavingLoading() {
+            const loader = document.getElementById('spreadsheet-loading');
+            if (loader) loader.style.display = 'none';
+        }
+
+        function resetPenyimpananLokal() {
+            if (!isAdminLoggedIn) { openLoginModal(); return; }
+            if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
+            try {
+                ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
+                appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [] };
+                offlineQueue = [];
+                closeSettingsModal();
+                showSavingLoading('Memuat ulang aplikasi...');
+                setTimeout(() => window.location.reload(), 300);
+            } catch (err) {
+                hideSavingLoading();
+                showModal('Gagal', 'Penyimpanan lokal tidak dapat di-reset: ' + (err.message || err));
+            }
+        }
+
+        function openImageLightbox(src) {
+            if (!src) return;
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            img.src = src;
+            box.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageLightbox() {
+            const box = document.getElementById('image-lightbox');
+            const img = document.getElementById('image-lightbox-img');
+            box.classList.add('hidden');
+            img.src = '';
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('click', function(event) {
+            const img = event.target.closest('img');
+            if (!img) return;
+            const src = img.currentSrc || img.src || '';
+            if (!src || img.id === 'image-lightbox-img') return;
+            if (img.closest('#image-lightbox')) return;
+            // Hanya foto dari area dokumentasi agar gambar UI lain tidak ikut fullscreen.
+            if (img.closest('[id*="dokumentasi"], .dokumentasi, .documentation')) {
+                event.preventDefault();
+                openImageLightbox(src);
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') closeImageLightbox();
+        });
+
     </script>
+
+    <div id="image-lightbox" class="image-lightbox hidden" onclick="closeImageLightbox()">
+        <button class="image-lightbox-close" type="button" aria-label="Tutup" onclick="event.stopPropagation(); closeImageLightbox()">×</button>
+        <img id="image-lightbox-img" src="" alt="Foto dokumentasi" onclick="event.stopPropagation()">
+    </div>
+
+<div id="spreadsheet-loading" style="position:fixed;inset:0;background:#fff;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center">
+<img src="https://i.pinimg.com/originals/71/3a/32/713a3272124cc57ba9e9fb7f59e9ab3b.gif" style="width:150px;max-width:60vw" alt="Loading">
+<div id="spreadsheet-loading-text" style="margin-top:10px;font-family:Arial,sans-serif;font-weight:bold">Memuat data...</div></div>
+
+<script>
+(function(){
+  const loader=document.getElementById('spreadsheet-loading');
+  window.addEventListener('load',function(){ setTimeout(()=>{if(loader)loader.style.display='none';},500); });
+})();
+</script>
 </body>
 </html>
