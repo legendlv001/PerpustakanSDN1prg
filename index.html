@@ -715,6 +715,7 @@
         }
 
         function render() {
+            appData.transaksi = normalizePinjamRows(appData.transaksi);
             const filterMurid = document.getElementById('filter-murid').value.toLowerCase();
             const containerMurid = document.getElementById('table-murid-container');
             
@@ -881,7 +882,34 @@
 
             document.getElementById('stat-murid').innerText = appData.murid.length;
             document.getElementById('stat-absen').innerText = appData.absensi.length;
-            document.getElementById('stat-pinjam').innerText = appData.transaksi.filter(t => Object.values(t || {}).some(v => String(v ?? '').trim() !== '')).length;
+            document.getElementById('stat-pinjam').innerText = normalizePinjamRows(appData.transaksi).filter(t =>
+                String(t.col5 || '').trim().toLowerCase() !== 'sudah dikembalikan'
+            ).length;
+        }
+
+
+        function normalizePinjamRows(rows) {
+            const headerWords = ['nama','nama siswa','peminjam','nama peminjam','siswa'];
+            return (Array.isArray(rows) ? rows : []).filter((t, index) => {
+                const c1 = String(t && t.col1 || '').trim();
+                const c2 = String(t && t.col2 || '').trim();
+                const c3 = String(t && t.col3 || '').trim();
+                const c4 = String(t && t.col4 || '').trim();
+                const c5 = String(t && t.col5 || '').trim();
+                const c6 = String(t && t.col6 || '').trim();
+                const a = c1.toLowerCase(), b = c2.toLowerCase(), e = c5.toLowerCase();
+
+                // Tolak semua header, termasuk header yang terbaca sebagai data.
+                if (headerWords.includes(a)) return false;
+                if ((a.includes('nama') || a.includes('peminjam')) &&
+                    (b === 'buku' || b.includes('judul buku') || b.includes('nama buku'))) return false;
+                if (index === 0 && (b === 'buku' || c3 === 'tanggal' || e === 'status')) return false;
+
+                // Tolak baris kosong/placeholder: transaksi harus punya minimal nama dan buku.
+                if (!c1 || !c2) return false;
+
+                return true;
+            });
         }
 
         async function loadAllData() {
