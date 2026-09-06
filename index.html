@@ -683,17 +683,18 @@
         }
 
         async function fetchSheetCSV(sheetName) {
+            const cacheKey = `perpus_cache_${String(sheetName).toLowerCase()}`;
             try {
                 const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
                 const response = await fetch(url, { cache: 'no-store' });
                 if (!response.ok) throw new Error('Network response not ok');
                 const csvText = await response.text();
                 const parsed = parseCSV(csvText);
-                localStorage.setItem(`perpus_cache_${sheetName}`, JSON.stringify(parsed));
+                localStorage.setItem(cacheKey, JSON.stringify(parsed));
                 return parsed;
             } catch (err) {
                 console.warn(`Menggunakan data cache offline untuk tab ${sheetName}:`, err);
-                const cached = localStorage.getItem(`perpus_cache_${sheetName}`);
+                const cached = localStorage.getItem(cacheKey);
                 return cached ? JSON.parse(cached) : [];
             }
         }
@@ -882,12 +883,23 @@
                     ];
                     dokumentasiContainer.innerHTML = dokumentasiTerurut.map(({ d, index }) => {
                         const waktu = d.col1 || '';
-                        const judul = escapeHtml(d.col2 || 'Dokumentasi');
-                        const jenis = (d.col3 || '').toLowerCase();
-                        const url = d.col4 || '';
+                        const judulRaw = d.col2 || 'Dokumentasi';
+                        const judul = escapeHtml(judulRaw);
+                        const jenis = (d.col3 || '').toLowerCase().trim();
+
+                        // Utamakan kolom D (col4), tetapi tetap baca kolom berikutnya
+                        // jika Apps Script/Spreadsheet menggeser URL ke kolom E/F.
+                        let url = String(d.col4 || '').trim();
+                        if (!url || url === judulRaw) url = String(d.col5 || '').trim();
+                        if (!url || url === judulRaw) url = String(d.col6 || '').trim();
+
                         const media = jenis === 'foto'
-                            ? `<img src="${escapeAttribute(url)}" alt="${escapeAttribute(judul)}" class="w-full h-48 object-cover rounded-lg border">`
-                            : `<a href="${escapeAttribute(url)}" target="_blank" rel="noopener noreferrer" class="block bg-blue-50 border border-blue-200 text-blue-700 p-4 rounded-lg break-all hover:bg-blue-100">🔗 ${judul}<br><span class="text-xs">${escapeHtml(url)}</span></a>`;
+                            ? (url
+                                ? `<img src="${escapeAttribute(url)}" alt="${escapeAttribute(judulRaw)}" class="w-full h-48 object-cover rounded-lg border">`
+                                : `<div class="w-full h-48 rounded-lg border bg-gray-50 flex items-center justify-center text-sm text-gray-400">URL foto belum tersedia</div>`)
+                            : (url
+                                ? `<a href="${escapeAttribute(url)}" target="_blank" rel="noopener noreferrer" class="block bg-blue-50 border border-blue-200 text-blue-700 p-4 rounded-lg break-all hover:bg-blue-100">🔗 ${judul}<br><span class="text-xs">${escapeHtml(url)}</span></a>`
+                                : `<div class="block bg-amber-50 border border-amber-200 text-amber-700 p-4 rounded-lg">⚠️ Link belum terbaca dari Spreadsheet.</div>`);
                         const hapus = isAdminLoggedIn ? `<button onclick="hapusDokumentasi(${index})" class="mt-3 bg-rose-600 text-white px-3 py-1 rounded text-xs">Hapus</button>` : '';
                         return `<div class="bg-white p-4 rounded-xl shadow-sm">${media}<div class="mt-3 font-semibold text-gray-800">${judul}</div><div class="text-xs text-gray-400 mt-1">${escapeHtml(waktu)}</div>${hapus}</div>`;
                     }).join('');
@@ -1215,6 +1227,15 @@
                 }
                 closeFormDokumentasiModal();
                 render();
+                // Pastikan tampilan membaca ulang baris yang benar-benar tersimpan di Spreadsheet.
+                if (navigator.onLine) {
+                    try {
+                        appData.dokumentasi = await fetchSheetCSV('Dokumentasi');
+                        render();
+                    } catch (refreshError) {
+                        console.warn('Gagal menyegarkan Dokumentasi setelah penyimpanan:', refreshError);
+                    }
+                }
                 showModal('Berhasil', jenis === 'foto' ? 'Foto berhasil diunggah dan dicatat.' : 'Link berhasil disimpan.');
             } catch (err) {
                 console.error(err);
