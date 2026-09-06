@@ -723,7 +723,11 @@
                         col3: row[2] || '', 
                         col4: row[3] || '', 
                         col5: row[4] || '',
-                        col6: row[5] || ''
+                        col6: row[5] || '',
+                        col7: row[6] || '',
+                        col8: row[7] || '',
+                        col9: row[8] || '',
+                        col10: row[9] || ''
                     });
                 }
             }
@@ -877,29 +881,33 @@
                 if (!appData.dokumentasi.length) {
                     dokumentasiContainer.innerHTML = '<div class="col-span-full bg-white p-6 rounded-xl shadow-sm text-center text-gray-400">Belum ada dokumentasi.</div>';
                 } else {
-                    const dokumentasiTerurut = [
-                        ...appData.dokumentasi.map((d, index) => ({ d, index })).filter(x => (x.d.col3 || '').toLowerCase() !== 'foto'),
-                        ...appData.dokumentasi.map((d, index) => ({ d, index })).filter(x => (x.d.col3 || '').toLowerCase() === 'foto')
-                    ];
-                    dokumentasiContainer.innerHTML = dokumentasiTerurut.map(({ d, index }) => {
+                    // Tampilkan sesuai urutan asli data dari Spreadsheet.
+                    // Tidak lagi memisahkan/mengurutkan link dan foto.
+                    dokumentasiContainer.innerHTML = appData.dokumentasi.map((d, index) => {
                         const waktu = d.col1 || '';
                         const judulRaw = d.col2 || 'Dokumentasi';
                         const judul = escapeHtml(judulRaw);
                         const jenis = (d.col3 || '').toLowerCase().trim();
 
-                        // Utamakan kolom D (col4), tetapi tetap baca kolom berikutnya
-                        // jika Apps Script/Spreadsheet menggeser URL ke kolom E/F.
-                        let url = String(d.col4 || '').trim();
-                        if (!url || url === judulRaw) url = String(d.col5 || '').trim();
-                        if (!url || url === judulRaw) url = String(d.col6 || '').trim();
+                        // Ambil URL dari kolom mana pun yang berisi alamat web.
+                        // Tetap memprioritaskan kolom D (col4) sesuai format Dokumentasi.
+                        const nilaiKolom = [
+                            d.col4, d.col5, d.col6, d.col7, d.col8, d.col9, d.col10
+                        ].map(v => String(v || '').trim()).filter(Boolean);
+
+                        let url = nilaiKolom.find(v => /^https?:\/\//i.test(v));
+                        if (!url) {
+                            url = nilaiKolom.find(v => /^www\./i.test(v));
+                        }
+                        if (url && /^www\./i.test(url)) url = 'https://' + url;
 
                         const media = jenis === 'foto'
                             ? (url
-                                ? `<img src="${escapeAttribute(url)}" alt="${escapeAttribute(judulRaw)}" class="w-full h-48 object-cover rounded-lg border">`
-                                : `<div class="w-full h-48 rounded-lg border bg-gray-50 flex items-center justify-center text-sm text-gray-400">URL foto belum tersedia</div>`)
+                                ? `<img src="${escapeAttribute(url)}" alt="${escapeAttribute(judulRaw)}" class="w-full h-48 object-cover rounded-lg border" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden');"><div class="hidden w-full h-48 rounded-lg border bg-gray-50 flex items-center justify-center text-sm text-gray-400">Foto tidak dapat ditampilkan</div>`
+                                : `<div class="w-full h-48 rounded-lg border bg-gray-50 flex items-center justify-center text-sm text-gray-400">Foto belum tersedia</div>`)
                             : (url
-                                ? `<a href="${escapeAttribute(url)}" target="_blank" rel="noopener noreferrer" class="block bg-blue-50 border border-blue-200 text-blue-700 p-4 rounded-lg break-all hover:bg-blue-100">🔗 ${judul}<br><span class="text-xs">${escapeHtml(url)}</span></a>`
-                                : `<div class="block bg-amber-50 border border-amber-200 text-amber-700 p-4 rounded-lg">⚠️ Link belum terbaca dari Spreadsheet.</div>`);
+                                ? `<a href="${escapeAttribute(url)}" target="_blank" rel="noopener noreferrer" title="Buka link" aria-label="Buka link" class="inline-flex items-center justify-center w-11 h-11 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xl hover:bg-blue-100 transition">🔗</a>`
+                                : `<div class="inline-flex items-center justify-center w-11 h-11 rounded-full bg-gray-50 border border-gray-200 text-gray-300 text-xl" title="Link belum terbaca">🔗</div>`);
                         const hapus = isAdminLoggedIn ? `<button onclick="hapusDokumentasi(${index})" class="mt-3 bg-rose-600 text-white px-3 py-1 rounded text-xs">Hapus</button>` : '';
                         return `<div class="bg-white p-4 rounded-xl shadow-sm">${media}<div class="mt-3 font-semibold text-gray-800">${judul}</div><div class="text-xs text-gray-400 mt-1">${escapeHtml(waktu)}</div>${hapus}</div>`;
                     }).join('');
