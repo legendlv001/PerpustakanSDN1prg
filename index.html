@@ -627,7 +627,40 @@
         let html5TugasQrCode = null;
         let scanAbsenSelectedMurid = [];
         let manualAbsenSelectedMurid = [];
-        let scannerAbsenProcessing = false;
+        
+let scannerAbsenProcessing = false;
+
+/**
+ * Format tampilan tanggal menjadi contoh: 7 Sep 2026.
+ * Data asli tetap disimpan apa adanya; yang diubah hanya tampilannya.
+ */
+function formatTanggalIndonesia(value) {
+    if (value === null || value === undefined || String(value).trim() === '') return '';
+
+    const raw = String(value).trim();
+    const bulan = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+
+    // Format Indonesia: dd/mm/yyyy atau d/m/yyyy, termasuk jika diikuti jam.
+    let m = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+    if (m) {
+        const hari = Number(m[1]);
+        const bln = Number(m[2]);
+        const tahun = Number(m[3]);
+        if (hari >= 1 && hari <= 31 && bln >= 1 && bln <= 12) {
+            return `${hari} ${bulan[bln - 1]} ${tahun}`;
+        }
+    }
+
+    // Format ISO / tanggal yang dapat dibaca JavaScript.
+    const d = new Date(raw);
+    if (!Number.isNaN(d.getTime())) {
+        return `${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
+    }
+
+    // Jika format tidak dikenali, tampilkan nilai asli agar data tidak hilang.
+    return raw;
+}
+
 
         async function loadPengaturanDariSheet() {
             const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=Pengaturan&range=B1:B2`;
@@ -770,7 +803,7 @@
             let noAbsen = 1;
             appData.absensi.forEach((a, index) => {
                 let nisAbsen = a.col2 || '';
-                let waktuAbsen = a.col3 || '';
+                let waktuAbsen = formatTanggalIndonesia(a.col3 || '');
                 let kegiatanAbsen = a.col4 || 'Membaca / Berhitung';
                 let kelasAbsen = a.col5 || '';
 
@@ -833,12 +866,12 @@
                         htmlTransaksi += `<td class="p-2 text-center">${nisPinjam}</td>`;
                         htmlTransaksi += `<td class="p-2 text-center">${kelasPinjam || '-'}</td>`;
                         htmlTransaksi += `<td class="p-2 text-left">${t.col2}</td>`;
-                        htmlTransaksi += `<td class="p-2 text-center">${t.col3}</td>`;
+                        htmlTransaksi += `<td class="p-2 text-center">${formatTanggalIndonesia(t.col3)}</td>`;
                         htmlTransaksi += `<td class="p-2 text-center font-medium">${statusPinjam}</td>`;
                     } else {
                         htmlTransaksi += `<td class="p-2 text-center">${kelasPinjam || '-'}</td>`;
                         htmlTransaksi += `<td class="p-2 text-left">${t.col2}</td>`;
-                        htmlTransaksi += `<td class="p-2 text-center">${t.col3}</td>`;
+                        htmlTransaksi += `<td class="p-2 text-center">${formatTanggalIndonesia(t.col3)}</td>`;
                         htmlTransaksi += `<td class="p-2 text-center font-medium">${statusPinjam}</td>`;
                     }
                     if (isAdminLoggedIn) {
@@ -867,7 +900,7 @@
                         ...appData.dokumentasi.map((d, index) => ({ d, index })).filter(x => (x.d.col3 || '').toLowerCase() === 'foto')
                     ];
                     dokumentasiContainer.innerHTML = dokumentasiTerurut.map(({ d, index }) => {
-                        const waktu = d.col1 || '';
+                        const waktu = formatTanggalIndonesia(d.col1 || '');
                         const judul = escapeHtml(d.col2 || 'Dokumentasi');
                         const jenis = String(d.col3 || '').trim().toLowerCase();
                         const url = String(d.col4 || '').trim();
