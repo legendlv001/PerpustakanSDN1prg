@@ -8,8 +8,8 @@
         function resetPenyimpananLokal() {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
-            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
-            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [] };
+            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_cache_struktur','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
+            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [], struktur: [] };
             offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
             showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
         }
@@ -53,8 +53,8 @@
         function resetPenyimpananLokal() {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
-            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
-            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [] };
+            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_cache_struktur','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
+            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [], struktur: [] };
             offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
             showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
         }
@@ -98,8 +98,8 @@
         function resetPenyimpananLokal() {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
-            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
-            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [] };
+            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_cache_struktur','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
+            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [], struktur: [] };
             offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
             showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
         }
@@ -143,8 +143,8 @@
         function resetPenyimpananLokal() {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
-            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
-            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [] };
+            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_cache_struktur','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
+            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [], struktur: [] };
             offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
             showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
         }
@@ -494,11 +494,12 @@
         <nav class="bg-emerald-600 text-white p-4 shadow-lg sticky top-0 z-40">
             <div class="container mx-auto flex flex-wrap justify-between items-center gap-2">
                 <div class="flex items-center space-x-2 md:space-x-3">
-                    <h1 class="text-xl md:text-2xl whitespace-nowrap">📚 PERPUS SDN 1 PARIGI</h1>
+                    <h1 class="text-xl md:text-2xl whitespace-nowrap">📚 PERPUSTAKAAN SDN 1 PARIGI</h1>
                     <span id="connection-badge" class="bg-emerald-800 text-emerald-100 text-[9px] md:text-[10px] px-1.5 py-0.5 rounded font-medium border border-emerald-500/50 hidden shadow-inner">Offline</span>
                 </div>
                 <div id="nav-buttons" class="flex flex-wrap items-center gap-2">
                     <button onclick="showPage('dashboard')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">🏠 Beranda</button>
+                     <button onclick="showPage('struktur')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">🏫 Struktur Perpustakaan</button>
                     <button onclick="showPage('murid')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">👨‍🎓 Murid</button>
                     <button onclick="showPage('absen')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">📋 Absen</button>
                     <button onclick="showPage('transaksi')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">📖 Pinjam</button>
@@ -515,7 +516,7 @@
         <main class="container mx-auto p-4 md:p-8">
             <div id="page-dashboard" class="page-content active-page">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-3xl text-emerald-800"><span class="animate-wave">👋</span> Selamat Datang di PERPUS SDN 1 PARIGI!</h2>
+                    <h2 class="text-3xl text-emerald-800"><span class="animate-wave">👋</span> Selamat Datang di PERPUSTAKAAN SDN 1 PARIGI!</h2>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="bg-purple-500 text-white p-6 rounded-2xl shadow-md"><h3>👥 Total Anggota</h3><p id="stat-murid" class="text-4xl font-bold">0</p></div>
@@ -528,6 +529,16 @@
                         <p class="text-sm">Anda memiliki akses penuh untuk menambah, mengedit, dan menghapus data absensi otomatis serta catatan sesi tugas.</p>
                     </div>
                     <span class="bg-amber-200 text-amber-900 text-xs px-2.5 py-1 rounded-full font-semibold">Admin</span>
+                </div>
+            </div>
+
+            <div id="page-struktur" class="page-content">
+                <div class="mb-6">
+                    <h2 class="text-2xl text-emerald-800">🏫 Struktur Perpustakaan</h2>
+                    <p class="text-sm text-gray-500 mt-1">Data struktur diambil langsung dari Sheet <b>struktur</b>.</p>
+                </div>
+                <div id="struktur-container" class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                    Memuat struktur perpustakaan...
                 </div>
             </div>
 
@@ -633,7 +644,8 @@
             murid: JSON.parse(localStorage.getItem('perpus_cache_murid')) || [], 
             absensi: JSON.parse(localStorage.getItem('perpus_cache_absen')) || [], 
             transaksi: JSON.parse(localStorage.getItem('perpus_cache_pinjam')) || [],
-            dokumentasi: JSON.parse(localStorage.getItem('perpus_cache_dokumentasi')) || [] 
+            dokumentasi: JSON.parse(localStorage.getItem('perpus_cache_dokumentasi')) || [],
+            struktur: JSON.parse(localStorage.getItem('perpus_cache_struktur')) || [] 
         };
 
         let offlineQueue = JSON.parse(localStorage.getItem('perpus_offline_queue')) || [];
@@ -824,6 +836,8 @@
             appData.absensi = appData.absensi.filter(row => !isHeaderRow('absen', row));
             appData.transaksi = normalizePinjamRows(appData.transaksi).filter(row => !isHeaderRow('pinjam', row));
             appData.dokumentasi = appData.dokumentasi.filter(row => !isHeaderRow('Dokumentasi', row));
+            if (!Array.isArray(appData.struktur)) appData.struktur = [];
+            renderStruktur();
             const filterMurid = document.getElementById('filter-murid').value.toLowerCase();
             const containerMurid = document.getElementById('table-murid-container');
             
@@ -1026,7 +1040,9 @@
                 appData.absensi = await fetchSheetCSV('absen');
                 appData.transaksi = (await fetchSheetCSV('pinjam')).filter(t => Object.values(t || {}).some(v => String(v ?? '').trim() !== ''));
                 appData.dokumentasi = await fetchSheetCSV('Dokumentasi');
+                appData.struktur = await fetchSheetCSV('struktur');
                 render();
+                renderStruktur();
             }
         }
 
@@ -1394,6 +1410,72 @@
             showModal('Berhasil', 'Dokumentasi berhasil dihapus.');
         }
 
+
+        function renderStruktur() {
+            const container = document.getElementById('struktur-container');
+            if (!container) return;
+
+            const rows = Array.isArray(appData.struktur) ? appData.struktur : [];
+
+            // Mendukung Sheet "struktur" dengan format umum:
+            // Kolom A = Jabatan, Kolom B = Nama.
+            // Jika Sheet memakai header, fetchSheetCSV() akan otomatis melewatinya.
+            const jabatanDefault = [
+                'Kepala Sekolah',
+                'Kepala Perpustakaan',
+                'Petugas Perpustakaan',
+                'Anggota'
+            ];
+
+            let data = rows.map((r, i) => ({
+                jabatan: String(r.col1 || '').trim() || jabatanDefault[i] || '',
+                nama: String(r.col2 || '').trim() || String(r.col1 || '').trim()
+            })).filter(r => r.jabatan || r.nama);
+
+            // Bila kolom pertama berisi nama dan jumlah baris sesuai struktur,
+            // tampilkan nama tersebut pada jabatan yang telah ditentukan.
+            if (data.length && data.every((r, i) => !jabatanDefault.includes(r.jabatan)) && data.length <= jabatanDefault.length) {
+                data = data.map((r, i) => ({
+                    jabatan: jabatanDefault[i],
+                    nama: r.nama || r.jabatan
+                }));
+            }
+
+            // Pastikan empat posisi struktur selalu tersedia.
+            data = jabatanDefault.map((jabatan, i) => {
+                const found = data.find(r =>
+                    r.jabatan.toLowerCase() === jabatan.toLowerCase()
+                );
+                return found || data[i] || { jabatan, nama: '' };
+            });
+
+            const icon = {
+                'Kepala Sekolah': '👨‍💼',
+                'Kepala Perpustakaan': '👩‍🏫',
+                'Petugas Perpustakaan': '📚',
+                'Anggota': '👥'
+            };
+
+            container.innerHTML = `
+                <div class="divide-y divide-gray-100">
+                    ${data.map((r, i) => `
+                        <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-6 p-5 hover:bg-emerald-50 transition">
+                            <div class="md:w-2/5 flex items-center gap-3">
+                                <span class="text-2xl">${icon[r.jabatan] || '📌'}</span>
+                                <div>
+                                    <p class="text-xs uppercase tracking-wide text-gray-400 font-semibold">Jabatan</p>
+                                    <p class="font-bold text-emerald-800">${escapeHtml(r.jabatan || jabatanDefault[i])}</p>
+                                </div>
+                            </div>
+                            <div class="md:flex-1">
+                                <p class="text-xs uppercase tracking-wide text-gray-400 font-semibold">Nama</p>
+                                <p class="text-gray-800 font-semibold">${escapeHtml(r.nama || '-')}</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>`;
+        }
+
         function showPage(id) {
             if (id === 'settings' && !isAdminLoggedIn) {
                 return;
@@ -1437,7 +1519,7 @@
                 backgroundColor: null 
             }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `Kartu_Perpus_${document.getElementById('card-nis').innerText}.png`;
+                link.download = `Kartu_Perpustakaan_${document.getElementById('card-nis').innerText}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             });
@@ -2019,8 +2101,8 @@
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
             try {
-                ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
-                appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [] };
+                ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_cache_struktur','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
+                appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [], struktur: [] };
                 offlineQueue = [];
                 closeSettingsModal();
                 showSavingLoading('Memuat ulang aplikasi...');
