@@ -502,6 +502,7 @@
                      <button onclick="showPage('struktur')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">🏫 Struktur Perpustakaan</button>
                     <button onclick="showPage('murid')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">👨‍🎓 Murid</button>
                     <button onclick="showPage('absen')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">📋 Absen</button>
+                     <button onclick="showPage('rekap')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">📊 Rekap</button>
                     <button onclick="showPage('transaksi')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">📖 Pinjam</button>
                     <button onclick="showPage('dokumentasi')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">🗂️ Dokumentasi</button>
                     <button onclick="openSettingsModal()" id="btn-settings" class="hidden hover:bg-emerald-700 px-3 py-1 rounded transition">⚙️ Pengaturan</button>
@@ -568,6 +569,20 @@
                 <div id="table-absen-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data absen...</div>
             </div>
 
+            <div id="page-rekap" class="page-content">
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+                    <div>
+                        <h2 class="text-2xl text-emerald-800">📊 Rekap Kehadiran Siswa</h2>
+                        <p class="text-sm text-gray-500 mt-1">Seluruh siswa dari Sheet <b>murid</b> dengan jumlah dan detail kunjungan dari Sheet <b>absen</b>.</p>
+                    </div>
+                    <button onclick="renderRekap()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm">🔄 Refresh Rekap</button>
+                </div>
+                <div class="mb-4">
+                    <input type="text" id="filter-rekap" oninput="renderRekap()" placeholder="🔍 Cari nama, kode siswa, atau kelas..." class="w-full md:w-96 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+                </div>
+                <div id="table-rekap-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat rekap...</div>
+            </div>
+
             <div id="page-dokumentasi" class="page-content">
                 <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
                     <div>
@@ -592,6 +607,22 @@
                 </div>
                 <div id="table-transaksi-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data transaksi...</div>
             </div>
+    <!-- Modal Detail Rekap Siswa -->
+    <div id="rekap-detail-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl p-5 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between gap-3 mb-4">
+                <div>
+                    <h3 id="rekap-detail-title" class="text-xl font-bold text-emerald-800">Detail Siswa</h3>
+                    <p id="rekap-detail-identitas" class="text-sm text-gray-500"></p>
+                </div>
+                <button type="button" onclick="closeRekapDetail()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded-lg">✕</button>
+            </div>
+            <div id="rekap-detail-summary" class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4"></div>
+            <div id="rekap-detail-content" class="border rounded-xl overflow-hidden">Memuat detail...</div>
+            <button type="button" onclick="closeRekapDetail()" class="w-full mt-4 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg">Tutup</button>
+        </div>
+    </div>
+
     <!-- Modal Pengaturan -->
     <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-5">
@@ -838,6 +869,7 @@
             appData.dokumentasi = appData.dokumentasi.filter(row => !isHeaderRow('Dokumentasi', row));
             if (!Array.isArray(appData.struktur)) appData.struktur = [];
             renderStruktur();
+            renderRekap();
             const filterMurid = document.getElementById('filter-murid').value.toLowerCase();
             const containerMurid = document.getElementById('table-murid-container');
             
@@ -1009,6 +1041,146 @@
             ).length;
         }
 
+
+        // =========================
+        // REKAP ABSEN PER SISWA
+        // =========================
+        function getMuridIdentity(m) {
+            return {
+                nama: String(m.col3 || m.col1 || '').trim(),
+                nis: String(m.col4 || m.col2 || '').trim(),
+                kelas: String(m.col5 || '').trim() || String(m.col3 || '').trim()
+            };
+        }
+
+        function getAbsenIdentity(a) {
+            return {
+                nama: String(a.col1 || '').trim(),
+                nis: String(a.col2 || '').trim(),
+                tanggal: String(a.col3 || '').trim(),
+                kegiatan: String(a.col4 || 'Membaca / Berhitung').trim() || 'Membaca / Berhitung',
+                kelas: String(a.col5 || '').trim()
+            };
+        }
+
+        function isRealAbsenRow(a) {
+            const x = getAbsenIdentity(a);
+            if (!x.nama && !x.nis) return false;
+            const v = [x.nama, x.nis, x.tanggal, x.kegiatan, x.kelas].map(s => s.toLowerCase());
+            if (v.includes('nama') || v.includes('nama siswa')) return false;
+            if (v.includes('nis') || v.includes('kode siswa')) return false;
+            if (v.includes('tanggal') || v.includes('waktu')) return false;
+            return true;
+        }
+
+        function getRekapAbsensiUntukMurid(murid) {
+            const m = getMuridIdentity(murid);
+            return appData.absensi.filter(a => {
+                if (!isRealAbsenRow(a)) return false;
+                const x = getAbsenIdentity(a);
+                if (m.nis && x.nis) return m.nis.toLowerCase() === x.nis.toLowerCase();
+                return m.nama && x.nama && m.nama.toLowerCase() === x.nama.toLowerCase();
+            });
+        }
+
+        function renderRekap() {
+            const container = document.getElementById('table-rekap-container');
+            if (!container) return;
+
+            const filter = String(document.getElementById('filter-rekap')?.value || '').trim().toLowerCase();
+            const daftar = (Array.isArray(appData.murid) ? appData.murid : []).map((m, index) => {
+                const id = getMuridIdentity(m);
+                return { index, ...id, total: getRekapAbsensiUntukMurid(m).length };
+            }).filter(m =>
+                !filter ||
+                m.nama.toLowerCase().includes(filter) ||
+                m.nis.toLowerCase().includes(filter) ||
+                m.kelas.toLowerCase().includes(filter)
+            );
+
+            if (!daftar.length) {
+                container.innerHTML = '<div class="text-center text-gray-400 py-10">Belum ada data siswa yang sesuai.</div>';
+                return;
+            }
+
+            let h = `<table class="w-full text-sm">
+                <thead class="bg-blue-50 text-blue-800"><tr>
+                    <th class="p-2 text-center">No</th>
+                    <th class="p-2 text-left">Nama Siswa</th>
+                    <th class="p-2 text-center">Kelas</th>
+                    <th class="p-2 text-center">Total Kunjungan</th>
+                    <th class="p-2 text-center">Detail</th>
+                </tr></thead><tbody>`;
+
+            daftar.forEach((m, i) => {
+                h += `<tr class="border-b hover:bg-blue-50/50">
+                    <td class="p-2 text-center">${i + 1}</td>
+                    <td class="p-2 font-medium">${escapeHtml(m.nama || '-')}</td>
+                    <td class="p-2 text-center">${escapeHtml(m.kelas || '-')}</td>
+                    <td class="p-2 text-center"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-semibold">${m.total}</span></td>
+                    <td class="p-2 text-center"><button onclick="openRekapDetail(${m.index})" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded-lg text-xs">👁️ Detail</button></td>
+                </tr>`;
+            });
+
+            h += '</tbody></table>';
+            container.innerHTML = h;
+        }
+
+        function openRekapDetail(index) {
+            const murid = appData.murid[index];
+            if (!murid) return;
+
+            const m = getMuridIdentity(murid);
+            const absensi = getRekapAbsensiUntukMurid(murid);
+
+            document.getElementById('rekap-detail-title').innerText = m.nama || 'Detail Siswa';
+            document.getElementById('rekap-detail-identitas').innerText =
+                `Kode: ${m.nis || '-'} • Kelas: ${m.kelas || '-'}`;
+
+            document.getElementById('rekap-detail-summary').innerHTML = `
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 text-center">
+                    <div class="text-xs text-gray-500">Total Kunjungan</div>
+                    <div class="text-2xl font-bold text-blue-700">${absensi.length}</div>
+                </div>
+                <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-center">
+                    <div class="text-xs text-gray-500">Nama</div>
+                    <div class="font-semibold text-emerald-800 truncate">${escapeHtml(m.nama || '-')}</div>
+                </div>
+                <div class="bg-purple-50 border border-purple-100 rounded-xl p-3 text-center">
+                    <div class="text-xs text-gray-500">Kelas</div>
+                    <div class="font-semibold text-purple-800">${escapeHtml(m.kelas || '-')}</div>
+                </div>`;
+
+            const detail = document.getElementById('rekap-detail-content');
+            if (!absensi.length) {
+                detail.innerHTML = '<div class="p-6 text-center text-gray-400">Siswa ini belum memiliki data kunjungan pada Sheet Absen.</div>';
+            } else {
+                let h = `<table class="w-full text-sm"><thead class="bg-emerald-50 text-emerald-800"><tr>
+                    <th class="p-2 text-center">No</th>
+                    <th class="p-2 text-center">Tanggal</th>
+                    <th class="p-2 text-left">Kegiatan / Tugas</th>
+                    <th class="p-2 text-center">Kelas</th>
+                </tr></thead><tbody>`;
+
+                absensi.forEach((a, i) => {
+                    const x = getAbsenIdentity(a);
+                    h += `<tr class="border-b">
+                        <td class="p-2 text-center">${i + 1}</td>
+                        <td class="p-2 text-center">${escapeHtml(formatTanggalIndonesia(x.tanggal) || '-')}</td>
+                        <td class="p-2">${escapeHtml(x.kegiatan || '-')}</td>
+                        <td class="p-2 text-center">${escapeHtml(x.kelas || m.kelas || '-')}</td>
+                    </tr>`;
+                });
+
+                detail.innerHTML = h + '</tbody></table>';
+            }
+
+            document.getElementById('rekap-detail-modal').classList.remove('hidden');
+        }
+
+        function closeRekapDetail() {
+            document.getElementById('rekap-detail-modal')?.classList.add('hidden');
+        }
 
         function normalizePinjamRows(rows) {
             const headerWords = ['nama','nama siswa','peminjam','nama peminjam','siswa'];
@@ -1483,6 +1655,7 @@
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active-page'));
             const page = document.getElementById('page-' + id);
             if (page) page.classList.add('active-page');
+            if (id === 'rekap') renderRekap();
         }
 
         function openPrintCardModal(namaEncoded, nisEncoded, kelasEncoded) {
