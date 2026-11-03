@@ -4,186 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PERPUSTAKAAN SDN 1 PARIGI</title>
-    <script src="https://cdn.tailwindcss.com">
-        function resetPenyimpananLokal() {
-            if (!isAdminLoggedIn) { openLoginModal(); return; }
-            if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
-            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_cache_struktur','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
-            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [], struktur: [] };
-            offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
-            showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
-        }
-
-        function openImageLightbox(src) {
-            if (!src) return;
-            const box = document.getElementById('image-lightbox');
-            const img = document.getElementById('image-lightbox-img');
-            img.src = src;
-            box.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeImageLightbox() {
-            const box = document.getElementById('image-lightbox');
-            const img = document.getElementById('image-lightbox-img');
-            box.classList.add('hidden');
-            img.src = '';
-            document.body.style.overflow = '';
-        }
-
-        document.addEventListener('click', function(event) {
-            const img = event.target.closest('img');
-            if (!img) return;
-            const src = img.currentSrc || img.src || '';
-            if (!src || img.id === 'image-lightbox-img') return;
-            if (img.closest('#image-lightbox')) return;
-            // Hanya foto dari area dokumentasi agar gambar UI lain tidak ikut fullscreen.
-            if (img.closest('[id*="dokumentasi"], .dokumentasi, .documentation')) {
-                event.preventDefault();
-                openImageLightbox(src);
-            }
-        });
-
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') closeImageLightbox();
-        });
-
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
-        function resetPenyimpananLokal() {
-            if (!isAdminLoggedIn) { openLoginModal(); return; }
-            if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
-            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_cache_struktur','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
-            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [], struktur: [] };
-            offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
-            showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
-        }
-
-        function openImageLightbox(src) {
-            if (!src) return;
-            const box = document.getElementById('image-lightbox');
-            const img = document.getElementById('image-lightbox-img');
-            img.src = src;
-            box.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeImageLightbox() {
-            const box = document.getElementById('image-lightbox');
-            const img = document.getElementById('image-lightbox-img');
-            box.classList.add('hidden');
-            img.src = '';
-            document.body.style.overflow = '';
-        }
-
-        document.addEventListener('click', function(event) {
-            const img = event.target.closest('img');
-            if (!img) return;
-            const src = img.currentSrc || img.src || '';
-            if (!src || img.id === 'image-lightbox-img') return;
-            if (img.closest('#image-lightbox')) return;
-            // Hanya foto dari area dokumentasi agar gambar UI lain tidak ikut fullscreen.
-            if (img.closest('[id*="dokumentasi"], .dokumentasi, .documentation')) {
-                event.preventDefault();
-                openImageLightbox(src);
-            }
-        });
-
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') closeImageLightbox();
-        });
-
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js">
-        function resetPenyimpananLokal() {
-            if (!isAdminLoggedIn) { openLoginModal(); return; }
-            if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
-            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_cache_struktur','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
-            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [], struktur: [] };
-            offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
-            showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
-        }
-
-        function openImageLightbox(src) {
-            if (!src) return;
-            const box = document.getElementById('image-lightbox');
-            const img = document.getElementById('image-lightbox-img');
-            img.src = src;
-            box.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeImageLightbox() {
-            const box = document.getElementById('image-lightbox');
-            const img = document.getElementById('image-lightbox-img');
-            box.classList.add('hidden');
-            img.src = '';
-            document.body.style.overflow = '';
-        }
-
-        document.addEventListener('click', function(event) {
-            const img = event.target.closest('img');
-            if (!img) return;
-            const src = img.currentSrc || img.src || '';
-            if (!src || img.id === 'image-lightbox-img') return;
-            if (img.closest('#image-lightbox')) return;
-            // Hanya foto dari area dokumentasi agar gambar UI lain tidak ikut fullscreen.
-            if (img.closest('[id*="dokumentasi"], .dokumentasi, .documentation')) {
-                event.preventDefault();
-                openImageLightbox(src);
-            }
-        });
-
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') closeImageLightbox();
-        });
-
-    </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
-        function resetPenyimpananLokal() {
-            if (!isAdminLoggedIn) { openLoginModal(); return; }
-            if (!confirm('Reset penyimpanan lokal perangkat ini? Data di Google Spreadsheet TIDAK dihapus.')) return;
-            ['perpus_cache_murid','perpus_cache_absen','perpus_cache_pinjam','perpus_cache_dokumentasi','perpus_cache_struktur','perpus_offline_queue'].forEach(k => localStorage.removeItem(k));
-            appData = { murid: [], absensi: [], transaksi: [], dokumentasi: [], struktur: [] };
-            offlineQueue = []; render(); updateConnectionStatus(); closeSettingsModal();
-            showModal('Berhasil', 'Penyimpanan lokal sudah di-reset. Muat ulang aplikasi untuk mengambil data terbaru.');
-        }
-
-        function openImageLightbox(src) {
-            if (!src) return;
-            const box = document.getElementById('image-lightbox');
-            const img = document.getElementById('image-lightbox-img');
-            img.src = src;
-            box.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeImageLightbox() {
-            const box = document.getElementById('image-lightbox');
-            const img = document.getElementById('image-lightbox-img');
-            box.classList.add('hidden');
-            img.src = '';
-            document.body.style.overflow = '';
-        }
-
-        document.addEventListener('click', function(event) {
-            const img = event.target.closest('img');
-            if (!img) return;
-            const src = img.currentSrc || img.src || '';
-            if (!src || img.id === 'image-lightbox-img') return;
-            if (img.closest('#image-lightbox')) return;
-            // Hanya foto dari area dokumentasi agar gambar UI lain tidak ikut fullscreen.
-            if (img.closest('[id*="dokumentasi"], .dokumentasi, .documentation')) {
-                event.preventDefault();
-                openImageLightbox(src);
-            }
-        });
-
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') closeImageLightbox();
-        });
-
-    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f0fdf4; }
@@ -260,6 +84,7 @@
         <div class="bg-white p-6 rounded-2xl w-full max-w-md text-center shadow-2xl">
             <h3 id="scanner-title" class="text-xl mb-2 text-emerald-800">📷 Scan Barcode / Kode</h3>
             <p id="scanner-subtitle" class="text-gray-600 mb-3 text-sm">Arahkan kamera ke QR Code / Barcode Kode Siswa.</p>
+
             <div id="reader" class="w-full overflow-hidden rounded-xl border mb-4 bg-black min-h-[250px] flex items-center justify-center relative">
                 <span class="text-gray-400 text-xs">Memuat kamera...</span>
             </div>
@@ -302,38 +127,54 @@
         </div>
     </div>
 
+    <!-- Modal Tambah Absen 2 Langkah (Step 1: Pilih Siswa, Step 2: Input Judul Buku) -->
     <div id="form-absen-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white p-6 rounded-2xl w-full max-w-md text-left shadow-2xl">
-            <h3 class="text-xl mb-4 text-emerald-800 text-center">📋 Tambah Absen Kunjungan</h3>
-            <form onsubmit="saveAbsenManual(event)">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-md text-left shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h3 class="text-xl mb-3 text-emerald-800 text-center font-bold">📋 Tambah Absen Kunjungan</h3>
+            
+            <!-- LANGKAH 1: Pilih Kelas, Siswa, & Tanggal -->
+            <div id="absen-step-1">
                 <div class="mb-3">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Pilih Kelas</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">1. Pilih Kelas</label>
                     <select id="absen-kelas-manual" onchange="renderAbsenManualSiswa()" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm" required><option value="">-- Pilih Kelas --</option></select>
                 </div>
                 <div class="mb-3">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Pilih Siswa</label>
-                    <div id="absen-manual-siswa" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded-lg p-2 bg-gray-50">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-sm font-semibold text-gray-700">2. Pilih Siswa yang Absen</label>
+                        <span class="text-xs text-emerald-700 font-bold" id="count-absen-manual-selected">0 Terpilih</span>
+                    </div>
+                    <div id="absen-manual-siswa" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto border rounded-lg p-2 bg-gray-50">
                         <p class="col-span-2 text-center text-xs text-gray-400 py-3">Pilih kelas terlebih dahulu.</p>
                     </div>
                 </div>
-                <input type="hidden" id="input-nis-absen">
-                <div class="mb-3">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Tanggal Kunjungan</label>
-                    <input type="date" id="input-tanggal-absen"
-                           class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-                           required>
-                    <p class="text-xs text-gray-500 mt-1">Pilih tanggal saja. Jam tidak dicatat.</p>
-                </div>
+                <!-- Hidden input untuk kompatibilitas jika diperlukan -->
+                <input type="hidden" id="input-nis-absen" value="">
                 <div class="mb-4">
-                    <label class="block text-sm text-gray-700 mb-1">Kegiatan / Aktivitas</label>
-                    <input type="text" id="input-kegiatan-absen" value="Membaca / Berhitung" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50 font-medium" readonly>
-                    <p class="text-xs text-gray-500 mt-1">Otomatis tercatat: Membaca / Berhitung</p>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">3. Tanggal Kunjungan</label>
+                    <input type="date" id="input-tanggal-absen" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm" required>
                 </div>
-                <div class="flex space-x-2">
-                    <button type="button" onclick="closeFormAbsenModal()" class="bg-gray-300 text-gray-700 w-1/2 py-2 rounded-lg hover:bg-gray-400 transition">Batal</button>
-                    <button id="btn-simpan-absen" type="submit" class="bg-emerald-600 text-white w-1/2 py-2 rounded-lg hover:bg-emerald-700 transition">Simpan</button>
+                <div class="flex space-x-2 pt-2 border-t">
+                    <button type="button" onclick="closeFormAbsenModal()" class="bg-gray-300 text-gray-700 w-1/2 py-2 rounded-lg hover:bg-gray-400 transition font-medium text-sm">Batal</button>
+                    <button type="button" onclick="goToAbsenStep2()" class="bg-emerald-600 text-white w-1/2 py-2 rounded-lg hover:bg-emerald-700 transition font-medium text-sm">➡️ Selanjutnya (Isi Buku)</button>
                 </div>
-            </form>
+            </div>
+
+            <!-- LANGKAH 2: Isi Judul Buku Dibaca per Siswa -->
+            <div id="absen-step-2" class="hidden">
+                <p class="text-xs text-gray-600 mb-3 bg-emerald-50 border border-emerald-200 p-2.5 rounded-lg">
+                    📚 Masukkan <b>Judul Buku Dibaca</b> untuk masing-masing siswa di bawah ini (Boleh dikosongkan jika tidak membaca buku tertentu).
+                </p>
+
+                <div id="absen-buku-inputs-container" class="space-y-3 max-h-64 overflow-y-auto p-1 mb-4">
+                    <!-- Dynamic per-student book input fields -->
+                </div>
+
+                <div class="flex space-x-2 pt-2 border-t">
+                    <button type="button" onclick="goToAbsenStep1()" class="bg-gray-300 text-gray-700 w-1/3 py-2 rounded-lg hover:bg-gray-400 transition font-medium text-sm">⬅️ Kembali</button>
+                    <button id="btn-simpan-absen" type="button" onclick="saveAbsenManualFinal()" class="bg-emerald-600 text-white w-2/3 py-2 rounded-lg hover:bg-emerald-700 transition font-medium text-sm">💾 Simpan Absen</button>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -353,7 +194,7 @@
                             <input type="radio" name="metode_tugas" value="scan" checked onclick="toggleTugasMethod('scan')" class="mr-2 text-purple-600 focus:ring-purple-500"> 📷 Scan Barcode / QR
                         </label>
                         <label class="flex items-center text-sm cursor-pointer">
-                            <input type="radio" name="metode_tugas" value="manual" onclick="toggleTugasMethod('manual')" class="mr-2 text-purple-600 focus:ring-purple-500"> ✍️ Ketik Kode Manual
+                            <input type="radio" name="metode_tugas" value="manual" onclick="toggleTugasMethod('manual')" class="mr-2 text-purple-600 focus:ring-purple-500"> ✍️ Pilih Siswa Manual
                         </label>
                     </div>
 
@@ -367,12 +208,12 @@
                     </div>
 
                     <div id="tugas-manual-section" class="border p-3 rounded-xl bg-purple-50/50 mb-3 hidden">
-  <label class="block text-xs font-semibold text-gray-700 mb-1">Pilih Kelas</label>
-  <select id="tugas-kelas-manual" onchange="renderTugasManualSiswa()" class="w-full px-3 py-2 border rounded-lg text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500"><option value="">-- Pilih Kelas --</option></select>
-  <div id="tugas-manual-siswa" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto"></div>
-</div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Pilih Kelas</label>
+                        <select id="tugas-kelas-manual" onchange="renderTugasManualSiswa()" class="w-full px-3 py-2 border rounded-lg text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-purple-500"><option value="">-- Pilih Kelas --</option></select>
+                        <div id="tugas-manual-siswa" class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto"></div>
+                    </div>
 
-<div class="mt-3">
+                    <div class="mt-3">
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Daftar Siswa Terpilih (<span id="count-selected-siswa">0</span>)</label>
                         <div id="selected-siswa-container" class="border rounded-xl p-2 max-h-36 overflow-y-auto bg-gray-50 text-sm space-y-1">
                             <p class="text-gray-400 text-xs italic text-center py-2">Belum ada siswa yang dipilih.</p>
@@ -499,12 +340,12 @@
                 </div>
                 <div id="nav-buttons" class="flex flex-wrap items-center gap-2">
                     <button onclick="showPage('dashboard')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">🏠 Beranda</button>
-                     <button onclick="showPage('struktur')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">🏫 Struktur Perpustakaan</button>
+                    <button onclick="showPage('struktur')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">🏫 Struktur Perpustakaan</button>
                     <button onclick="showPage('murid')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">👨‍🎓 Murid</button>
                     <button onclick="showPage('absen')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">📋 Absen</button>
                     <button onclick="showPage('transaksi')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">📖 Pinjam</button>
                     <button onclick="showPage('dokumentasi')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">🗂️ Dokumentasi</button>
-                     <button onclick="showPage('rekap')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">📊 Rekap</button>
+                    <button onclick="showPage('rekap')" class="hover:bg-emerald-700 px-3 py-1 rounded transition">📊 Rekap</button>
                     <button onclick="openSettingsModal()" id="btn-settings" class="hidden hover:bg-emerald-700 px-3 py-1 rounded transition">⚙️ Pengaturan</button>
                     <div id="auth-nav-container">
                         <button onclick="openLoginModal()" id="btn-login-admin" class="bg-amber-500 hover:bg-amber-600 px-3 py-1 rounded transition text-sm font-semibold">🔐 Login Admin</button>
@@ -521,7 +362,7 @@
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="bg-purple-500 text-white p-6 rounded-2xl shadow-md"><h3>👥 Total Anggota</h3><p id="stat-murid" class="text-4xl font-bold">0</p></div>
-                    <div class="bg-blue-500 text-white p-6 rounded-2xl shadow-md"><h3>📊 Total Kunjungan</h3><p id="stat-absen" class="text-4xl font-bold">0</p></div>
+                    <div class="bg-blue-500 text-white p-6 rounded-2xl shadow-md"><h3>📅 Hari Aktif Absen</h3><p id="stat-absen" class="text-4xl font-bold">0 Hari</p></div>
                     <div class="bg-orange-500 text-white p-6 rounded-2xl shadow-md"><h3>📖 Peminjaman Aktif</h3><p id="stat-pinjam" class="text-4xl font-bold">0</p></div>
                 </div>
                 <div id="admin-status-banner" class="mt-8 bg-amber-50 border border-amber-200 p-4 rounded-xl text-amber-800 flex justify-between items-center hidden">
@@ -564,7 +405,7 @@
                     </div>
                 </div>
                 <div class="mb-4">
-                    <input type="text" id="filter-absen" oninput="render()" placeholder="🔍 Cari berdasarkan nama, kelas, kegiatan/tugas, atau waktu..." class="w-full md:w-80 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
+                    <input type="text" id="filter-absen" oninput="render()" placeholder="🔍 Cari berdasarkan nama, kelas, kegiatan/tugas, buku, atau waktu..." class="w-full md:w-80 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
                 </div>
                 <div id="table-absen-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data absen...</div>
             </div>
@@ -607,6 +448,7 @@
                 </div>
                 <div id="table-transaksi-container" class="bg-white p-4 rounded-xl shadow-sm overflow-x-auto min-h-[200px]">Memuat data transaksi...</div>
             </div>
+
     <!-- Modal Detail Rekap Siswa -->
     <div id="rekap-detail-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl p-5 max-h-[90vh] overflow-y-auto">
@@ -706,7 +548,6 @@
             const raw = String(value).trim();
             if (!raw) return null;
 
-            // Google Visualization dapat mengirim: Date(2026,6,9,13,19,28)
             let m = raw.match(/^Date\((\d{4}),(\d{1,2}),(\d{1,2})(?:,(\d{1,2}),(\d{1,2}),(\d{1,2})(?:,(\d+))?)?\)$/);
             if (m) {
                 return {
@@ -716,13 +557,11 @@
                 };
             }
 
-            // dd/mm/yyyy atau d/m/yyyy
             m = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
             if (m) {
                 return { year: Number(m[3]), month: Number(m[2]), day: Number(m[1]) };
             }
 
-            // yyyy-mm-dd
             m = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
             if (m) {
                 return { year: Number(m[1]), month: Number(m[2]), day: Number(m[3]) };
@@ -747,10 +586,8 @@
         }
 
         function formatTanggalUntukSheet(inputValue) {
-            // Input HTML date selalu yyyy-mm-dd.
             const m = String(inputValue || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
             if (!m) throw new Error('Tanggal absen tidak valid.');
-            // Kirim string dd/MM/yyyy agar Code.gs menyimpan tanggal tanpa jam.
             return `${m[3]}/${m[2]}/${m[1]}`;
         }
 
@@ -815,7 +652,7 @@
             }
             if (sheetName === 'absen') {
                 return (['nama siswa','nama'].includes(v[0]) && ['nis','kode siswa'].includes(v[1])) ||
-                       (['tanggal','waktu'].includes(v[2]) && v.some(x => ['kegiatan','kelas'].includes(x)));
+                       (['tanggal','waktu'].includes(v[2]) && v.some(x => ['kegiatan','kelas','buku','judul buku'].includes(x)));
             }
             if (sheetName === 'pinjam') {
                 return ['nama siswa','nama','peminjam','nama peminjam'].includes(v[0]) ||
@@ -870,6 +707,8 @@
             if (!Array.isArray(appData.struktur)) appData.struktur = [];
             renderStruktur();
             renderRekap();
+
+            // RENDER DATA MURID
             const filterMurid = document.getElementById('filter-murid').value.toLowerCase();
             const containerMurid = document.getElementById('table-murid-container');
             
@@ -890,7 +729,7 @@
                 let kelasMurid = m.col5 || m.col3 || '';
 
                 if (namaMurid.toLowerCase().includes(filterMurid) || kodeMurid.toLowerCase().includes(filterMurid) || kelasMurid.toLowerCase().includes(filterMurid)) {
-                    htmlMurid += `<tr class="border-b"><td class="p-2 text-center">${noUrut++}</td><td class="p-2 text-left">${namaMurid}</td>`;
+                    htmlMurid += `<tr class="border-b"><td class="p-2 text-center">${noUrut++}</td><td class="p-2 text-left font-medium">${namaMurid}</td>`;
                     if (isAdminLoggedIn) {
                         htmlMurid += `<td class="p-2 text-center">${kodeMurid}</td>`;
                     }
@@ -908,6 +747,7 @@
             htmlMurid += `</tbody></table>`;
             containerMurid.innerHTML = htmlMurid;
 
+            // RENDER DATA ABSEN (Tabel Menampilkan Kolom F Judul Buku)
             const filterAbsen = document.getElementById('filter-absen').value.toLowerCase();
             const containerAbsen = document.getElementById('table-absen-container');
             
@@ -915,7 +755,7 @@
             if (isAdminLoggedIn) {
                 htmlAbsen += `<th class="p-2 text-center">Kode Siswa</th>`;
             }
-            htmlAbsen += `<th class="p-2 text-center">Kelas</th><th class="p-2 text-center">Kegiatan / Tugas</th><th class="p-2 text-center">Waktu</th>`;
+            htmlAbsen += `<th class="p-2 text-center">Kelas</th><th class="p-2 text-center">Kegiatan / Tugas</th><th class="p-2 text-left">Buku Dibaca (Kolom F)</th><th class="p-2 text-center">Waktu</th>`;
             if (isAdminLoggedIn) {
                 htmlAbsen += `<th class="p-2 text-center">Aksi</th>`;
             }
@@ -927,6 +767,7 @@
                 let waktuAbsen = formatTanggalIndonesia(a.col3 || '');
                 let kegiatanAbsen = a.col4 || 'Membaca / Berhitung';
                 let kelasAbsen = a.col5 || '';
+                let bukuAbsen = a.col6 || '-';
 
                 if (!kelasAbsen && a.col4 && !a.col4.includes('/') && !a.col4.includes('Membaca') && !a.col4.includes('Berhitung')) {
                     kelasAbsen = a.col4;
@@ -938,13 +779,13 @@
                     if (foundM) kelasAbsen = foundM.col5 || foundM.col3;
                 }
 
-                if (a.col1.toLowerCase().includes(filterAbsen) || nisAbsen.includes(filterAbsen) || kelasAbsen.toLowerCase().includes(filterAbsen) || kegiatanAbsen.toLowerCase().includes(filterAbsen) || waktuAbsen.toLowerCase().includes(filterAbsen)) {
+                if (a.col1.toLowerCase().includes(filterAbsen) || nisAbsen.includes(filterAbsen) || kelasAbsen.toLowerCase().includes(filterAbsen) || kegiatanAbsen.toLowerCase().includes(filterAbsen) || bukuAbsen.toLowerCase().includes(filterAbsen) || waktuAbsen.toLowerCase().includes(filterAbsen)) {
                     let badgeColor = (kegiatanAbsen === 'Membaca / Berhitung') ? 'bg-emerald-100 text-emerald-800' : 'bg-purple-100 text-purple-800';
-                    htmlAbsen += `<tr class="border-b"><td class="p-2 text-center">${noAbsen++}</td><td class="p-2 text-left">${a.col1}</td>`;
+                    htmlAbsen += `<tr class="border-b"><td class="p-2 text-center">${noAbsen++}</td><td class="p-2 text-left font-semibold text-gray-800">${a.col1}</td>`;
                     if (isAdminLoggedIn) {
                         htmlAbsen += `<td class="p-2 text-center">${nisAbsen}</td>`;
                     }
-                    htmlAbsen += `<td class="p-2 text-center">${kelasAbsen || '-'}</td><td class="p-2 text-center"><span class="${badgeColor} text-xs px-2 py-0.5 rounded-full font-medium">${kegiatanAbsen}</span></td><td class="p-2 text-center">${waktuAbsen}</td>`;
+                    htmlAbsen += `<td class="p-2 text-center">${kelasAbsen || '-'}</td><td class="p-2 text-center"><span class="${badgeColor} text-xs px-2 py-0.5 rounded-full font-medium">${kegiatanAbsen}</span></td><td class="p-2 text-left font-medium text-emerald-900 bg-emerald-50/50">${bukuAbsen}</td><td class="p-2 text-center">${waktuAbsen}</td>`;
                     if (isAdminLoggedIn) {
                         htmlAbsen += `<td class="p-2 text-center">
                             <button onclick="editAbsen(${index})" class="bg-amber-500 hover:bg-amber-600 text-white px-2 py-1 rounded text-xs mr-1 transition">Edit</button>
@@ -957,6 +798,7 @@
             htmlAbsen += `</tbody></table>`;
             containerAbsen.innerHTML = htmlAbsen;
 
+            // RENDER DATA TRANSAKSI
             const filterTransaksi = document.getElementById('filter-transaksi').value.toLowerCase();
             const containerTransaksi = document.getElementById('table-transaksi-container');
             
@@ -982,7 +824,7 @@
                 
                 if (t.col1.toLowerCase().includes(filterTransaksi) || t.col2.toLowerCase().includes(filterTransaksi) || t.col3.toLowerCase().includes(filterTransaksi) || nisPinjam.includes(filterTransaksi) || kelasPinjam.toLowerCase().includes(filterTransaksi) || statusPinjam.toLowerCase().includes(filterTransaksi)) {
                     
-                    htmlTransaksi += `<tr class="border-b"><td class="p-2 text-center">${noTransaksi++}</td><td class="p-2 text-left">${t.col1}</td>`;
+                    htmlTransaksi += `<tr class="border-b"><td class="p-2 text-center">${noTransaksi++}</td><td class="p-2 text-left font-medium">${t.col1}</td>`;
                     if (isAdminLoggedIn) {
                         htmlTransaksi += `<td class="p-2 text-center">${nisPinjam}</td>`;
                         htmlTransaksi += `<td class="p-2 text-center">${kelasPinjam || '-'}</td>`;
@@ -1011,6 +853,7 @@
             htmlTransaksi += `</tbody></table>`;
             containerTransaksi.innerHTML = htmlTransaksi;
 
+            // DOKUMENTASI
             const dokumentasiContainer = document.getElementById('dokumentasi-container');
             if (dokumentasiContainer) {
                 if (!appData.dokumentasi.length) {
@@ -1034,8 +877,17 @@
                 }
             }
 
+            // HITUNG HARI AKTIF ABSEN (TANGGAL UNIK DARI SHEET ABSEN)
+            const tanggalUnikAbsen = new Set();
+            appData.absensi.forEach(a => {
+                if (isRealAbsenRow(a)) {
+                    const tglFormated = formatTanggalIndonesia(a.col3 || '');
+                    if (tglFormated) tanggalUnikAbsen.add(tglFormated);
+                }
+            });
+
             document.getElementById('stat-murid').innerText = appData.murid.length;
-            document.getElementById('stat-absen').innerText = appData.absensi.length;
+            document.getElementById('stat-absen').innerText = tanggalUnikAbsen.size + " Hari";
             document.getElementById('stat-pinjam').innerText = normalizePinjamRows(appData.transaksi).filter(t =>
                 String(t.col5 || '').trim().toLowerCase() !== 'sudah dikembalikan'
             ).length;
@@ -1059,7 +911,8 @@
                 nis: String(a.col2 || '').trim(),
                 tanggal: String(a.col3 || '').trim(),
                 kegiatan: String(a.col4 || 'Membaca / Berhitung').trim() || 'Membaca / Berhitung',
-                kelas: String(a.col5 || '').trim()
+                kelas: String(a.col5 || '').trim(),
+                buku: String(a.col6 || '-').trim()
             };
         }
 
@@ -1159,6 +1012,7 @@
                     <th class="p-2 text-center">No</th>
                     <th class="p-2 text-center">Tanggal</th>
                     <th class="p-2 text-left">Kegiatan / Tugas</th>
+                    <th class="p-2 text-left">Buku Dibaca (Kolom F)</th>
                     <th class="p-2 text-center">Kelas</th>
                 </tr></thead><tbody>`;
 
@@ -1168,6 +1022,7 @@
                         <td class="p-2 text-center">${i + 1}</td>
                         <td class="p-2 text-center">${escapeHtml(formatTanggalIndonesia(x.tanggal) || '-')}</td>
                         <td class="p-2">${escapeHtml(x.kegiatan || '-')}</td>
+                        <td class="p-2 text-emerald-900 font-medium bg-emerald-50/50">${escapeHtml(x.buku || '-')}</td>
                         <td class="p-2 text-center">${escapeHtml(x.kelas || m.kelas || '-')}</td>
                     </tr>`;
                 });
@@ -1193,13 +1048,11 @@
                 const c6 = String(t && t.col6 || '').trim();
                 const a = c1.toLowerCase(), b = c2.toLowerCase(), e = c5.toLowerCase();
 
-                // Tolak semua header, termasuk header yang terbaca sebagai data.
                 if (headerWords.includes(a)) return false;
                 if ((a.includes('nama') || a.includes('peminjam')) &&
                     (b === 'buku' || b.includes('judul buku') || b.includes('nama buku'))) return false;
                 if (index === 0 && (b === 'buku' || c3 === 'tanggal' || e === 'status')) return false;
 
-                // Tolak baris kosong/placeholder: transaksi harus punya minimal nama dan buku.
                 if (!c1 || !c2) return false;
 
                 return true;
@@ -1324,8 +1177,6 @@
 
         function logoutAdmin() {
             isAdminLoggedIn = false;
-            // Logout hanya mengakhiri sesi. Password yang dipilih untuk diingat
-            // tetap tersimpan sampai pengguna menonaktifkan fitur Ingat Password.
             localStorage.removeItem('perpus_admin_logged');
             showPage('dashboard');
             updateAdminUI();
@@ -1427,7 +1278,6 @@
             const enabled = document.getElementById('settings-remember-admin').checked;
 
             if (enabled) {
-                // Gunakan password admin aktif sebagai password yang diingat.
                 localStorage.setItem('perpus_admin_remember', 'true');
                 localStorage.setItem('perpus_admin_remembered_password', ADMIN_PASSWORD);
                 showModal('Berhasil', 'Password admin akan diingat di perangkat ini.');
@@ -1564,14 +1414,6 @@
             });
         }
 
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(String(reader.result).split(',')[1]);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
         async function hapusDokumentasi(index) {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             if (!confirm('Hapus dokumentasi ini?')) return;
@@ -1589,9 +1431,6 @@
 
             const rows = Array.isArray(appData.struktur) ? appData.struktur : [];
 
-            // Mendukung Sheet "struktur" dengan format umum:
-            // Kolom A = Jabatan, Kolom B = Nama.
-            // Jika Sheet memakai header, fetchSheetCSV() akan otomatis melewatinya.
             const jabatanDefault = [
                 'Kepala Sekolah',
                 'Kepala Perpustakaan',
@@ -1604,8 +1443,6 @@
                 nama: String(r.col2 || '').trim() || String(r.col1 || '').trim()
             })).filter(r => r.jabatan || r.nama);
 
-            // Bila kolom pertama berisi nama dan jumlah baris sesuai struktur,
-            // tampilkan nama tersebut pada jabatan yang telah ditentukan.
             if (data.length && data.every((r, i) => !jabatanDefault.includes(r.jabatan)) && data.length <= jabatanDefault.length) {
                 data = data.map((r, i) => ({
                     jabatan: jabatanDefault[i],
@@ -1613,7 +1450,6 @@
                 }));
             }
 
-            // Pastikan empat posisi struktur selalu tersedia.
             data = jabatanDefault.map((jabatan, i) => {
                 const found = data.find(r =>
                     r.jabatan.toLowerCase() === jabatan.toLowerCase()
@@ -1708,7 +1544,7 @@
                 scanAbsenSelectedMurid=[]; renderScanAbsenBatch();
                 batchBox.classList.remove('hidden'); doneBtn.classList.remove('hidden'); closeBtn.classList.remove('w-full'); closeBtn.classList.add('w-1/2');
                 document.getElementById('scanner-title').innerText='📷 Scan Absen';
-                document.getElementById('scanner-subtitle').innerText='Scan siswa satu per satu. Semua hasil akan disimpan saat Selesai.';
+                document.getElementById('scanner-subtitle').innerText='Scan QR Code siswa satu per satu. Klik Selesai untuk menginput Judul Buku.';
             } else {
                 batchBox.classList.add('hidden'); doneBtn.classList.add('hidden'); closeBtn.classList.remove('w-1/2'); closeBtn.classList.add('w-full');
                 document.getElementById('scanner-title').innerText='📷 Scan Barcode / Kode Siswa';
@@ -1738,21 +1574,35 @@
             const box=document.getElementById('scan-absen-list'); const count=document.getElementById('scan-absen-count');
             count.innerText=scanAbsenSelectedMurid.length;
             if(!scanAbsenSelectedMurid.length){box.innerHTML='Belum ada siswa.';return;}
-            box.innerHTML=scanAbsenSelectedMurid.map((m,i)=>`<div class="flex justify-between py-1 border-b last:border-0"><span>${escapeHtml(m.col3||m.col1||'')}</span><button type="button" class="text-rose-600" onclick="hapusScanAbsen(${i})">✕</button></div>`).join('');
+            box.innerHTML=scanAbsenSelectedMurid.map((m,i)=>`<div class="flex justify-between py-1 border-b last:border-0 font-medium"><span>${i+1}. ${escapeHtml(m.col3||m.col1||'')} (${escapeHtml(m.col5||m.col3||'')})</span><button type="button" class="text-rose-600 font-bold px-1" onclick="hapusScanAbsen(${i})">✕</button></div>`).join('');
         }
         function hapusScanAbsen(i){scanAbsenSelectedMurid.splice(i,1);renderScanAbsenBatch();}
         function clearScanAbsenBatch(){scanAbsenSelectedMurid=[];renderScanAbsenBatch();}
+        
         async function selesaiScanAbsen(){
             if(!scanAbsenSelectedMurid.length){showModal('Peringatan','Belum ada siswa yang discan.');return;}
             scannerAbsenProcessing=true;
             const simpan=[...scanAbsenSelectedMurid];
+            
+            // Pop-up input judul buku per siswa terpindai
+            const muridBukuList = [];
+            for (let i = 0; i < simpan.length; i++) {
+                const m = simpan[i];
+                const nama = m.col3 || m.col1 || '';
+                let buku = prompt(`[${i+1}/${simpan.length}] Siswa: ${nama}\n\nMasukkan Judul Buku yang dibaca (Boleh dikosongkan jika tidak membaca):`, "");
+                if (buku === null) buku = "";
+                muridBukuList.push({ murid: m, buku: buku.trim() || '-' });
+            }
+
             try {
                 if(html5QrCode&&html5QrCode.isScanning){ try{await html5QrCode.stop();}catch(e){} }
                 const waktuStr=new Date().toLocaleString();
-                for(const m of simpan){
+                for(const item of muridBukuList){
+                    const m = item.murid;
+                    const bukuInput = item.buku;
                     const nama=m.col3||m.col1||''; const nis=m.col4||m.col2||''; const kelas=m.col5||m.col3||'';
-                    await queueOrSendRequest('add','absen',[nama,nis,waktuStr,'Membaca / Berhitung',kelas]);
-                    appData.absensi.unshift({col1:nama,col2:nis,col3:waktuStr,col4:'Membaca / Berhitung',col5:kelas});
+                    await queueOrSendRequest('add','absen',[nama,nis,waktuStr,'Membaca / Berhitung',kelas,bukuInput]);
+                    appData.absensi.unshift({col1:nama,col2:nis,col3:waktuStr,col4:'Membaca / Berhitung',col5:kelas,col6:bukuInput});
                 }
                 localStorage.setItem('perpus_cache_absen',JSON.stringify(appData.absensi));
                 scanAbsenSelectedMurid=[]; renderScanAbsenBatch(); closeScannerModal(); render(); await loadAllData();
@@ -1797,6 +1647,8 @@
         function renderAbsenManualSiswa() {
             const kelas = document.getElementById('absen-kelas-manual')?.value || '';
             const box = document.getElementById('absen-manual-siswa');
+            const counter = document.getElementById('count-absen-manual-selected');
+            if (counter) counter.innerText = `${manualAbsenSelectedMurid.length} Terpilih`;
             if (!box) return;
             if (!kelas) { box.innerHTML = '<p class="col-span-2 text-center text-xs text-gray-400 py-3">Pilih kelas terlebih dahulu.</p>'; return; }
             const siswa = appData.murid.filter(m => (m.col5 || m.col3 || '').toString().trim() === kelas);
@@ -1804,9 +1656,15 @@
                 const kode=(m.col4||m.col2||'').toString().trim();
                 const nama=m.col3||m.col1||'';
                 const sel=manualAbsenSelectedMurid.some(x => (x.col4||x.col2||'').toString().trim()===kode);
-                return `<button type="button" onclick="toggleAbsenManualSiswa('${encodeURIComponent(kode)}')" class="border rounded-lg p-2 text-left text-xs bg-white ${sel?'ring-2 ring-emerald-500 bg-emerald-50':''}"><span class="block font-semibold">${escapeHtml(nama)}</span><span class="text-gray-500">${escapeHtml(kode)}</span></button>`;
+                return `<button type="button" onclick="toggleAbsenManualSiswa('${encodeURIComponent(kode)}')" class="border rounded-lg p-2 text-left text-xs transition flex justify-between items-center ${sel?'bg-emerald-100 border-emerald-500 font-semibold text-emerald-900 shadow-xs':'bg-white text-gray-700 hover:bg-emerald-50'}">
+                    <span>${escapeHtml(nama)}</span>
+                    <span class="text-[10px] ${sel?'text-emerald-700 font-bold':'text-gray-400'}">${sel?'✅ Terpilih':kode}</span>
+                </button>`;
             }).join('');
-            document.getElementById('input-nis-absen').value = manualAbsenSelectedMurid.map(m=>m.col4||m.col2||'').join(',');
+            const nisInput = document.getElementById('input-nis-absen');
+            if (nisInput) {
+                nisInput.value = manualAbsenSelectedMurid.map(m=>m.col4||m.col2||'').join(',');
+            }
         }
 
         function toggleAbsenManualSiswa(k) {
@@ -1820,38 +1678,78 @@
         function openFormAbsenModal() {
             if (!isAdminLoggedIn) { openLoginModal(); return; }
             manualAbsenSelectedMurid=[];
-            document.getElementById('input-kegiatan-absen').value = 'Membaca / Berhitung';
             document.getElementById('input-tanggal-absen').value = todayInputDate();
             document.getElementById('absen-kelas-manual').value='';
             populateAbsenKelas();
+            goToAbsenStep1();
             document.getElementById('form-absen-modal').classList.remove('hidden');
         }
 
         function closeFormAbsenModal() { document.getElementById('form-absen-modal').classList.add('hidden'); }
 
-        async function saveAbsenManual(event) {
-            event.preventDefault();
+        // ALUR STEP 1 & STEP 2 ABSEN MANUAL
+        function goToAbsenStep1() {
+            document.getElementById('absen-step-1').classList.remove('hidden');
+            document.getElementById('absen-step-2').classList.add('hidden');
+        }
+
+        function goToAbsenStep2() {
+            if (manualAbsenSelectedMurid.length === 0) {
+                showModal('Peringatan', 'Silakan pilih minimal satu siswa.');
+                return;
+            }
+            const tgl = document.getElementById('input-tanggal-absen').value;
+            if (!tgl) {
+                showModal('Peringatan', 'Tanggal kunjungan wajib dipilih.');
+                return;
+            }
+
+            const container = document.getElementById('absen-buku-inputs-container');
+            let html = '';
+            manualAbsenSelectedMurid.forEach((m, idx) => {
+                const nama = m.col3 || m.col1 || '';
+                const kode = m.col4 || m.col2 || '';
+                html += `
+                    <div class="border rounded-xl p-3 bg-gray-50/80">
+                        <label class="block text-xs font-semibold text-emerald-800 mb-1">
+                            ${idx + 1}. ${escapeHtml(nama)} <span class="text-gray-500 font-normal">(${escapeHtml(kode)})</span>
+                        </label>
+                        <input type="text" id="absen-buku-input-${idx}" placeholder="Ketik judul buku yang dibaca..." class="w-full px-3 py-1.5 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+
+            document.getElementById('absen-step-1').classList.add('hidden');
+            document.getElementById('absen-step-2').classList.remove('hidden');
+        }
+
+        async function saveAbsenManualFinal() {
             if (savingAbsen) return;
-            if (manualAbsenSelectedMurid.length===0) { showModal('Peringatan','Pilih minimal satu siswa.'); return; }
+            const tanggalInput = document.getElementById('input-tanggal-absen').value;
+            if (!tanggalInput) { showModal('Peringatan', 'Tanggal kunjungan wajib dipilih.'); return; }
+            
+            const selected = [...manualAbsenSelectedMurid];
+            const itemAbsenList = [];
+
+            selected.forEach((m, idx) => {
+                const bukuInput = document.getElementById(`absen-buku-input-${idx}`)?.value.trim() || '-';
+                itemAbsenList.push({ murid: m, buku: bukuInput });
+            });
+
             const btn = document.getElementById('btn-simpan-absen');
             savingAbsen = true;
             if (btn) { btn.disabled = true; btn.innerText = '⏳ Menyimpan...'; }
             showSavingLoading('Menyimpan absen ke Spreadsheet...');
-            const tanggalInput = document.getElementById('input-tanggal-absen').value;
-            if (!tanggalInput) {
-                hideSavingLoading();
-                savingAbsen = false;
-                if (btn) { btn.disabled = false; btn.innerText = 'Simpan'; }
-                showModal('Peringatan', 'Tanggal kunjungan wajib dipilih.');
-                return;
-            }
+            
             const waktuStr = formatTanggalUntukSheet(tanggalInput);
-            const selected = [...manualAbsenSelectedMurid];
             try {
-                for (const m of selected) {
+                for (const item of itemAbsenList) {
+                    const m = item.murid;
+                    const bukuInput = item.buku;
                     const nama=m.col3||m.col1||''; const nis=m.col4||m.col2||''; const kelas=m.col5||m.col3||'';
-                    await queueOrSendRequest('add','absen',[nama,nis,waktuStr,'Membaca / Berhitung',kelas]);
-                    appData.absensi.unshift({col1:nama,col2:nis,col3:waktuStr,col4:'Membaca / Berhitung',col5:kelas});
+                    await queueOrSendRequest('add','absen',[nama,nis,waktuStr,'Membaca / Berhitung',kelas,bukuInput]);
+                    appData.absensi.unshift({col1:nama,col2:nis,col3:waktuStr,col4:'Membaca / Berhitung',col5:kelas,col6:bukuInput});
                 }
                 localStorage.setItem('perpus_cache_absen',JSON.stringify(appData.absensi));
                 closeFormAbsenModal(); render(); await loadAllData();
@@ -1862,7 +1760,7 @@
                 showModal('Gagal Menyimpan','Absensi belum tersimpan ke Spreadsheet.\n\n'+(e.message||e));
             } finally {
                 savingAbsen = false;
-                if (btn) { btn.disabled = false; btn.innerText = 'Simpan'; }
+                if (btn) { btn.disabled = false; btn.innerText = '💾 Simpan Absen'; }
             }
         }
 
@@ -1998,8 +1896,8 @@
                     let namaM = m.col3 || m.col1 || '';
                     let kodeM = m.col4 || m.col2 || '';
                     let kelasM = m.col5 || m.col3 || '';
-                    await queueOrSendRequest('add', 'absen', [namaM, kodeM, waktuStr, taskLabel, kelasM]);
-                    appData.absensi.unshift({ col1: namaM, col2: kodeM, col3: waktuStr, col4: taskLabel, col5: kelasM });
+                    await queueOrSendRequest('add', 'absen', [namaM, kodeM, waktuStr, taskLabel, kelasM, '-']);
+                    appData.absensi.unshift({ col1: namaM, col2: kodeM, col3: waktuStr, col4: taskLabel, col5: kelasM, col6: '-' });
                 }
                 localStorage.setItem('perpus_cache_absen', JSON.stringify(appData.absensi));
                 render(); await loadAllData();
@@ -2087,7 +1985,7 @@
             }
         }
 
-        async function prosesAbsenByNIS(nisInput, kegiatanInput) {
+        async function prosesAbsenByNIS(nisInput, kegiatanInput, bukuInput = '-') {
             if (!nisInput || savingAbsen) return;
             const muridDitemukan = appData.murid.find(m => (m.col4 || m.col2).toString().trim() === nisInput.toString().trim());
             if (!muridDitemukan) { showModal("Gagal", "Kode Siswa " + nisInput + " tidak terdaftar dalam Data Murid!"); return; }
@@ -2097,8 +1995,8 @@
             const kelasMurid = muridDitemukan.col5 || muridDitemukan.col3 || '';
             const waktuStr = new Date().toLocaleString();
             try {
-                await queueOrSendRequest('add', 'absen', [namaMurid, nisInput, waktuStr, kegiatanInput, kelasMurid]);
-                appData.absensi.unshift({ col1: namaMurid, col2: nisInput, col3: waktuStr, col4: kegiatanInput, col5: kelasMurid });
+                await queueOrSendRequest('add', 'absen', [namaMurid, nisInput, waktuStr, kegiatanInput, kelasMurid, bukuInput]);
+                appData.absensi.unshift({ col1: namaMurid, col2: nisInput, col3: waktuStr, col4: kegiatanInput, col5: kelasMurid, col6: bukuInput });
                 localStorage.setItem('perpus_cache_absen', JSON.stringify(appData.absensi));
                 render(); await loadAllData(); hideSavingLoading();
                 showModal("Berhasil", "Absen tersimpan ke Spreadsheet: " + namaMurid);
@@ -2186,11 +2084,14 @@
             const kelasBaru = prompt("Edit Kelas:", defaultKelas);
             if (kelasBaru === null) return;
 
-            appData.absensi[index] = { col1: namaBaru, col2: nisBaru, col3: waktuBaruNormal, col4: kegiatanBaru, col5: kelasBaru };
+            const bukuBaru = prompt("Edit Buku Dibaca (Kolom F):", a.col6 || '-');
+            if (bukuBaru === null) return;
+
+            appData.absensi[index] = { col1: namaBaru, col2: nisBaru, col3: waktuBaruNormal, col4: kegiatanBaru, col5: kelasBaru, col6: bukuBaru };
             localStorage.setItem('perpus_cache_absen', JSON.stringify(appData.absensi));
             render();
 
-            try { await queueOrSendRequest('edit', 'absen', [namaBaru, nisBaru, waktuBaruNormal, kegiatanBaru, kelasBaru], index + 2); } catch(e) { showModal('Gagal Menyimpan', e.message || String(e)); return; }
+            try { await queueOrSendRequest('edit', 'absen', [namaBaru, nisBaru, waktuBaruNormal, kegiatanBaru, kelasBaru, bukuBaru], index + 2); } catch(e) { showModal('Gagal Menyimpan', e.message || String(e)); return; }
             showModal("Berhasil", "Data absen berhasil diperbarui!");
         }
 
@@ -2309,7 +2210,6 @@
             const src = img.currentSrc || img.src || '';
             if (!src || img.id === 'image-lightbox-img') return;
             if (img.closest('#image-lightbox')) return;
-            // Hanya foto dari area dokumentasi agar gambar UI lain tidak ikut fullscreen.
             if (img.closest('[id*="dokumentasi"], .dokumentasi, .documentation')) {
                 event.preventDefault();
                 openImageLightbox(src);
